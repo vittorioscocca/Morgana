@@ -127,25 +127,29 @@ class PointsManager {
     }
     
     func addPointsForShopping(expense: Double){
-        let newPoints = Int(expense * self.personalDiscount! / self.changeCreditToPoint!)
         
-        self.balanceCurrentPoints += newPoints
-        self.totalPoints! += newPoints
+        if personalDiscount == 0 {
+            personalDiscount = firstShoppingDiscount
+        }
+        let newPoints = Int(expense * personalDiscount! / changeCreditToPoint!)
         
-        if self.weeklyShopping! > self.weeklyThreshold! {
-            self.totalExtraDiscountShopping! += expense
+        balanceCurrentPoints += newPoints
+        totalPoints! += newPoints
+        
+        if weeklyShopping! > weeklyThreshold! {
+            totalExtraDiscountShopping! += expense
         }else {
-            self.totalStandardShopping! += expense
+            totalStandardShopping! += expense
         }
         self.totalShopping! += expense
         
-        if self.isAWeeklyShopping() {
-            self.weeklyShopping! +=  expense
+        if isAWeeklyShopping() {
+            weeklyShopping! +=  expense
         }else {
-            self.weeklyShopping = expense
+            weeklyShopping = expense
         }
-        if self.weeklyShopping! > self.weeklyThreshold! {
-            self.personalDiscount = self.secondShoppingDiscount
+        if weeklyShopping! > weeklyThreshold! {
+            personalDiscount = secondShoppingDiscount
         }
     }
     
@@ -154,8 +158,8 @@ class PointsManager {
     }
     
     func addPointsForStandardConsumption() {
-        self.totalStandardConsumptions! += 1
-        self.balanceCurrentPoints +=  1
+        totalStandardConsumptions! += 1
+        balanceCurrentPoints +=  1
     }
     
     func addPointsForDiversifiedConsumption(date: Date) {
@@ -165,19 +169,19 @@ class PointsManager {
         })
         
         if isAnIndicatedDay {
-            self.totalDiversifiedConsumptions! =   1
-            self.balanceCurrentPoints = 2
+            totalDiversifiedConsumptions! =   1
+            balanceCurrentPoints = 2
         }else {
-            self.addPointsForStandardConsumption()
+            addPointsForStandardConsumption()
         }
     }
     
     
     func totalUsersPoints()->Int {
-        return self.balanceCurrentPoints
+        return balanceCurrentPoints
     }
     
-    func updateNewValuesOnFirebase(){
+    func updateNewValuesOnFirebase(onCompletion: @escaping ()->()){
         let newValuesDictionary: [String: Any] = [
             "personalDiscount": self.personalDiscount!,
             "totalCurrentPoints": self.totalCurrentPoints!,
@@ -193,6 +197,7 @@ class PointsManager {
         ]
         
         FireBaseAPI.updateNode(node: "usersPointsStats/"+userId, value: newValuesDictionary)
+        onCompletion()
     }
     
     //control if the current shopping fifferencies from last shopping of 1 week
@@ -209,17 +214,16 @@ class PointsManager {
 
         let diffTime = (finalDate?.timeIntervalSinceNow)! * -1
         
-        // se la differenza tra la data corrente e l'ultima data su Firebase è maggiore di una settimana si sostituisce l'ultima data
+        // se la differenza tra la data corrente e l'ultima data su Firebase è maggiore di una settimana si sostituisce l'ultima data 604800: settimana in secondi
         if diffTime < 604800 {
             return true
         }else {
-            //ref.child("usersPointsStats/"+(userFireBase?.uid)!+"/"+"lastDateShopping").setValue(FIRServerValue.timestamp())
             FireBaseAPI.returnFirebaseTimeStamp(onCompletion: { (FIRTimestamp) in
                 guard FIRTimestamp != nil else {
                     print("errore nel recupero del Firtimestamp")
                     return
                 }
-                let dictionaryToUpload :[String:TimeInterval] = ["lastDateShopping":FIRTimestamp!]
+                let dictionaryToUpload :[String:TimeInterval] = ["lastDateShopping":FIRTimestamp!, "personalDiscount":self.firstShoppingDiscount!,"weeklyShopping":0]
                 FireBaseAPI.updateNode(node: "usersPointsStats/"+self.userId, value: dictionaryToUpload)
             })
             return false
