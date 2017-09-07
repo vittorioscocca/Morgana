@@ -47,6 +47,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             UNUserNotificationCenter.current().delegate = self
             // For iOS 10 data message (sent via FCM)
             FIRMessaging.messaging().remoteMessageDelegate = self
+            
         }
         
         application.registerForRemoteNotifications()
@@ -198,14 +199,20 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         let userInfo = notification.request.content.userInfo
-        // Print message ID.
-        print("Message ID: \(userInfo["gcm.message_id"]!)")
         
         // Print full message.
         print("%@", userInfo)
+        print("Message ID: \(userInfo["gcm.message_id"]!)")
+        
+        if notification.request.identifier == "LocalAlert"{
+            completionHandler( [.alert,.sound,.badge])
+        }
+
         
         
     }
+    
+  
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         

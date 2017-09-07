@@ -159,22 +159,23 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
             for order in Cart.sharedIstance.carrello {
                 FirebaseData.sharedIstance.saveOrderSentOnFirebase(user: self.user!, userDestination: order.userDestination!, badgeValue: self.productOfferedBadge.object(forKey: "paymentOfferedBadge") as! Int,order: order, onCompletion: {
                     print("ordine salvato su firebase")
-                    //DispatchQueue.main.async {
+                    DispatchQueue.main.async {
                         // ritorno sul main thread ed aggiorno la view
                         self.stopActivityIndicator()
                         
-                    //}
+                    }
                     if Cart.sharedIstance.state == "Valid" {
                         print("Pagamento carrello valido")
-                        self.startActivityIndicator("Aggiorno il tuo punteggio ...")
+                        
                         PointsManager.sharedInstance.readUserPointsStatsOnFirebase(onCompletion: { (error) in
                             guard error == nil else {
                                 print(error!)
                                 return
                             }
-                            PointsManager.sharedInstance.addPointsForShopping(expense: order.costoTotale)
+                            let points = PointsManager.sharedInstance.addPointsForShopping(expense: order.costoTotale)
                             PointsManager.sharedInstance.updateNewValuesOnFirebase(onCompletion: {
-                                self.stopActivityIndicator()
+                                
+                                NotitificationsCenter.localNotification(title: "Congratulazioni \((self.user?.firstName)!)", body: "Hai appena guadagnato \(points) Punti!")
                             })
                             
                             print("Punti aggiornati")
@@ -316,19 +317,19 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
         activityIndicator.removeFromSuperview()
         effectView.removeFromSuperview()
         
-        strLabel = UILabel(frame: CGRect(x: 50, y: 0, width: 240, height: 46))
+        strLabel = UILabel(frame: CGRect(x: 50, y: 0, width: 240, height: 66))
         strLabel.text = title
-        strLabel.font = UIFont.systemFont(ofSize: 11, weight: UIFontWeightMedium)
+        strLabel.font = UIFont.systemFont(ofSize: 14, weight: UIFontWeightMedium)
         strLabel.textColor = UIColor(white: 0.9, alpha: 0.7)
         
-        effectView.frame = CGRect(x: view.frame.midX - strLabel.frame.width/2, y: view.frame.midY - strLabel.frame.height/2 , width: 200, height: 46)
+        effectView.frame = CGRect(x: view.frame.midX - strLabel.frame.width/2, y: view.frame.midY - strLabel.frame.height/2 , width: 240, height: 66)
         effectView.layer.cornerRadius = 15
         effectView.layer.masksToBounds = true
         
         //activityIndicator.center = self.view.center
         activityIndicator.hidesWhenStopped = true
         activityIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyle.white
-        activityIndicator.frame = CGRect(x: 0, y: 0, width: 46, height: 46)
+        activityIndicator.frame = CGRect(x: 0, y: 0, width: 46, height: 66)
         activityIndicator.startAnimating()
         
         effectView.addSubview(activityIndicator)

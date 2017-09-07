@@ -13,6 +13,7 @@ import Firebase
 import FirebaseMessaging
 import FirebaseInstanceID
 import UserNotifications
+import UserNotificationsUI //framework to customize the notification
 
 
 //Notification center for FireBase push notification and mailgun e-mail notification
@@ -75,6 +76,49 @@ class NotitificationsCenter{
             }
             
         })
+    }
+    
+    class func localNotification(title: String, body: String) {
+        let center = UNUserNotificationCenter.current()
+        
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.categoryIdentifier = "alarm"
+        content.userInfo = ["gcm.message_id": "LocalAlert"]
+        content.sound = UNNotificationSound.default()
+        //content.subtitle = "Lets code,Talk is cheap"
+       
+        
+        
+        
+        //To Present image in notification 
+        /*
+        if let path = Bundle.main.path(forResource: "monkey", ofType: "png") {
+            let url = URL(fileURLWithPath: path)
+            
+            do {
+                let attachment = try UNNotificationAttachment(identifier: "sampleImage", url: url, options: nil)
+                content.attachments = [attachment]
+            } catch {
+                print("attachment not found.")
+            }
+        }*/
+        
+        // schedulare una notifica
+        /*
+         var dateComponents = DateComponents()
+         dateComponents.hour = 19
+         dateComponents.minute = 30
+         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)*/
+        
+        // Deliver the notification in five seconds.
+        let trigger = UNTimeIntervalNotificationTrigger.init(timeInterval: 3.0, repeats: false)
+        
+        let request = UNNotificationRequest(identifier: "LocalAlert", content: content, trigger: trigger)
+        
+        center.add(request)
+        
     }
 }
 

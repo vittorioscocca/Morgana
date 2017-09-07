@@ -126,7 +126,7 @@ class PointsManager {
 
     }
     
-    func addPointsForShopping(expense: Double){
+    func addPointsForShopping(expense: Double)->Int{
         
         if personalDiscount == 0 {
             personalDiscount = firstShoppingDiscount
@@ -151,6 +151,7 @@ class PointsManager {
         if weeklyShopping! > weeklyThreshold! {
             personalDiscount = secondShoppingDiscount
         }
+        return newPoints
     }
     
     func addPointsForRegistrations(){
@@ -214,7 +215,8 @@ class PointsManager {
 
         let diffTime = (finalDate?.timeIntervalSinceNow)! * -1
         
-        // se la differenza tra la data corrente e l'ultima data su Firebase è maggiore di una settimana si sostituisce l'ultima data 604800: settimana in secondi
+        // se la differenza tra la data corrente e l'ultima data su Firebase è maggiore di una settimana si sostituisce l'ultima data 
+        //604800: settimana in secondi
         if diffTime < 604800 {
             return true
         }else {
