@@ -13,7 +13,7 @@ class PointsManager {
     static let sharedInstance = PointsManager()
     
     //usersPointsStats
-    private var lastDateShopping: TimeInterval?
+    private var lastDateShopping: TimeInterval?//time of last weekly shopping
     private var personalDiscount: Double?
     private var totalCurrentPoints: Int?  //punteggio corrente, si azzera dopo la conversione in crediti
     private var totalDiversifiedConsumptions: Int?  //totale delle consumazioni differenziate
