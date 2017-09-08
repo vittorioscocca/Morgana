@@ -1338,6 +1338,7 @@
                         <segue destination="tx2-nO-4fE" kind="unwind" identifier="unwindToProfile" unwindAction="unwindToProfile:" id="uQJ-bV-zXb"/>
                         <segue destination="tx2-nO-4fE" kind="unwind" identifier="unwindFromFriendsListToMyDrinks" unwindAction="unwindToMyDrinks:" id="OPE-QI-JDv"/>
                         <segue destination="tx2-nO-4fE" kind="unwind" identifier="unwidToMyDrinksWithoutValue" unwindAction="unwindToMyDrinksWitoutValue:" id="Rjb-va-VxW"/>
+                        <segue destination="tx2-nO-4fE" kind="unwind" identifier="unwindToOfferfromListFriendWithoutValue" unwindAction="unwindToOffer:" id="g1U-PR-dhp"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="EQl-nn-QQI" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -1489,6 +1490,7 @@
                         <outlet property="myTable" destination="cEy-GV-9sF" id="d4C-Mw-BOp"/>
                         <segue destination="uLa-7x-16s" kind="unwind" identifier="unwindToOffer" unwindAction="unwindToOffer:" id="UBb-Ww-xz4"/>
                         <segue destination="BI0-tg-3ae" kind="show" identifier="segueToPayement" id="Jc7-8B-p64"/>
+                        <segue destination="uLa-7x-16s" kind="unwind" identifier="unwindToOfferFromCartWithoutData" unwindAction="unwindToOffer:" id="0jN-uM-Z1e"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="IyU-7O-rPg" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -1847,6 +1849,6 @@
         <image name="userDefault" width="163" height="154"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="OXA-AZ-LfE"/>
+        <segue reference="B23-cs-HaJ"/>
     </inferredMetricsTieBreakers>
 </document>

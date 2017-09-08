@@ -80,23 +80,18 @@ class NotitificationsCenter{
     
     class func localNotification(title: String, body: String) {
         let center = UNUserNotificationCenter.current()
-        
         let content = UNMutableNotificationContent()
+        
         content.title = title
         content.body = body
-        content.categoryIdentifier = "alarm"
+        content.categoryIdentifier = "alert"
         content.userInfo = ["gcm.message_id": "LocalAlert"]
         content.sound = UNNotificationSound.default()
         //content.subtitle = "Lets code,Talk is cheap"
-       
-        
-        
-        
         //To Present image in notification 
         /*
         if let path = Bundle.main.path(forResource: "monkey", ofType: "png") {
             let url = URL(fileURLWithPath: path)
-            
             do {
                 let attachment = try UNNotificationAttachment(identifier: "sampleImage", url: url, options: nil)
                 content.attachments = [attachment]
@@ -105,20 +100,67 @@ class NotitificationsCenter{
             }
         }*/
         
-        // schedulare una notifica
-        /*
-         var dateComponents = DateComponents()
-         dateComponents.hour = 19
-         dateComponents.minute = 30
-         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)*/
-        
         // Deliver the notification in five seconds.
         let trigger = UNTimeIntervalNotificationTrigger.init(timeInterval: 3.0, repeats: false)
-        
         let request = UNNotificationRequest(identifier: "LocalAlert", content: content, trigger: trigger)
-        
         center.add(request)
-        
     }
+    
+    class func scheduledExpiratedOrderLocalNotification(title: String, body: String, identifier: String, expirationDate: Date){
+        
+        let center = UNUserNotificationCenter.current()
+        let content = UNMutableNotificationContent()
+    
+        content.title = title
+        content.body = body
+        content.categoryIdentifier = "alert"
+        content.userInfo = ["gcm.message_id": "expiratedOrder"]
+        content.sound = UNNotificationSound.default()
+        
+        var dateComponents = DateComponents()
+        let calendar = Calendar.current
+        dateComponents.hour = 8
+        dateComponents.minute = 00
+        dateComponents.day = calendar.component(.day, from: expirationDate)
+        
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+        center.add(request) { (error : Error?) in
+            if let theError = error {
+                print(theError.localizedDescription)
+            }
+        }
+    }
+    
+    class func scheduledRememberExpirationLocalNotification(title: String, body: String, identifier: String){
+        
+        let center = UNUserNotificationCenter.current()
+        let content = UNMutableNotificationContent()
+        
+        content.title = title
+        content.body = body
+        content.categoryIdentifier = "RemeberExpiration"
+        content.userInfo = ["gcm.message_id": "RemeberExpiration"]
+        content.sound = UNNotificationSound.default()
+        
+        
+        var dateComponents = DateComponents()
+        dateComponents.hour = 21
+        dateComponents.minute = 33
+        
+            
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        //let trigger1 = UNTimeIntervalNotificationTrigger.init(timeInterval: 3.0, repeats: false)
+        print("NOTIFICA CICLICA CREATA ogni giorno ore \(dateComponents.hour!):\(dateComponents.minute!)")
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+        center.add(request) { (error : Error?) in
+            if let theError = error {
+                print(theError.localizedDescription)
+            }
+        }
+    }
+    
+    
+    
 }
 

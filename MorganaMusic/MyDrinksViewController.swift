@@ -107,7 +107,11 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
             var currentDate = Date()
             currentDate = Calendar.current.date(byAdding:.hour,value: 2,to: currentDate)!
             self.lastOrderSentReadedTimestamp.set(currentDate, forKey: "lastOrderReceivedReadedTimestamp")
+            if self.firebaseObserverKilled.bool(forKey: "firebaseObserverKilled") {
+                self.firebaseObserverKilled.set(false, forKey: "firebaseObserverKilled")
+            }
             print("aggiornamento giornaliero effettuato")
+            print("observer activate")
         }
         
     }
@@ -120,6 +124,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         FireBaseAPI.removeObserver(node: "orderOffered/" + (self.user?.idApp)!)
         FireBaseAPI.removeObserver(node: "orderReceived/" + (self.user?.idApp)!)
         self.firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
+        print("observed Killed")
 
     }
     
@@ -203,7 +208,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
     private func readOrderReceived() {
         self.nowReadingOrdersAndOffersOnFirebase = true
         
-        FirebaseData.sharedIstance.readOrderReceivedOnFireBase(onCompletion: { (ordersReceived) in
+        FirebaseData.sharedIstance.readOrderReceivedOnFireBase(user: self.user!, onCompletion: { (ordersReceived) in
             guard !ordersReceived.isEmpty else {
                 print("errore di lettura su ordini inviati")
                 return
@@ -967,7 +972,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         switch sender.identifier! {
         case "unwindFromFriendsListToMyDrinks":
             
-            FirebaseData.sharedIstance.readUserIdAppFromIdFB(node: "users", idFB: (self.forwardOrder?.userDestination?.idFB)!, onCompletion: { (error,idApp) in
+            FirebaseData.sharedIstance.readUserIdAppFromIdFB(node: "users", child: "id FB", idFB: (self.forwardOrder?.userDestination?.idFB)!, onCompletion: { (error,idApp) in
                 guard error == nil else {
                     print(error!)
                     return

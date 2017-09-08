@@ -269,17 +269,17 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
     private func completeCartInformation(){
         for j in Cart.sharedIstance.carrello {
                 //Get idApp
-                FirebaseData.sharedIstance.readUserIdAppFromIdFB(node: "users", idFB: (j.userDestination?.idFB)!, onCompletion: { (error,idApp) in
-                    guard error == nil else {
-                        print(error!)
-                        return
-                    }
-                    guard idApp != nil else {return}
-                    if idApp! != "04fLLHPLYYboLfy8enAkogDcdI02" {
-                        j.userDestination?.idApp = idApp!
-                        self.completeCartWithFirebaseToken(idApp: idApp!)
-                    }
-                })
+            FirebaseData.sharedIstance.readUserIdAppFromIdFB(node: "users", child: "id FB", idFB: (j.userDestination?.idFB)!, onCompletion: { (error,idApp) in
+                guard error == nil else {
+                    print(error!)
+                    return
+                }
+                guard idApp != nil else {return}
+                if idApp! != "04fLLHPLYYboLfy8enAkogDcdI02" {
+                    j.userDestination?.idApp = idApp!
+                    self.completeCartWithFirebaseToken(idApp: idApp!)
+                }
+            })
             
         }
     }

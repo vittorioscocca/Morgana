@@ -68,6 +68,7 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
             (cell as! CartUserTableViewCell).nome_label.text = (Cart.sharedIstance.carrello[indexPath.row].userDestination?.fullName)!
             (cell as! CartUserTableViewCell).totProdotti_label.text = "Prodotti: " + String(Cart.sharedIstance.carrello[indexPath.row].prodottiTotali)
             (cell as! CartUserTableViewCell).costoOfferta_label.text = "€ " + String(format:"%.2f", Cart.sharedIstance.carrello[indexPath.row].costoTotale)
+            print((Cart.sharedIstance.carrello[indexPath.row].userDestination?.fullName)!,(Cart.sharedIstance.carrello[indexPath.row].userDestination?.idFB)!)
             
         } else {
             //products section
@@ -99,7 +100,7 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
     }
     
     @IBAction func unwindToOffer(_ sender: UIBarButtonItem) {
-        self.performSegue(withIdentifier: "unwindToOffer", sender: nil)
+        self.performSegue(withIdentifier: "unwindToOfferFromCartWithoutData", sender: nil)
         self.dismiss(animated: true) { () -> Void in
             print("VC Dismesso")
         }

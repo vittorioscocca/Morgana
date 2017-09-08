@@ -43,6 +43,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 options: authOptions,
                 completionHandler: {_,_ in })
             
+            setCategories()
+            
             // For iOS 10 display notification (sent via APNS)
             UNUserNotificationCenter.current().delegate = self
             // For iOS 10 data message (sent via FCM)
@@ -60,6 +62,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             return true
         }
         //FBSDKLoginButton.classForCoder()
+        
         FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
         
         return true
@@ -207,11 +210,19 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         if notification.request.identifier == "LocalAlert"{
             completionHandler( [.alert,.sound,.badge])
         }
-
         
-        
+        if userInfo["gcm.message_id"] as! String == "RemeberExpiration"{
+            print(notification.request.identifier)
+            completionHandler( [.alert,.sound,.badge])
+        }
     }
     
+    func setCategories(){
+        
+        let deleteExpirationAction = UNNotificationAction(identifier: "delete.action",title: "Non ricordarlmelo più",options: [])
+        let remeberExpirationCategory = UNNotificationCategory(identifier: "RemeberExpiration",actions: [deleteExpirationAction],intentIdentifiers: [],options: [])
+        UNUserNotificationCenter.current().setNotificationCategories([remeberExpirationCategory])
+    }
   
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
@@ -225,21 +236,31 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         // Print full message.
         print(userInfo)
         
-        if userInfo["identifier"] as! String  == "myDrinks" {
-            //when tap on notification user go to view notification target
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            /*
-            let tabBarViewChild = storyboard.instantiateViewController(withIdentifier: "OfferViewController")
-            UpdateBadgeInfo.sharedIstance.updateBadgeInformations(nsArray: tabBarViewChild.tabBarController?.tabBar.items as NSArray!)*/
-            
-            let rootVC = storyboard.instantiateViewController(withIdentifier: "HomeViewController") as! UITabBarController
-            rootVC.selectedIndex = 2 // Index of the tab bar item you want to present, as shown in question it seems is item 2
-            self.window!.rootViewController = rootVC
-            
+        let action = response.actionIdentifier
+        if action == "delete.action"{
+            print(response.notification.request.identifier)
+            center.removePendingNotificationRequests(withIdentifiers: [response.notification.request.identifier] )
+            print("pending repeated Notification deleted identifier \(userInfo["identifier"] as! String)")
+        }
+        if let id = userInfo["identifier"] as? String  {
+            if id == "myDrinks" {
+                //when tap on notification user go to view notification target
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                /*
+                 let tabBarViewChild = storyboard.instantiateViewController(withIdentifier: "OfferViewController")
+                 UpdateBadgeInfo.sharedIstance.updateBadgeInformations(nsArray: tabBarViewChild.tabBarController?.tabBar.items as NSArray!)*/
+                
+                let rootVC = storyboard.instantiateViewController(withIdentifier: "HomeViewController") as! UITabBarController
+                rootVC.selectedIndex = 2 // Index of the tab bar item you want to present, as shown in question it seems is item 2
+                self.window!.rootViewController = rootVC
+            }
         }
         completionHandler()
     }
 }
+
+
+
 
 extension AppDelegate : FIRMessagingDelegate {
     

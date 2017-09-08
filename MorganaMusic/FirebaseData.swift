@@ -9,6 +9,7 @@
 import Foundation
 import FirebaseDatabase
 import Firebase
+import UserNotifications
 
 class FirebaseData {
     
@@ -48,6 +49,7 @@ class FirebaseData {
                 "IdAppUserDestination": (order.userDestination?.idApp)!,
                 "timestamp" : FIRServerValue.timestamp(),
                 "orderOfferedAutoId" : order.orderOfferedAutoId,
+                "orderNotificationIsScheduled": order.orderNotificationIsScheduled,
                 "orderAutoId": "",
                 "pendingPaymentAutoId": "",
                 "orderReaded":"false"
@@ -64,8 +66,6 @@ class FirebaseData {
                 }
             })
         }
-        
-        
         self.saveProductOnFireBase()
         self.saveOrderAsReceivedOnFireBase()
         self.savePaymentOnFireBase(onCompletion: {
@@ -360,11 +360,21 @@ class FirebaseData {
                             offerta.orderReaded = false
                         } else {offerta.orderReaded = true}
                         break
+                    case "orderNotificationIsScheduled":
+                        offerta.orderNotificationIsScheduled = (valore as? Bool)!
+                        break
                     default:
                         break
                     }
                 }
                 if offerta.offerState != "Scaduta" {
+                    //scheduling notification appearing in expirationDate
+                    if !offerta.orderNotificationIsScheduled {
+                        NotitificationsCenter.scheduledExpiratedOrderLocalNotification(title: "Ordine scaduto", body: "Il prodotto che hai offerto a \((offerta.userDestination?.fullName)!) è scaduto", identifier: offerta.idOfferta!, expirationDate: self.stringTodateObject(date: offerta.expirationeDate!))
+                        print("Notifica scadenza schedulata correttamente")
+                        offerta.orderNotificationIsScheduled = true
+                        FireBaseAPI.updateNode(node: "orderOffered/"+(self.user?.idApp)!+"/"+offerta.idOfferta!, value: ["orderNotificationIsScheduled":true])
+                    }
                     
                     ref.child("sessions").setValue(FIRServerValue.timestamp())
                     ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
@@ -400,8 +410,13 @@ class FirebaseData {
                 }else if self.user?.idApp != offerta.userDestination?.idApp   {
                     self.ordersSent.append(offerta)
                 }
+                //if consumption is before expirationDate, scheduled notification is killed
+                if offerta.offerState == "Offerta consumata" {
+                    let center = UNUserNotificationCenter.current()
+                    center.removePendingNotificationRequests(withIdentifiers: [offerta.idOfferta!])
+                }
             }
-            self.ordersSent.sort(by: {self.stringTodateObject(timestamp: $0.timeStamp) > self.stringTodateObject(timestamp: $1.timeStamp)})
+            self.ordersSent.sort(by: {self.timestampTodateObject(timestamp: $0.timeStamp) > self.timestampTodateObject(timestamp: $1.timeStamp)})
             self.readProductsSentDetails(ordersToRead:self.ordersSent, onCompletion: {
                 onCompletion(self.ordersSent)
             })
@@ -409,13 +424,11 @@ class FirebaseData {
         })
     }
     
-    func readOrderReceivedOnFireBase(onCompletion: @escaping ([Order])->()) {
+    func readOrderReceivedOnFireBase(user: User, onCompletion: @escaping ([Order])->()) {
         let ref = FIRDatabase.database().reference()
-        let query = ref.child("orderReceived/"+(self.user?.idApp)!).queryOrdered(byChild: "timestamp")
-        
         self.ordersReceived.removeAll()
-        
-        query.observe(.value, with: { (snap) in
+        self.user = user
+        ref.child("orderReceived/" + (self.user?.idApp)!).observe(.value, with: { (snap) in
             // controllo che lo snap dei dati non sia vuoto
             guard snap.exists() else {return}
             guard snap.value != nil else {return}
@@ -427,6 +440,7 @@ class FirebaseData {
             for (orderId, dati_pendingOffers) in dizionario_offerte {
                 
                 let offerta: Order = Order(prodotti: [], userDestination: UserDestination(nil,nil,nil,nil,nil), userSender: UserDestination(nil,nil,nil,nil,nil))
+                offerta.orderAutoId = orderId as! String
                 for (chiave,valore) in (dati_pendingOffers as! NSDictionary) {
                     
                     switch chiave as! String {
@@ -459,12 +473,26 @@ class FirebaseData {
                             offerta.orderReaded = false
                         } else {offerta.orderReaded = true}
                         break
+                    case "orderNotificationIsScheduled":
+                        offerta.orderNotificationIsScheduled = (valore as? Bool)!
+                        break
+                    case "total":
+                        offerta.totalReadedFromFirebase = (valore as? String)!
+                        break
                     default:
                         break
                     }
                 }
                 
                 if offerta.offerState != "Scaduta" {
+                    //scheduling notification appearing in expirationDate
+                    if !offerta.orderNotificationIsScheduled {
+                        NotitificationsCenter.scheduledExpiratedOrderLocalNotification(title: "Ordine scaduto", body: "Il prodotto che ti è stato offerto  è scaduto", identifier:"expirationDate-"+offerta.idOfferta!, expirationDate: self.stringTodateObject(date: offerta.expirationeDate!))
+                        print("Notifica scadenza schedulata correttamente")
+                        offerta.orderNotificationIsScheduled = true
+                        FireBaseAPI.updateNode(node: "orderReceived/"+(self.user?.idApp)!+"/"+offerta.orderAutoId, value: ["orderNotificationIsScheduled":true])
+                    }
+                    
                     ref.child("sessions").setValue(FIRServerValue.timestamp())
                     ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
                         let timeStamp = snap.value! as! TimeInterval
@@ -477,30 +505,43 @@ class FirebaseData {
                         dateFormatter.pmSymbol = "PM"
                         dateFormatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
                         let dateString = dateFormatter.string(from: date as Date)
-                        let finalDate = dateFormatter.date(from: dateString)
-                        self.lastOrderReceivedReadedTimestamp.set(finalDate!, forKey: "lastOrderReceivedReadedTimestamp")
+                        let currentDate = dateFormatter.date(from: dateString)
+                        self.lastOrderReceivedReadedTimestamp.set(currentDate!, forKey: "lastOrderReceivedReadedTimestamp")
                         
                         let date1Formatter = DateFormatter()
                         date1Formatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
                         date1Formatter.locale = Locale.init(identifier: "it_IT")
                         
-                        let dateObj = date1Formatter.date(from: offerta.expirationeDate!)
-                        if dateObj! < finalDate! {
+                        let expirationDate = date1Formatter.date(from: offerta.expirationeDate!)
+                        if expirationDate! < currentDate! {
                             ref.child("orderReceived/" + (self.user?.idApp)! + "/" + offerta.orderAutoId).updateChildValues(["offerState" : "Scaduta"])
                             ref.child("orderOffered/" + (offerta.userSender?.idApp)! + "/" + offerta.idOfferta!).updateChildValues(["offerState" : "Scaduta"])
                             offerta.offerState = "Scaduta"
                             let msg = "Il prodotto che hai offerto a \((self.user?.fullName)!) è scaduto"
                             NotitificationsCenter.sendNotification(userIdApp: (offerta.userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
                             self.updateNumberPendingProductsOnFireBase((offerta.userSender?.idApp)!, recOrPurch: "purchased")
+                        }else {
+                            let components = Calendar.current.dateComponents([.day], from: currentDate!, to: expirationDate!)
+                            print("difference is \(components.day ?? 0) days  ")
+                            //components.day! < 2
+                            if  components.day! <= 2 {
+                                NotitificationsCenter.scheduledRememberExpirationLocalNotification(title: "Ordine in scadenza", body: "l'ordine di € \(offerta.totalReadedFromFirebase) è in scadenza, affrettati a consumare", identifier: "RememberExpiration-"+offerta.idOfferta!)
+                            }
+                            
                         }
                     })
                 }
                 if offerta.paymentState == "Valid" && offerta.offerState != "Offerta rifiutata" && offerta.offerState != "Offerta inoltrata" {
-                    offerta.orderAutoId = orderId as! String
                     self.ordersReceived.append(offerta)
                 }
+                
+                //if consumption is before expirationDate, scheduled notification is killed
+                if offerta.offerState == "Offerta consumata" {
+                    let center = UNUserNotificationCenter.current()
+                    center.removePendingNotificationRequests(withIdentifiers: ["expirationDate-"+offerta.idOfferta!])
+                }
             }
-            self.ordersReceived.sort(by: {self.stringTodateObject(timestamp: $0.timeStamp) > self.stringTodateObject(timestamp: $1.timeStamp)})
+            self.ordersReceived.sort(by: {self.timestampTodateObject(timestamp: $0.timeStamp) > self.timestampTodateObject(timestamp: $1.timeStamp)})
            
             self.readUserSender(onCompletion: {
                 self.readProductsSentDetails(ordersToRead: self.ordersReceived ,onCompletion: {
@@ -600,7 +641,7 @@ class FirebaseData {
         })
     }
 
-    private func stringTodateObject(timestamp: TimeInterval)->Date {
+    private func timestampTodateObject(timestamp: TimeInterval)->Date {
         
         let date = NSDate(timeIntervalSince1970: timestamp/1000)
         
@@ -611,6 +652,20 @@ class FirebaseData {
         let dateString = dateFormatter.string(from: date as Date)
         return dateFormatter.date(from: dateString)!
     }
+    
+    private func stringTodateObject(date: String)->Date {
+        
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.amSymbol = "AM"
+        dateFormatter.pmSymbol = "PM"
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
+        //let dateString = dateFormatter.string(from: date as Date)
+        
+        return dateFormatter.date(from: date)!
+        
+    }
+
     
     func updateStateOnFirebase (order: Order, state: String){
         FireBaseAPI.updateNode(node: "orderReceived/" + (self.user?.idApp)! + "/" + order.orderAutoId, value: ["orderReaded" : "true", "offerState":state])
@@ -663,8 +718,8 @@ class FirebaseData {
     }
     
     //function  return user idApp from his Facebook iD
-    func readUserIdAppFromIdFB(node:String, idFB:String, onCompletion: @escaping (String?,String?)->()){
-        FireBaseAPI.readKeyForValueEqualTo(node: node, value: idFB, onCompletion: { (error,idApp) in
+    func readUserIdAppFromIdFB(node:String, child: String, idFB:String?, onCompletion: @escaping (String?,String?)->()){
+        FireBaseAPI.readKeyForValueEqualTo(node: node, child: child, value: idFB, onCompletion: { (error,idApp) in
             guard error == nil else {
                 onCompletion(error,idApp)
                 return

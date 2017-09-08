@@ -82,10 +82,7 @@ class CoreDataController {
                 return nil
                 
             case 1:
-                print("L'Utente \(idApp!) è in memoria")
-                
                 user = result[0]
-                print("Utente \(user!.email!) \(user!.idApp!)")
                 return user!
             case 2:
                 user = result[0]
@@ -93,7 +90,6 @@ class CoreDataController {
             case 3:
                 user = result[0]
                 return user!
-                
             default:
                 return nil
             }

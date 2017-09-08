@@ -283,7 +283,7 @@ class ListaAmiciViewController: UIViewController,UITableViewDelegate, UITableVie
             performSegue(withIdentifier: "unwindToProfile", sender: nil)
             
         }else if self.segueFrom == "offerView" {
-            performSegue(withIdentifier: "unwindToOfferfromListFriend", sender: nil)
+            performSegue(withIdentifier: "unwindToOfferfromListFriendWithoutValue", sender: nil)
             
         }else if self.segueFrom == "myDrinks" {
             performSegue(withIdentifier: "unwidToMyDrinksWithoutValue", sender: nil)

@@ -5,7 +5,6 @@
 //  Created by Vittorio Scocca on 03/05/17.
 //  Copyright © 2017 Vittorio Scocca. All rights reserved.
 //
-
 import FBSDKCoreKit
 import FBSDKLoginKit
 import UIKit
@@ -16,7 +15,7 @@ import FirebaseInstanceID
 
 // Destination Order and products Order controller
 class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableViewDataSource{
-
+    
     @IBOutlet weak var myTable: UITableView!
     @IBOutlet weak var quantità_label: UITextField!
     @IBOutlet weak var totale_label: UITextField!
@@ -83,6 +82,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         self.getFriendsList()
         self.myTable.dataSource = self
         self.myTable.delegate = self
+        print("eccolo:  \(FIRInstanceID.instanceID().token()!)")
         
         //reset Firebase DB. only for simulator tests
         //FireBaseAPI.resetFirebaseDB()
@@ -90,29 +90,11 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        guard CheckConnection.isConnectedToNetwork() == true else{
-            self.isConnectedtoNetwork = false
-            self.generateAlert(title: Alert.lostConnection_title.rawValue, msg: Alert.lostConnection_msg.rawValue)
-            return
-        }
         if  isConnectedtoNetwork == false {
             self.viewDidLoad()
         }
         self.isConnectedtoNetwork = true
         self.myTable.reloadData()
-        
-        //Hide Delet BarButtonItem if cart is empty
-        if (Order.sharedIstance.prodotti?.count)! > 1 {
-            self.delete.isEnabled = true
-        }
-        
-        //Disable Cart BarButtonItem if cart is Empty and remove badge number
-        if Cart.sharedIstance.carrello.count == 0 {
-            self.carousel.isEnabled = false
-            self.carousel.removeBadge()
-        }else {
-            self.carousel.addBadge(number: Cart.sharedIstance.carrello.count)
-        }
         
         //Update badge info
         UpdateBadgeInfo.sharedIstance.updateBadgeInformations(nsArray: self.tabBarController?.tabBar.items as NSArray!)
@@ -184,7 +166,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
                     self.quantità_label.text = "Quantità prodotti: " + "\(Order.sharedIstance.prodottiTotali)"
                     self.totale_label.text = " Totale: € " + String(format:"%.2f", Order.sharedIstance.costoTotale)
                 }else {
-                   cell?.textLabel?.text = elemento?.productName
+                    cell?.textLabel?.text = elemento?.productName
                 }
                 cell?.accessoryType = UITableViewCellAccessoryType.none
                 cell?.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
@@ -231,7 +213,8 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
             
         }else {
             if (thisCell?.textLabel?.text == "+    Aggiungi altro drink") {
-                if !self.offerteCaricate {
+                //if !self.offerteCaricate {
+                  if false {
                     thisCell?.selectionStyle = UITableViewCellSelectionStyle.none
                 } else {
                     self.performSegue(withIdentifier: "segueToOfferta", sender: nil)
@@ -256,7 +239,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         switch editingStyle {
         case .delete:
             print("premuto il tasto Delete")
-
+            
             let elemento = Order.sharedIstance.prodotti?[indexPath.row]
             print("elimo l'elemento \((elemento?.productName)!)")
             
@@ -292,6 +275,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
                 }
             }
             self.offerteCaricate = true
+            print("offerte caricate")
         })
     }
     
@@ -302,11 +286,11 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         
         let action = UIAlertAction(title: "Chiudi", style: UIAlertActionStyle.default, handler:
         {(paramAction:UIAlertAction!) in
-                        print("Il messaggio di chiusura è stato premuto")
+            print("Il messaggio di chiusura è stato premuto")
         })
         controller!.addAction(action)
         self.present(controller!, animated: true, completion: nil)
-            
+        
         
     }
     
@@ -476,10 +460,10 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
             print("data prima richiesta: ",defaults.object(forKey: "Data")!)
             return true
         }
-
+        
         //current Date
         let currentDate = Date()
-       
+        
         
         // difference in seconds from TimeIntervalNow and one date
         let diffTime = (defaults.object(forKey: "Data") as! Date).timeIntervalSinceNow * -1
@@ -495,7 +479,45 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
     }
     
     @IBAction func unwindToOffer(_ sender: UIStoryboardSegue) {
-        print("unwind to DrinksOrder")
+        switch sender.identifier! {
+        case "unwindToOffer":
+            //Hide Delet BarButtonItem if cart is empty
+            if (Order.sharedIstance.prodotti?.count)! > 1 {
+                self.delete.isEnabled = true
+            }
+            
+            //Disable Cart BarButtonItem if cart is Empty and remove badge number
+            if Cart.sharedIstance.carrello.count == 0 {
+                self.carousel.isEnabled = false
+                self.carousel.removeBadge()
+            }else {
+                self.carousel.addBadge(number: Cart.sharedIstance.carrello.count)
+            }
+
+            break
+        case "unwindToOfferfromListFriendWithoutValue":
+            print("senza valori e reload table")
+            break
+        case "unwindToOfferFromCartWithoutData":
+            print("senza dati")
+            break
+        default:
+            self.myTable.reloadData()
+            break
+        }
+        //Hide Delet BarButtonItem if cart is empty
+        if (Order.sharedIstance.prodotti?.count)! > 1 {
+            self.delete.isEnabled = true
+        }
+        
+        //Disable Cart BarButtonItem if cart is Empty and remove badge number
+        if Cart.sharedIstance.carrello.count == 0 {
+            self.carousel.isEnabled = false
+            self.carousel.removeBadge()
+        }else {
+            self.carousel.addBadge(number: Cart.sharedIstance.carrello.count)
+        }
+
     }
     
     @IBAction func addToCaourosel(_ sender: UIButton) {
@@ -515,7 +537,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
             userDestination.pictureUrl = self.user?.pictureUrl
             userDestination.idApp = self.user?.idApp
         }
-    
+        
         let order = Order(prodotti: Order.sharedIstance.prodotti!, userDestination: userDestination, userSender: UserDestination(nil,self.user?.idApp,nil,nil,nil))
         
         var insertOk = false
@@ -544,7 +566,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         if !insertOk {
             Cart.sharedIstance.carrello.append(order)
         }
-
+        
         self.carousel.isEnabled = true
         self.carousel.addBadge(number: Cart.sharedIstance.carrello.count)
         self.deleteOrdine()
@@ -558,5 +580,5 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         self.generateAlert2(title: Alert.deleteSelection_title.rawValue, msg: Alert.deleteSelection_msg.rawValue)
     }
     
-
+    
 }

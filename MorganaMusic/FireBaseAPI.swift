@@ -163,19 +163,32 @@ class FireBaseAPI {
         })
     }
     
-    class func readKeyForValueEqualTo(node: String, value: String, onCompletion: @escaping (String?,String?) -> ()){
+    class func readKeyForValueEqualTo(node: String, child: String, value: String?, onCompletion: @escaping (String?,String?) -> ()){
         guard CheckConnection.isConnectedToNetwork() == true else {
             error = "Connessione Internet Assente"
             onCompletion(error,nil)
             return
         }
-        
-        let query = ref.child(node).queryOrdered(byChild: "id FB").queryEqual(toValue: value)
+        guard value != nil else {
+            error = "Valore \(child) nullo"
+            onCompletion(error,nil)
+            return
+        }
+        let query = ref.child(node).queryOrdered(byChild: child).queryEqual(toValue: value)
         query.observeSingleEvent(of: .childAdded, with: { (snap) in
-            guard snap.exists() else {return}
-            guard snap.value != nil else {return}
+            guard snap.exists() else {
+                error = "Valore \(child) non trovato"
+                onCompletion(error,nil)
+                return
+            }
+            guard snap.value != nil else {
+                error = "Valore \(child) non trovato"
+                return
+            }
             onCompletion(error,snap.key)
         })
+        
+        
     }
     
     //update value

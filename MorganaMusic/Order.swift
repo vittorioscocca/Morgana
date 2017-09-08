@@ -23,12 +23,13 @@ class Order {
     var orderOfferedAutoId = ""
     var pendingPaymentAutoId = ""
     var timeStamp : TimeInterval = 0
+    var orderNotificationIsScheduled = false
     
     var paymentState: String?
     var offerState: String?
     var dataCreazioneOfferta: String?
     var idOfferta: String?
-    
+    var totalReadedFromFirebase: String = ""
     enum offerStates: String {
         case rifiutata = "Offerta rifiutata" //l'utente destinatario dell'offerta rifiuta l'offerta
         case accettata = "Offerta accettata" // l'utente destinatario dell'offerta accetta l'offerta
@@ -143,7 +144,8 @@ class Order {
             formatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
             formatter.locale = Locale.init(identifier: "it_IT")
             let dateOfferta: Date = formatter.date(from: self.dataCreazioneOfferta!)!
-            let date = Calendar.current.date(byAdding: .weekOfMonth, value: 1, to: dateOfferta)
+            //let date = Calendar.current.date(byAdding: .weekOfMonth, value: 1, to: dateOfferta)
+            let date = Calendar.current.date(byAdding: .weekday, value: 3, to: dateOfferta)
             self.expirationeDate = formatter.string(from: date!)
         }
     }

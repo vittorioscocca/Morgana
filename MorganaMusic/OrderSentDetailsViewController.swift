@@ -15,8 +15,8 @@ class OrderSentDetailsViewController: UIViewController, UITableViewDelegate, UIT
 
     //le sezioni della tabella
     var sectionTitle = ["Destinatario", "Riepilogo"]
-    
     var offertaInviata: Order?
+    var imageCache = [String:UIImage]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -61,12 +61,48 @@ class OrderSentDetailsViewController: UIViewController, UITableViewDelegate, UIT
         if (sectionTitle[indexPath.section] == sectionTitle[0]) {
             cell = tableView.dequeueReusableCell(withIdentifier: "cellUserDetaildTable", for: indexPath)
             
-            let url = NSURL(string: (offertaInviata?.userDestination?.pictureUrl)!)
-            let data = NSData(contentsOf: url! as URL)
-            (cell as! CartUserTableViewCell).friendImageView.image = UIImage(data: data! as Data)
+            //let url = NSURL(string: (offertaInviata?.userDestination?.pictureUrl)!)
+            //let data = NSData(contentsOf: url! as URL)
+            //(cell as! CartUserTableViewCell).friendImageView.image = UIImage(data: data! as Data)
             (cell as! CartUserTableViewCell).nome_label.text = offertaInviata?.userDestination?.fullName
             (cell as! CartUserTableViewCell).costoOfferta_label.text = "Totale € " + String(format:"%.2f", (offertaInviata?.costoTotale)!)
             
+            
+            if let pictureUrl = offertaInviata?.userDestination?.pictureUrl {
+                if let img = imageCache[pictureUrl] {
+                    (cell as! OrderSentTableViewCell).friendImageView.image = img
+                }else {
+                    // The image isn't cached, download the img data
+                    // We should perform this in a background thread
+                    
+                    //let request: NSURLRequest = NSURLRequest(url: url! as URL)
+                    //let mainQueue = OperationQueue.main
+                    
+                    let request = NSMutableURLRequest(url: NSURL(string: (offertaInviata?.userDestination?.pictureUrl)!)! as URL)
+                    let session = URLSession.shared
+                    
+                    //NSURLConnection.sendAsynchronousRequest(request as URLRequest, queue: mainQueue, completionHandler: { (response, data, error) -> Void in
+                    let task = session.dataTask(with: request as URLRequest, completionHandler: {data, response, error -> Void in
+                        if error == nil {
+                            // Convert the downloaded data in to a UIImage object
+                            let image = UIImage(data: data!)
+                            // Store the image in to our cache
+                            self.imageCache[(self.offertaInviata?.userDestination?.pictureUrl)!] = image
+                            // Update the cell
+                            DispatchQueue.main.async(execute: {
+                                if let cellToUpdate = tableView.cellForRow(at: indexPath) {
+                                    (cellToUpdate as! CartUserTableViewCell).friendImageView.image = image
+                                }
+                            })
+                        }
+                        else {
+                            print("Error: \(error!.localizedDescription)")
+                        }
+                    })
+                    task.resume()
+                }
+                
+            }
             
         } else {
             cell = tableView.dequeueReusableCell(withIdentifier: "defaultCell", for: indexPath)
