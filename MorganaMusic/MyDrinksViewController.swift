@@ -73,12 +73,10 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         
         self.friendsList = CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: self.uid!)
         
-        
         self.readOrdersSent()
         self.readOrderReceived()
         self.firebaseObserverKilled.set(false, forKey: "firebaseObserverKilled")
  
-        
         self.myTable.addSubview(refreshControl1)
         successView.isHidden = true
     }
@@ -111,7 +109,6 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 self.firebaseObserverKilled.set(false, forKey: "firebaseObserverKilled")
             }
             print("aggiornamento giornaliero effettuato")
-            print("observer activate")
         }
         
     }
@@ -119,13 +116,11 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
     //remove all observers utilized into controller
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        
+        /*
         FireBaseAPI.removeObserver(node: "users/" + (self.user?.idApp)!)
         FireBaseAPI.removeObserver(node: "orderOffered/" + (self.user?.idApp)!)
-        FireBaseAPI.removeObserver(node: "orderReceived/" + (self.user?.idApp)!)
+        FireBaseAPI.removeObserver(node: "orderReceived/" + (self.user?.idApp)!)*/
         self.firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
-        print("observed Killed")
-
     }
     
     private func generateStandardAlert(){

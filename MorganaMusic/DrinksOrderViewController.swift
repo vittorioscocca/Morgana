@@ -213,9 +213,9 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
             
         }else {
             if (thisCell?.textLabel?.text == "+    Aggiungi altro drink") {
-                //if !self.offerteCaricate {
-                  if false {
+                if !self.offerteCaricate {
                     thisCell?.selectionStyle = UITableViewCellSelectionStyle.none
+                    self.myTable.reloadData()
                 } else {
                     self.performSegue(withIdentifier: "segueToOfferta", sender: nil)
                 }

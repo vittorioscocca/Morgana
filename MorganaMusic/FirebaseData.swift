@@ -49,7 +49,7 @@ class FirebaseData {
                 "IdAppUserDestination": (order.userDestination?.idApp)!,
                 "timestamp" : FIRServerValue.timestamp(),
                 "orderOfferedAutoId" : order.orderOfferedAutoId,
-                "orderNotificationIsScheduled": order.orderNotificationIsScheduled,
+                "orderNotificationIsScheduled": order.orderNotificationIsScheduled!,
                 "orderAutoId": "",
                 "pendingPaymentAutoId": "",
                 "orderReaded":"false"
@@ -144,6 +144,7 @@ class FirebaseData {
             offerDetails.removeValue(forKey: "orderOfferedAutoId")
             offerDetails["userSender"] = (self.user?.idApp)!
             offerDetails["orderReaded"] = "false"
+            offerDetails["orderExpirationNotificationIsScheduled"] = false
             if (self.user?.idApp)! == (offerDetails["IdAppUserDestination"] as! String) {
                 offerDetails["offerState"] = "Offerta accettata"
             }
@@ -299,7 +300,7 @@ class FirebaseData {
         let ref = FIRDatabase.database().reference()
         self.ordersSent.removeAll()
         
-        ref.child("orderOffered/" + (self.user?.idApp)!).observe(.value, with: { (snap) in
+        ref.child("orderOffered/" + (self.user?.idApp)!).observeSingleEvent(of: .value, with: { (snap) in
             guard snap.exists() else {return}
             guard snap.value != nil else {return}
             self.ordersSent.removeAll()
@@ -369,11 +370,14 @@ class FirebaseData {
                 }
                 if offerta.offerState != "Scaduta" {
                     //scheduling notification appearing in expirationDate
-                    if !offerta.orderNotificationIsScheduled {
-                        NotitificationsCenter.scheduledExpiratedOrderLocalNotification(title: "Ordine scaduto", body: "Il prodotto che hai offerto a \((offerta.userDestination?.fullName)!) è scaduto", identifier: offerta.idOfferta!, expirationDate: self.stringTodateObject(date: offerta.expirationeDate!))
-                        print("Notifica scadenza schedulata correttamente")
-                        offerta.orderNotificationIsScheduled = true
-                        FireBaseAPI.updateNode(node: "orderOffered/"+(self.user?.idApp)!+"/"+offerta.idOfferta!, value: ["orderNotificationIsScheduled":true])
+                    if !offerta.orderNotificationIsScheduled! {
+                        DispatchQueue.main.async {
+                            NotitificationsCenter.scheduledExpiratedOrderLocalNotification(title: "Ordine scaduto", body: "Il prodotto che hai offerto a \((offerta.userDestination?.fullName)!) è scaduto", identifier: offerta.idOfferta!, expirationDate: self.stringTodateObject(date: offerta.expirationeDate!))
+                            print("Notifica scadenza schedulata correttamente")
+                            offerta.orderNotificationIsScheduled = true
+                            FireBaseAPI.updateNode(node: "orderOffered/"+(self.user?.idApp)!+"/"+offerta.idOfferta!, value: ["orderNotificationIsScheduled":true])
+                        }
+                        
                     }
                     
                     ref.child("sessions").setValue(FIRServerValue.timestamp())
@@ -428,7 +432,7 @@ class FirebaseData {
         let ref = FIRDatabase.database().reference()
         self.ordersReceived.removeAll()
         self.user = user
-        ref.child("orderReceived/" + (self.user?.idApp)!).observe(.value, with: { (snap) in
+        ref.child("orderReceived/" + (self.user?.idApp)!).observeSingleEvent(of:.value, with: { (snap) in
             // controllo che lo snap dei dati non sia vuoto
             guard snap.exists() else {return}
             guard snap.value != nil else {return}
@@ -476,6 +480,9 @@ class FirebaseData {
                     case "orderNotificationIsScheduled":
                         offerta.orderNotificationIsScheduled = (valore as? Bool)!
                         break
+                    case "orderExpirationNotificationIsScheduled":
+                        offerta.orderExpirationNotificationIsScheduled = (valore as? Bool)!
+                        break
                     case "total":
                         offerta.totalReadedFromFirebase = (valore as? String)!
                         break
@@ -486,11 +493,13 @@ class FirebaseData {
                 
                 if offerta.offerState != "Scaduta" {
                     //scheduling notification appearing in expirationDate
-                    if !offerta.orderNotificationIsScheduled {
-                        NotitificationsCenter.scheduledExpiratedOrderLocalNotification(title: "Ordine scaduto", body: "Il prodotto che ti è stato offerto  è scaduto", identifier:"expirationDate-"+offerta.idOfferta!, expirationDate: self.stringTodateObject(date: offerta.expirationeDate!))
-                        print("Notifica scadenza schedulata correttamente")
-                        offerta.orderNotificationIsScheduled = true
-                        FireBaseAPI.updateNode(node: "orderReceived/"+(self.user?.idApp)!+"/"+offerta.orderAutoId, value: ["orderNotificationIsScheduled":true])
+                    if !offerta.orderNotificationIsScheduled! {
+                        DispatchQueue.main.async {
+                            NotitificationsCenter.scheduledExpiratedOrderLocalNotification(title: "Ordine scaduto", body: "Il prodotto che ti è stato offerto  è scaduto", identifier:"expirationDate-"+offerta.idOfferta!, expirationDate: self.stringTodateObject(date: offerta.expirationeDate!))
+                            print("Notifica scadenza schedulata correttamente")
+                            offerta.orderNotificationIsScheduled = true
+                            FireBaseAPI.updateNode(node: "orderReceived/"+(self.user?.idApp)!+"/"+offerta.orderAutoId, value: ["orderNotificationIsScheduled":true])
+                        }
                     }
                     
                     ref.child("sessions").setValue(FIRServerValue.timestamp())
@@ -524,10 +533,13 @@ class FirebaseData {
                             let components = Calendar.current.dateComponents([.day], from: currentDate!, to: expirationDate!)
                             print("difference is \(components.day ?? 0) days  ")
                             //components.day! < 2
-                            if  components.day! <= 2 {
-                                NotitificationsCenter.scheduledRememberExpirationLocalNotification(title: "Ordine in scadenza", body: "l'ordine di € \(offerta.totalReadedFromFirebase) è in scadenza, affrettati a consumare", identifier: "RememberExpiration-"+offerta.idOfferta!)
+                            if  components.day! <= 2 && !offerta.orderExpirationNotificationIsScheduled!{
+                                DispatchQueue.main.async {
+                                    NotitificationsCenter.scheduledRememberExpirationLocalNotification(title: "Ordine in scadenza", body: "l'ordine di € \(offerta.totalReadedFromFirebase) è in scadenza, affrettati a consumare", identifier: "RememberExpiration-"+offerta.idOfferta!)
+                                    offerta.orderExpirationNotificationIsScheduled = true
+                                    FireBaseAPI.updateNode(node: "orderReceived/"+(self.user?.idApp)!+"/"+offerta.orderAutoId, value: ["orderExpirationNotificationIsScheduled":true])
+                                }
                             }
-                            
                         }
                     })
                 }

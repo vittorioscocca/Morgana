@@ -124,11 +124,13 @@ class NotitificationsCenter{
         dateComponents.day = calendar.component(.day, from: expirationDate)
         
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
+        print("NOTIFICA REMEBER EXPIRATION CREATA alle \(dateComponents.hour!):\(dateComponents.minute!)")
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
         center.add(request) { (error : Error?) in
             if let theError = error {
                 print(theError.localizedDescription)
             }
+            
         }
     }
     
@@ -151,12 +153,13 @@ class NotitificationsCenter{
             
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
         //let trigger1 = UNTimeIntervalNotificationTrigger.init(timeInterval: 3.0, repeats: false)
-        print("NOTIFICA CICLICA CREATA ogni giorno ore \(dateComponents.hour!):\(dateComponents.minute!)")
+         print("NOTIFICA CICLICA CREATA ogni giorno ore \(dateComponents.hour!):\(dateComponents.minute!)")
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
         center.add(request) { (error : Error?) in
             if let theError = error {
                 print(theError.localizedDescription)
             }
+           
         }
     }
     

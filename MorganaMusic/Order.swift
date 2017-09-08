@@ -18,12 +18,13 @@ class Order {
     var expirationeDate: String?
     var userDestination: UserDestination?
     var userSender: UserDestination?
-    var orderReaded = false
+    var orderReaded :Bool?
     var orderAutoId = ""
     var orderOfferedAutoId = ""
     var pendingPaymentAutoId = ""
     var timeStamp : TimeInterval = 0
-    var orderNotificationIsScheduled = false
+    var orderNotificationIsScheduled :Bool?
+    var orderExpirationNotificationIsScheduled :Bool?
     
     var paymentState: String?
     var offerState: String?
@@ -84,6 +85,9 @@ class Order {
         self.paymentState = paymentStates.pending.rawValue
         self.offerState = offerStates.pending.rawValue
         self.orderOfferedAutoId = ""
+        self.orderNotificationIsScheduled = false
+        self.orderReaded = false
+        self.orderExpirationNotificationIsScheduled = false
     }
     
     
