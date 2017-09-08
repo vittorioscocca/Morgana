@@ -300,7 +300,7 @@ class FirebaseData {
         let ref = FIRDatabase.database().reference()
         self.ordersSent.removeAll()
         
-        ref.child("orderOffered/" + (self.user?.idApp)!).observeSingleEvent(of: .value, with: { (snap) in
+        ref.child("orderOffered/" + (self.user?.idApp)!).observeSingleEvent(of:.value, with: { (snap) in
             guard snap.exists() else {return}
             guard snap.value != nil else {return}
             self.ordersSent.removeAll()
