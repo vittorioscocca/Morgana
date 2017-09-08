@@ -138,6 +138,7 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                 "totalStandardConsumptions": 0,
                 "totalDiversifiedConsumptions": 0,
                 "totalPoints": 0,
+                "currentFreeMoney": 0,
                 "lastDateShopping": 0
                 ] as [String : Any]
             

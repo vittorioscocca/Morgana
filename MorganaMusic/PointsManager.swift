@@ -19,7 +19,8 @@ class PointsManager {
     private var totalDiversifiedConsumptions: Int?  //totale delle consumazioni differenziate
     private var totalShopping: Double?  // storico, totale € consumati
     private var totalExtraDiscountShopping: Double?  // totale spesa in extra sconto
-    private var totalFreeMoney: Double?  // totale in € convertiti da punti in crediti
+    private var totalFreeMoney: Double?  // corrispndenza in € rispetto ai punti totali
+    private var currentFreeMoney: Double? //corrispndenza in € rispetto ai punti correnti
     private var totalPoints: Int?  //storico di tutto il punteggio cumulato da un utente
     private var totalPresence: Int? // numero di volte che ci si è registrati
     private var totalStandardShopping: Double?  // total spesa in sconto standard, la somma di queste due variabili genera totalExpense
@@ -86,6 +87,7 @@ class PointsManager {
             self.totalCurrentPoints = dictionary?["totalCurrentPoints"] as? Int
             self.totalExtraDiscountShopping = dictionary?["totalExtraDiscountShopping"] as? Double
             self.totalFreeMoney = dictionary?["totalFreeMoney"] as? Double
+            self.currentFreeMoney = dictionary?["currentFreeMoney"] as? Double
             self.totalStandardShopping = dictionary?["totalStandardShopping"] as? Double
             self.weeklyShopping = dictionary?["weeklyShopping"] as? Double
             self.totalShopping = dictionary?["totalShopping"] as? Double
@@ -133,6 +135,7 @@ class PointsManager {
         }
         let newPoints = Int(expense * personalDiscount! / changeCreditToPoint!)
         
+        currentFreeMoney! += (expense * personalDiscount!)
         balanceCurrentPoints += newPoints
         totalPoints! += newPoints
         
@@ -183,8 +186,10 @@ class PointsManager {
     }
     
     func updateNewValuesOnFirebase(onCompletion: @escaping ()->()){
+        
         let newValuesDictionary: [String: Any] = [
             "personalDiscount": self.personalDiscount!,
+            "currentFreeMoney": self.currentFreeMoney!,
             "totalCurrentPoints": self.totalCurrentPoints!,
             "totalExtraDiscountShopping": self.totalExtraDiscountShopping!,
             "totalFreeMoney": self.totalFreeMoney!,

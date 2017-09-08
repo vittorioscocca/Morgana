@@ -224,6 +224,9 @@ class FireBaseAPI {
         
         //remove OrderDetails
         ref.child("productsOffersDetails").removeValue()
+        
+        //resetUserPointsStats
+        
     }
     
     
