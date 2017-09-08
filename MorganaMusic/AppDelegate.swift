@@ -240,7 +240,7 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         if action == "delete.action"{
             print(response.notification.request.identifier)
             center.removePendingNotificationRequests(withIdentifiers: [response.notification.request.identifier] )
-            print("pending repeated Notification deleted identifier \(userInfo["identifier"] as! String)")
+            print("Notification id \(response.notification.request.identifier) killed")
         }
         if let id = userInfo["identifier"] as? String  {
             if id == "myDrinks" {

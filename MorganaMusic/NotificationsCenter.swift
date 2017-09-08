@@ -146,7 +146,7 @@ class NotitificationsCenter{
         
         var dateComponents = DateComponents()
         dateComponents.hour = 21
-        dateComponents.minute = 33
+        dateComponents.minute = 42
         
             
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
