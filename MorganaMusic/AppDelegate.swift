@@ -220,8 +220,11 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
     func setCategories(){
         
         let deleteExpirationAction = UNNotificationAction(identifier: "delete.action",title: "Non ricordarlmelo più",options: [])
+        let acceptOrderAction = UNNotificationAction(identifier: "acceptOrder.action",title: "Accetta",options: [])
+        let refuseOrderAction = UNNotificationAction(identifier: "refuseOrder.action",title: "Rifiuta",options: [])
         let remeberExpirationCategory = UNNotificationCategory(identifier: "RemeberExpiration",actions: [deleteExpirationAction],intentIdentifiers: [],options: [])
-        UNUserNotificationCenter.current().setNotificationCategories([remeberExpirationCategory])
+        let OrderSentCategory = UNNotificationCategory(identifier: "OrderSent",actions: [acceptOrderAction,refuseOrderAction],intentIdentifiers: [],options: [])
+        UNUserNotificationCenter.current().setNotificationCategories([remeberExpirationCategory,OrderSentCategory])
     }
   
     
@@ -237,11 +240,34 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         print(userInfo)
         
         let action = response.actionIdentifier
-        if action == "delete.action"{
+        
+        switch action {
+        case "delete.action":
             print(response.notification.request.identifier)
             center.removePendingNotificationRequests(withIdentifiers: [response.notification.request.identifier] )
             print("Notification id \(response.notification.request.identifier) killed")
+            break
+        case "acceptOrder.action":
+            //nel messaggio trasportiamo: id ordine, id aoo sender, id appDestination con quest info basta chiamare anche da qui FIREBASE
+            /*
+            FirebaseData.sharedIstance.updateStateOnFirebase(order: self.ordersReceived[indexPath.row],state: "Offerta accettata")
+            self.ordersReceived[indexPath.row].acceptOffer()
+            tableView.setEditing(false, animated: true)
+            self.performSegue(withIdentifier: "segueToOrderDetails", sender: indexPath)
+            tableView.deselectRow(at: indexPath, animated: true)
+            self.resetSegmentControl1()
+            let msg = "Il tuo amico " + (self.user?.fullName)!  + " ha accettato il tuo ordine"
+            NotitificationsCenter.sendNotification(userIdApp: (self.ordersReceived[indexPath.row].userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
+            FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase((self.ordersReceived[indexPath.row].userSender?.idApp)!, recOrPurch: "purchased")*/
+            break
+        case "refuseOrder.action" :
+            
+            break
+        default:
+            break
         }
+        
+        
         if let id = userInfo["identifier"] as? String  {
             if id == "myDrinks" {
                 //when tap on notification user go to view notification target

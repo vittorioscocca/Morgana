@@ -500,7 +500,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 
                 //Action accept order
                 let acceptOrderAction = UITableViewRowAction(style: .default, title: "Accetta") { (action, index) in
-                    (thisCell as? OrderReceivedTableViewCell)?.cellReaded = true
+                    (thisCell as? OrderReceivedTableViewCell)?.cellReaded = true 
                     FirebaseData.sharedIstance.user = self.user
                     FirebaseData.sharedIstance.updateStateOnFirebase(order: self.ordersReceived[indexPath.row],state: "Offerta accettata")
                     self.ordersReceived[indexPath.row].acceptOffer()

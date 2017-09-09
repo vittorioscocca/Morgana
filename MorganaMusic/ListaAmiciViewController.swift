@@ -130,7 +130,7 @@ class ListaAmiciViewController: UIViewController,UITableViewDelegate, UITableVie
             (cell as! FirendsListTableViewCell).forwardButton.tag = indexPath.row
             //(cell as! FirendsListTableViewCell).forwardButton.addTarget(self, action: "forwardAction:", for: .touchUpInside)
             (cell as! FirendsListTableViewCell).forwardButton.addTarget(self, action: #selector(forwardAction(_:)), for: .touchUpInside)
-        }
+        } 
         
         // If this image is already cached, don't re-download
         

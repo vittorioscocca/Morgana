@@ -1265,20 +1265,20 @@
                                                             <rect key="frame" x="0.0" y="5" width="60" height="60"/>
                                                             <constraints>
                                                                 <constraint firstAttribute="height" constant="60" id="Lu0-8d-abe"/>
-                                                                <constraint firstAttribute="width" constant="59.999999999999993" id="Usp-3O-ggn"/>
+                                                                <constraint firstAttribute="width" constant="60" id="dUJ-vJ-gbW"/>
                                                             </constraints>
                                                         </imageView>
                                                         <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="D7d-wn-SYV">
                                                             <rect key="frame" x="76" y="20" width="271" height="30"/>
                                                             <subviews>
                                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Friend Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hjB-U1-j3e">
-                                                                    <rect key="frame" x="0.0" y="0.0" width="271" height="30"/>
+                                                                    <rect key="frame" x="0.0" y="0.0" width="189.5" height="30"/>
                                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                     <nil key="textColor"/>
                                                                     <nil key="highlightedColor"/>
                                                                 </label>
                                                                 <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="txA-ON-0zf">
-                                                                    <rect key="frame" x="271" y="0.0" width="0.0" height="30"/>
+                                                                    <rect key="frame" x="189.5" y="0.0" width="81.5" height="30"/>
                                                                     <state key="normal" title="Invia"/>
                                                                     <userDefinedRuntimeAttributes>
                                                                         <userDefinedRuntimeAttribute type="number" keyPath="layer.borderWidth">
