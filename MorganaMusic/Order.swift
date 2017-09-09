@@ -142,15 +142,22 @@ class Order {
         }
     }
     
-    func calcolaDataScadenzaOfferta () {
+    func calcolaDataScadenzaOfferta (selfOrder: Bool) {
         if self.dataCreazioneOfferta != nil {
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
             formatter.locale = Locale.init(identifier: "it_IT")
             let dateOfferta: Date = formatter.date(from: self.dataCreazioneOfferta!)!
-            //let date = Calendar.current.date(byAdding: .weekOfMonth, value: 1, to: dateOfferta)
-            let date = Calendar.current.date(byAdding: .weekday, value: 3, to: dateOfferta)
-            self.expirationeDate = formatter.string(from: date!)
+            //if the user has bought the order for itself expiration date is from 1 year
+            var date = Date()
+            if selfOrder {
+                date = Calendar.current.date(byAdding: .year, value: 1, to: dateOfferta)!
+            }else {
+                //let date = Calendar.current.date(byAdding: .weekOfMonth, value: 1, to: dateOfferta)
+                date = Calendar.current.date(byAdding: .weekday, value: 3, to: dateOfferta)!
+            }
+            
+            self.expirationeDate = formatter.string(from: date)
         }
     }
     

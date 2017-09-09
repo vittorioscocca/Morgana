@@ -151,7 +151,7 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
             
             for order in Cart.sharedIstance.carrello{
                 order.dataCreazioneOfferta = paycreatetime
-                order.calcolaDataScadenzaOfferta()
+                order.calcolaDataScadenzaOfferta(selfOrder: (self.user?.idApp! == order.userDestination?.idApp!))
                 order.pendingOffer()
             }
             self.startActivityIndicator("Pagamento in validazione...")
@@ -179,9 +179,10 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
                         
                         print("Punti aggiornati")
                         Cart.sharedIstance.initializeCart()
+                        self.performSegue(withIdentifier: "unwindToOfferFromPayment", sender: nil)
                     })
                     
-                    self.performSegue(withIdentifier: "unwindToOfferFromPayment", sender: nil)
+                    
                     
                 } else {
                    print("Pagamento carrello non valido, riprova")

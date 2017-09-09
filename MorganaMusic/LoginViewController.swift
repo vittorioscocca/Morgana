@@ -92,6 +92,8 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
             //if user exist on firbase exit, else save user data on firebase(only one time)
             guard !snap.exists() else {
                 print("exist: user already exist on Firebase")
+                //Firebase Token can changed, so if there is such problem with a login/logout we have the new Token
+                ref.child("user/"+(userFireBase?.uid)!).updateChildValues(["fireBaseIstanceIDToken" : FIRInstanceID.instanceID().token()!])
                 onCompletion()
                 return
             }
@@ -107,8 +109,9 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                 "number of pending purchased products": 0,
                 "number of pending received products" : 0,
                 "account state" : "Active",
+                "merchantCode":"0",
                 "fireBaseIstanceIDToken" : FIRInstanceID.instanceID().token()!,
-                "credits": 0
+                "credits": 5
                 ] as [String : Any]
             ref.child("users").child((userFireBase?.uid)!).setValue(dataUser)
             onCompletion()
