@@ -352,7 +352,6 @@ class FirebaseData {
         })
     }
 
-    
     func readOrdersSentOnFireBase(user: User, friendsList: [Friend]?,onCompletion: @escaping ([Order])->()){
         self.user = user
         let ref = FIRDatabase.database().reference()

@@ -1268,17 +1268,17 @@
                                                                 <constraint firstAttribute="width" constant="60" id="dUJ-vJ-gbW"/>
                                                             </constraints>
                                                         </imageView>
-                                                        <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="D7d-wn-SYV">
+                                                        <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" translatesAutoresizingMaskIntoConstraints="NO" id="D7d-wn-SYV">
                                                             <rect key="frame" x="76" y="20" width="271" height="30"/>
                                                             <subviews>
                                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Friend Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hjB-U1-j3e">
-                                                                    <rect key="frame" x="0.0" y="0.0" width="189.5" height="30"/>
+                                                                    <rect key="frame" x="0.0" y="0.0" width="204.5" height="30"/>
                                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                     <nil key="textColor"/>
                                                                     <nil key="highlightedColor"/>
                                                                 </label>
                                                                 <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="txA-ON-0zf">
-                                                                    <rect key="frame" x="189.5" y="0.0" width="81.5" height="30"/>
+                                                                    <rect key="frame" x="204.5" y="0.0" width="66.5" height="30"/>
                                                                     <state key="normal" title="Invia"/>
                                                                     <userDefinedRuntimeAttributes>
                                                                         <userDefinedRuntimeAttribute type="number" keyPath="layer.borderWidth">
@@ -1290,9 +1290,6 @@
                                                                     </userDefinedRuntimeAttributes>
                                                                 </button>
                                                             </subviews>
-                                                            <constraints>
-                                                                <constraint firstItem="txA-ON-0zf" firstAttribute="width" secondItem="D7d-wn-SYV" secondAttribute="width" multiplier="0.3" id="D2E-27-c3b"/>
-                                                            </constraints>
                                                         </stackView>
                                                     </subviews>
                                                 </stackView>
