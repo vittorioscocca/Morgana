@@ -26,9 +26,9 @@ class NotitificationsCenter{
     private static var fireBaseIstanceIDToken: String = String()
     
     
-    class func sendNotification(userIdApp: String, msg: String, controlBadgeFrom: String) {
+    class func sendNotification(userDestinationIdApp: String, msg: String, controlBadgeFrom: String) {
         
-        FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + userIdApp, onCompletion: {(error,dictionary) in
+        FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + userDestinationIdApp, onCompletion: {(error,dictionary) in
             guard error == nil else {
                 (print("nessuna connessione"))
                 return
@@ -57,7 +57,7 @@ class NotitificationsCenter{
                 
                 request.setValue(authorizationKey, forHTTPHeaderField: "Authorization")//This is where you add your HTTP headers like Content-Type, Accept and so on
                 request.timeoutInterval = 200000.0
-                let params = ["to" : fireBaseIstanceIDToken, "data" : ["identifier" : "RemeberExpiration"], "notification" :["title" : "", "body": msg, "click_action":"OrderSent", "sound" : "default", "badge" : String(userDestinationBadgeValue)], "priority" : "high" ] as [String : Any]
+                let params = ["to" : fireBaseIstanceIDToken, "data" : ["identifier" : "RemeberExpiration"], "notification" :["title" : "", "body": msg, "sound" : "default", "badge" : String(userDestinationBadgeValue)], "priority" : "high" ] as [String : Any]
                 var httpData :Data = Data()
                 do {
                     httpData = try JSONSerialization.data(withJSONObject: params, options: .prettyPrinted)
@@ -77,6 +77,62 @@ class NotitificationsCenter{
             
         })
     }
+    
+    class func sendOrderNotification(userDestinationIdApp: String, msg: String, controlBadgeFrom: String, userFullName: String, userIdApp: String, userSenderIdApp: String, idOrder: String, autoIdOrder: String) {
+        
+        FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + userDestinationIdApp, onCompletion: {(error,dictionary) in
+            guard error == nil else {
+                (print("nessuna connessione"))
+                return
+            }
+            guard dictionary != nil else {
+                return
+            }
+            var valuePendingProduct = ""
+            
+            if controlBadgeFrom == "received" {
+                valuePendingProduct = "number of pending received products"
+            } else if controlBadgeFrom == "purchased" {
+                valuePendingProduct = "number of pending purchased products"
+            }
+            userDestinationBadgeValue = dictionary?[valuePendingProduct] as! Int
+            userDestinationBadgeValue = userDestinationBadgeValue + 1
+            
+            
+            guard (dictionary?["fireBaseIstanceIDToken"] as? String) != nil else {return}
+            fireBaseIstanceIDToken = dictionary?["fireBaseIstanceIDToken"] as! String
+            
+            if let url = NSURL(string: "https://fcm.googleapis.com/fcm/send"){
+                let request = NSMutableURLRequest(url: url as URL)
+                request.httpMethod = "POST" //Or GET if that's what you need
+                request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+                
+                request.setValue(authorizationKey, forHTTPHeaderField: "Authorization")//This is where you add your HTTP headers like Content-Type, Accept and so on
+                request.timeoutInterval = 200000.0
+                let params = ["to" : fireBaseIstanceIDToken, "data" : ["identifier" : "OrderSent","userFullName": userFullName, "userIdApp": userDestinationIdApp, "userSenderIdApp": userSenderIdApp, "idOrder": idOrder, "autoIdOrder": autoIdOrder], "notification" :["title" : "", "body": msg, "click_action":"OrderSent", "sound" : "default", "badge" : String(userDestinationBadgeValue)], "priority" : "high" ] as [String : Any]
+                var httpData :Data = Data()
+                do {
+                    httpData = try JSONSerialization.data(withJSONObject: params, options: .prettyPrinted)
+                    // here "jsonData" is the dictionary encoded in JSON data
+                    
+                } catch {
+                    print(error.localizedDescription)
+                }
+                
+                request.httpBody = httpData
+                let session = URLSession.shared
+                session.dataTask(with: request as URLRequest, completionHandler: { (returnData, response, error) -> Void in
+                    let strData = NSString(data: returnData!, encoding: String.Encoding.utf8.rawValue)
+                    print("NOTIFICA INVIATA \(strData!)")
+                }).resume() //Remember this one or nothing will happen :-)
+            }
+            
+        })
+    }
+
+        
+        
+    
     
     class func localNotification(title: String, body: String) {
         let center = UNUserNotificationCenter.current()

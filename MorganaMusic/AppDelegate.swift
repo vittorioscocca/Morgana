@@ -207,6 +207,7 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         print("%@", userInfo)
         print("Message ID: \(userInfo["gcm.message_id"]!)")
         
+        
         if notification.request.identifier == "LocalAlert"{
             completionHandler( [.alert,.sound,.badge])
         }
@@ -215,6 +216,18 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             print(notification.request.identifier)
             completionHandler( [.alert,.sound,.badge])
         }
+        
+        if userInfo["gcm.message_id"] as! String == "OrderSent"{
+            print(notification.request.identifier)
+            completionHandler( [.alert,.sound,.badge])
+        }
+        
+        if userInfo["gcm.message_id"] as! String == "expiratedOrder"{
+            print(notification.request.identifier)
+            completionHandler( [.alert,.sound,.badge])
+        }
+        
+        
     }
     
     func setCategories(){
@@ -248,17 +261,20 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             print("Notification id \(response.notification.request.identifier) killed")
             break
         case "acceptOrder.action":
-            //nel messaggio trasportiamo: id ordine, id aoo sender, id appDestination con quest info basta chiamare anche da qui FIREBASE
-            /*
-            FirebaseData.sharedIstance.updateStateOnFirebase(order: self.ordersReceived[indexPath.row],state: "Offerta accettata")
-            self.ordersReceived[indexPath.row].acceptOffer()
-            tableView.setEditing(false, animated: true)
-            self.performSegue(withIdentifier: "segueToOrderDetails", sender: indexPath)
-            tableView.deselectRow(at: indexPath, animated: true)
-            self.resetSegmentControl1()
-            let msg = "Il tuo amico " + (self.user?.fullName)!  + " ha accettato il tuo ordine"
-            NotitificationsCenter.sendNotification(userIdApp: (self.ordersReceived[indexPath.row].userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
-            FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase((self.ordersReceived[indexPath.row].userSender?.idApp)!, recOrPurch: "purchased")*/
+            print("SIAMO QUIIIIIIIIIIIII")
+            let fireBaseToken = UserDefaults.standard
+            let uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
+            let user = CoreDataController.sharedIstance.findUserForIdApp(uid)
+            
+            //Se funziona  evitare di passarlo nel messaggio
+            let userFullName = user?.fullName
+            let userIdApp = userInfo["userIdApp"] as? String
+            let userSenderIdApp = userInfo["userSenderIdApp"] as? String
+            let idOrder = userInfo["idOrder"] as? String
+            let autoIdOrder = userInfo["autoIdOrder"] as? String
+                
+            FirebaseData.sharedIstance.acceptOrder(state: "Offerta accettata", userFullName: userFullName!, userIdApp: userIdApp!, userSenderIdApp: userSenderIdApp!, idOrder: idOrder!, autoIdOrder: autoIdOrder!)
+            print("Ordine ACCETTATO")
             break
         case "refuseOrder.action" :
             
@@ -269,7 +285,8 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         
         
         if let id = userInfo["identifier"] as? String  {
-            if id == "myDrinks" {
+            if id == "OrderSent" {
+                
                 //when tap on notification user go to view notification target
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
                 /*

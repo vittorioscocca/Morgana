@@ -274,24 +274,27 @@ class PaymentManager {
                 
                 let dizionario_offerte = snap.value! as! NSDictionary
                 
-                for (chiave,valore) in dizionario_offerte {
-                    switch chiave as! String {
-                    case "IdAppUserDestination":
-                        let idAppUserDestination = valore as! String
-                        if idAppUserDestination !=  user.idApp {
-                            let msg = "Il tuo amico " + (user.fullName)! + " ti ha appena offerto qualcosa"
-                            //push notification and App badge value for Receiver
-                            NotitificationsCenter.sendNotification(userIdApp: idAppUserDestination, msg: msg, controlBadgeFrom: "received")
-                        }
-                        self.updateNumberPendingProducts(idAppUserDestination, recOrPurch: "received")
-                        break
-                    default:
-                        break
-                    }
+                
+                let idAppUserDestination = dizionario_offerte["IdAppUserDestination"] as? String
+                let userFullName = user.fullName
+                let userIdApp = user.idApp
+                let userSenderIdApp = user.idApp
+                let idOrder = dizionario_offerte["orderAutoId"] as? String
+                let autoIdOrder = dizionario_offerte["orderOfferedAutoId"] as? String
+                
+                
+                if  idAppUserDestination != user.idApp {
+                    let msg = "Il tuo amico " + (user.fullName)! + " ti ha appena offerto qualcosa"
+                    //push notification and App badge value for Receiver
+                    NotitificationsCenter.sendOrderNotification(userDestinationIdApp: idAppUserDestination!, msg: msg, controlBadgeFrom: "received", userFullName: userFullName!, userIdApp: userIdApp!, userSenderIdApp: userSenderIdApp!,idOrder: idOrder!, autoIdOrder: autoIdOrder!)
                 }
+                self.updateNumberPendingProducts(idAppUserDestination!, recOrPurch: "received")
+                
             })
         }
     }
+    
+    
     
     private func updateNumberPendingProducts(_ idAppUserDestination: String, recOrPurch: String){
         let ref = FIRDatabase.database().reference()

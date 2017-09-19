@@ -502,17 +502,14 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 let acceptOrderAction = UITableViewRowAction(style: .default, title: "Accetta") { (action, index) in
                     (thisCell as? OrderReceivedTableViewCell)?.cellReaded = true 
                     FirebaseData.sharedIstance.user = self.user
-                    FirebaseData.sharedIstance.updateStateOnFirebase(order: self.ordersReceived[indexPath.row],state: "Offerta accettata")
+                    FirebaseData.sharedIstance.acceptOrder(state: "Offerta accettata", userFullName: (self.user?.fullName)!, userIdApp: (self.user?.idApp)!, userSenderIdApp: (self.ordersReceived[indexPath.row].userSender?.idApp)!, idOrder: self.ordersReceived[indexPath.row].idOfferta!, autoIdOrder: self.ordersReceived[indexPath.row].orderAutoId)
                     self.ordersReceived[indexPath.row].acceptOffer()
                     tableView.setEditing(false, animated: true)
                     self.performSegue(withIdentifier: "segueToOrderDetails", sender: indexPath)
                     tableView.deselectRow(at: indexPath, animated: true)
                     self.resetSegmentControl1()
-                    let msg = "Il tuo amico " + (self.user?.fullName)!  + " ha accettato il tuo ordine"
-                    NotitificationsCenter.sendNotification(userIdApp: (self.ordersReceived[indexPath.row].userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
-                    FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase((self.ordersReceived[indexPath.row].userSender?.idApp)!, recOrPurch: "purchased")
-                    self.myTable.reloadData()
                     
+                    self.myTable.reloadData()
                 }
                 acceptOrderAction.backgroundColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
                 
@@ -787,15 +784,12 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 action = UIAlertAction(title: "Rifiuta", style: UIAlertActionStyle.default, handler: {(paramAction:UIAlertAction!) in
                     print("'Rifiuta' è stato cliccato")
                     FirebaseData.sharedIstance.user = self.user
-                    FirebaseData.sharedIstance.updateStateOnFirebase(order: self.ordersReceived[(indexPath?.row)!],state: "Offerta rifiutata")
+                    FirebaseData.sharedIstance.refuseOrder(state: "Offerta rifiutata", userFullName: (self.user?.fullName)!, userIdApp: (self.user?.idApp)!, userSenderIdApp: (self.ordersReceived[(indexPath?.row)!].userSender?.idApp)!, idOrder: self.ordersReceived[(indexPath?.row)!].idOfferta!, autoIdOrder: self.ordersReceived[(indexPath?.row)!].orderAutoId)
                     self.ordersReceived[(indexPath?.row)!].refuseOffer()
                     //FirebaseData.sharedIstance.deleteOrderReceveidOnFirebase(order: self.ordersReceived[(indexPath?.row)!])
-                    let msg = "Il tuo amico " + (self.user?.fullName)!  + " ha rifiutato il tuo ordine"
-                    NotitificationsCenter.sendNotification(userIdApp: (self.ordersReceived[(indexPath?.row)!].userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
-                    FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase((self.ordersReceived[(indexPath?.row)!].userSender?.idApp)!, recOrPurch: "purchased")
+                    
                     self.ordersReceived.remove(at: (indexPath?.row)!)
                     self.myTable.deleteRows(at: [indexPath!], with: .fade)
-                    
             })
             actionAnnulla = UIAlertAction(title: "Annulla", style: UIAlertActionStyle.default, handler:
                 {(paramAction:UIAlertAction!) in

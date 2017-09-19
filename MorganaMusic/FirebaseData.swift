@@ -127,10 +127,11 @@ class FirebaseData {
                     onCompletion()
                 })
             }
+            
         })
     }
     
-    //saveProductOnFireBase
+    //SAVE PRODUCT ON FIREBASE
     private func buildProductOrderDetailsDictionary(idFBFriend: String?, creationDate: String? )->[String:String]?{
         //costruisco il dictionary di dettaglio delle offerte: i prodotti
         guard idFBFriend != nil else {return nil}
@@ -191,8 +192,7 @@ class FirebaseData {
     }
     
 
-    //saveOrderAsReceivedOnFireBase
-    
+    //SAVE ORDER AS RECEIVED ON FIREBASE
     private func buildOrderDetailsReceivedDictionary(dictionary:[String:Any] )->[String:Any]{
         
         var offerDetails: [String:Any] = dictionary
@@ -259,9 +259,10 @@ class FirebaseData {
         for numberOfpaymentIdOrders in 0...(idOrder?.count)! - 1 {
             self.paymentDetails?["offerID"+String(numberOfpaymentIdOrders)] = idOrder?[numberOfpaymentIdOrders]
         }
+        self.idOrder?.removeAll()
     }
     
-    //savePaymentOnFireBase
+    //SAVE PAYMENT ON FIREBAASE
     private func savePaymentOnFireBase (onCompletion: @escaping ()->()){
         
         buildPaymentIdOrders()
@@ -461,7 +462,7 @@ class FirebaseData {
                             ref.child("orderReceived/" + (offerta.userDestination?.idApp)! + "/" + offerta.orderOfferedAutoId).updateChildValues(["offerState" : "Scaduta"])
                             
                             let msg = "Il prodotto che ti è stato offerto da \((self.user?.fullName)!) è scaduto"
-                            NotitificationsCenter.sendNotification(userIdApp: (offerta.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
+                            NotitificationsCenter.sendNotification(userDestinationIdApp: (offerta.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
                             self.updateNumberPendingProductsOnFireBase((offerta.userDestination?.idApp)!, recOrPurch: "received")
                         }
                     })
@@ -584,7 +585,7 @@ class FirebaseData {
                             ref.child("orderOffered/" + (offerta.userSender?.idApp)! + "/" + offerta.idOfferta!).updateChildValues(["offerState" : "Scaduta"])
                             offerta.offerState = "Scaduta"
                             let msg = "Il prodotto che hai offerto a \((self.user?.fullName)!) è scaduto"
-                            NotitificationsCenter.sendNotification(userIdApp: (offerta.userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
+                            NotitificationsCenter.sendNotification(userDestinationIdApp: (offerta.userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
                             self.updateNumberPendingProductsOnFireBase((offerta.userSender?.idApp)!, recOrPurch: "purchased")
                             let center = UNUserNotificationCenter.current()
                             center.removePendingNotificationRequests(withIdentifiers: ["RememberExpiration-"+offerta.idOfferta!])
@@ -736,11 +737,16 @@ class FirebaseData {
         return dateFormatter.date(from: date)!
         
     }
-
     
-    func updateStateOnFirebase (order: Order, state: String){
+    //func updateStateOnFirebase (order: Order, state: String){
+    func updateStateOnFirebase (userIdApp: String, userSenderIdApp: String, idOrder: String, autoIdOrder: String, state: String){
+        
+        FireBaseAPI.updateNode(node: "orderReceived/" + userIdApp + "/" + autoIdOrder, value: ["orderReaded" : "true", "offerState":state])
+        FireBaseAPI.updateNode(node: "orderOffered/" + userSenderIdApp + "/" + idOrder, value: ["offerState":state])
+        
+        /*
         FireBaseAPI.updateNode(node: "orderReceived/" + (self.user?.idApp)! + "/" + order.orderAutoId, value: ["orderReaded" : "true", "offerState":state])
-        FireBaseAPI.updateNode(node: "orderOffered/" + (order.userSender?.idApp)! + "/" + order.idOfferta!, value: ["offerState":state])
+        FireBaseAPI.updateNode(node: "orderOffered/" + (order.userSender?.idApp)! + "/" + order.idOfferta!, value: ["offerState":state])*/
         
     }
     
@@ -798,7 +804,26 @@ class FirebaseData {
             onCompletion(error,idApp)
         })
     }
+    
+    func acceptOrder(state: String, userFullName: String, userIdApp: String, userSenderIdApp: String,idOrder: String, autoIdOrder: String){
+        
+        FirebaseData.sharedIstance.updateStateOnFirebase(userIdApp: userIdApp, userSenderIdApp: userSenderIdApp, idOrder: idOrder, autoIdOrder: autoIdOrder, state: state)
+        
+        let msg = "Il tuo amico " + userFullName  + " ha accettato il tuo ordine"
+        
+        NotitificationsCenter.sendNotification(userDestinationIdApp:userSenderIdApp, msg: msg, controlBadgeFrom: "purchased")
+        
+        FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase(userSenderIdApp, recOrPurch: "purchased")
+    }
+    
+    func refuseOrder(state: String, userFullName: String, userIdApp: String, userSenderIdApp: String,idOrder: String, autoIdOrder: String) {
+       
+        FirebaseData.sharedIstance.updateStateOnFirebase(userIdApp: userIdApp, userSenderIdApp: userSenderIdApp, idOrder: idOrder, autoIdOrder: autoIdOrder, state: state)
+        
+        let msg = "Il tuo amico " + userFullName  + " ha rifiutato il tuo ordine"
+        NotitificationsCenter.sendNotification(userDestinationIdApp: userSenderIdApp, msg: msg, controlBadgeFrom: "purchased")
 
-    
-    
+        FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase(userSenderIdApp, recOrPurch: "purchased")
+    }
+
 }
