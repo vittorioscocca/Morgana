@@ -18,7 +18,7 @@ import UserNotifications
 
 class FireBaseAPI {
     
-    static let ref = FIRDatabase.database().reference()
+    static let ref = Database.database().reference()
     static var dictionary: [String:Any]?
     
     static var error: String?
@@ -212,7 +212,7 @@ class FireBaseAPI {
             onCompletion(nil)
             return
         }
-        ref.child("sessions").setValue(FIRServerValue.timestamp())
+        ref.child("sessions").setValue(ServerValue.timestamp())
         ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
             let timeStamp = snap.value! as! TimeInterval
             onCompletion(timeStamp)

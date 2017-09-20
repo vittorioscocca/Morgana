@@ -82,7 +82,8 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         self.getFriendsList()
         self.myTable.dataSource = self
         self.myTable.delegate = self
-        print("eccolo:  \(FIRInstanceID.instanceID().token()!)")
+        let token = Messaging.messaging().fcmToken
+        print("FCM token: \(token ?? "")")
         
         //reset Firebase DB. only for simulator tests
         //FireBaseAPI.resetFirebaseDB()
@@ -334,7 +335,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         
         strLabel = UILabel(frame: CGRect(x: 50, y: 0, width: 200, height: 46))
         strLabel.text = title
-        strLabel.font = UIFont.systemFont(ofSize: 14, weight: UIFontWeightMedium)
+        strLabel.font = UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
         strLabel.textColor = UIColor(white: 0.9, alpha: 0.7)
         
         effectView.frame = CGRect(x: view.frame.midX - strLabel.frame.width/2, y: view.frame.midY - strLabel.frame.height/2 , width: 200, height: 46)
@@ -390,7 +391,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
             print("Totale amici letti:  \(counts)")
             var contFriends = 0
             
-            self.startActivityIndicator("Carico lista amici...")
+            //self.startActivityIndicator("Carico lista amici...")
             let dati: NSArray = newResult.object(forKey: "data") as! NSArray
             
             guard dati.count != 0 else {
@@ -414,7 +415,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
                 CoreDataController.sharedIstance.addFriendInUser(idAppUser: self.uid!, idFB: idFB, mail: mail, fullName: name, firstName: firstName, lastName: lastName, gender: nil, pictureUrl: url)
             }
             print("Aggiornamento elnco amici di Facebook completato!. Inseriti \(contFriends) amici")
-            self.stopActivityIndicator()
+            //self.stopActivityIndicator()
         })
     }
     

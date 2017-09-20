@@ -107,7 +107,7 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
         let scaleX = imgQRCode.frame.size.width / qrcodeImage.extent.size.width
         let scaleY = imgQRCode.frame.size.height / qrcodeImage.extent.size.height
         
-        let transformedImage = qrcodeImage.applying(CGAffineTransform(scaleX: scaleX, y: scaleY))
+        let transformedImage = qrcodeImage.transformed(by: CGAffineTransform(scaleX: scaleX, y: scaleY))
         
         let context:CIContext = CIContext.init(options: nil)
         let cgImage:CGImage = context.createCGImage(transformedImage, from: transformedImage.extent)!

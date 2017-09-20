@@ -39,7 +39,7 @@ class UpdateBadgeInfo {
             return
         }
         
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         ref.child("users/" + (self.user?.idApp)!).observe(.value, with: { (snap) in
             
            

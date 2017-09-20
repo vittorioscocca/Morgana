@@ -23,10 +23,10 @@ class QrReaderViewControllerViewController: UIViewController,AVCaptureMetadataOu
         let session = AVCaptureSession()
         
         //Define capture device
-        let captureDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeVideo)
+        let captureDevice = AVCaptureDevice.default(for: AVMediaType.video)
         
         do {
-            let input = try AVCaptureDeviceInput(device: captureDevice)
+            let input = try AVCaptureDeviceInput(device: captureDevice!)
             session.addInput(input)
         }
         catch {
@@ -37,10 +37,10 @@ class QrReaderViewControllerViewController: UIViewController,AVCaptureMetadataOu
         session.addOutput(output)
         
         output.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
-        output.metadataObjectTypes = [AVMetadataObjectTypeQRCode]
+        output.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
         
         video = AVCaptureVideoPreviewLayer(session: session)
-        video.videoGravity = AVLayerVideoGravityResizeAspectFill
+        video.videoGravity = AVLayerVideoGravity.resizeAspectFill
         video.frame = view.layer.bounds
         view.layer.addSublayer(video)
         self.view.bringSubview(toFront: square)
@@ -48,11 +48,11 @@ class QrReaderViewControllerViewController: UIViewController,AVCaptureMetadataOu
         session.startRunning()
     }
     
-    func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputMetadataObjects metadataObjects: [Any]!, from connection: AVCaptureConnection!) {
+    func metadataOutput(captureOutput: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
         var alert = UIAlertController()
-        if metadataObjects != nil && metadataObjects.count != 0 {
+        if !metadataObjects.isEmpty && metadataObjects.count != 0 {
             if let object = metadataObjects[0] as? AVMetadataMachineReadableCodeObject{
-                if object.type == AVMetadataObjectTypeQRCode {
+                if object.type == AVMetadataObject.ObjectType.qr {
                     alert = UIAlertController(title: "Dettagli ordine", message: object.stringValue, preferredStyle: .alert)
                 }
                 present(alert, animated: true, completion: nil)

@@ -56,7 +56,7 @@ class InitialSliderViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    func handleSwipes(_ sender: UISwipeGestureRecognizer) {
+    @objc func handleSwipes(_ sender: UISwipeGestureRecognizer) {
         
         switch sender.direction {
         case UISwipeGestureRecognizerDirection.left:

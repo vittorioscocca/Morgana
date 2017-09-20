@@ -228,7 +228,7 @@ class PaymentManager {
     }
     
     private func setPaymentAndOrderCompletedOnFirebase(user: User){
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         ref.child("pendingPayments/" + (user.idApp)! + "/" + (self.payment?.autoId)!).updateChildValues(["stateCartPayment":"Valid","statePayment" : "terminated"])
         for i in (self.payment?.relatedOrders)! {
             ref.child("orderOffered/" + (user.idApp)! + "/" + i).updateChildValues(["paymentState" : "Valid"])
@@ -237,7 +237,7 @@ class PaymentManager {
     }
     
     private func setOrderReceivedCompletedOnFirebase(user: User, autiIdOrderReceived: String){
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         ref.child("orderOffered/" + (user.idApp)! + "/" + autiIdOrderReceived).observeSingleEvent(of: .value, with: { (snap) in
             guard snap.exists() else {return}
             guard snap.value != nil else {return}
@@ -266,7 +266,7 @@ class PaymentManager {
     }
     
     private func prepareNotification(user: User){
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         for i in (self.payment?.relatedOrders)! {
             ref.child("orderOffered/" + (user.idApp)! + "/" + i).observeSingleEvent(of: .value, with: { (snap) in
                 guard snap.exists() else {return}
@@ -297,7 +297,7 @@ class PaymentManager {
     
     
     private func updateNumberPendingProducts(_ idAppUserDestination: String, recOrPurch: String){
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         ref.child("users/" + idAppUserDestination).observeSingleEvent(of: .value, with: { (snap) in
             guard snap.exists() else {return}
             guard snap.value != nil else {return}

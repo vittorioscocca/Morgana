@@ -111,7 +111,7 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         let scaleX = imgQRCode.frame.size.width / qrcodeImage.extent.size.width
         let scaleY = imgQRCode.frame.size.height / qrcodeImage.extent.size.height
         
-        let transformedImage = qrcodeImage.applying(CGAffineTransform(scaleX: scaleX, y: scaleY))
+        let transformedImage = qrcodeImage.transformed(by: CGAffineTransform(scaleX: scaleX, y: scaleY))
         
         let context:CIContext = CIContext.init(options: nil)
         let cgImage:CGImage = context.createCGImage(transformedImage, from: transformedImage.extent)!
@@ -128,7 +128,7 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         
         strLabel = UILabel(frame: CGRect(x: 50, y: 0, width: 200, height: 46))
         strLabel.text = title
-        strLabel.font = UIFont.systemFont(ofSize: 14, weight: UIFontWeightMedium)
+        strLabel.font = UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
         strLabel.textColor = UIColor(white: 0.9, alpha: 0.7)
         
         effectView.frame = CGRect(x: view.frame.midX - strLabel.frame.width/2, y: view.frame.midY - strLabel.frame.height/2 , width: 200, height: 46)
@@ -315,13 +315,13 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         self.fbToken.set(nil, forKey: "FBToken")
         
         //effettuologout da firebase
-        let firebaseAuth = FIRAuth.auth()
+        let firebaseAuth = Auth.auth()
         do {
             //kill firebase observer
             FireBaseAPI.removeObserver(node: "users/" + (self.user?.idApp)!)
             FireBaseAPI.removeObserver(node: "orderOffered/" + (self.user?.idApp)!)
             FireBaseAPI.removeObserver(node: "orderReceived/" + (self.user?.idApp)!)
-            try firebaseAuth?.signOut()
+            try firebaseAuth.signOut()
             self.fireBaseToken.removeObject(forKey: "FireBaseToken")
             
             print("utente disconnesso di firebase")

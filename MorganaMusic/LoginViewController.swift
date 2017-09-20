@@ -11,6 +11,7 @@ import UIKit
 import FBSDKLoginKit
 import FirebaseDatabase
 import FirebaseAuth
+import FirebaseMessaging
 import FirebaseInstanceID
 
 //Facebook and Firebase Login Controller
@@ -84,8 +85,8 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
     
     //update user info on Firebase
     private func addUserInCloud(user: User, onCompletion: @escaping ()->()){
-        let userFireBase = FIRAuth.auth()?.currentUser
-        let ref = FIRDatabase.database().reference()
+        let userFireBase = Auth.auth().currentUser
+        let ref = Database.database().reference()
         
         
         ref.child("users/"+(userFireBase?.uid)!).observeSingleEvent(of: .value, with: { (snap) in
@@ -93,7 +94,7 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
             guard !snap.exists() else {
                 print("exist: user already exist on Firebase")
                 //Firebase Token can changed, so if there is such problem with a login/logout we have the new Token
-                ref.child("users/"+(userFireBase?.uid)!).updateChildValues(["fireBaseIstanceIDToken" : FIRInstanceID.instanceID().token()!])
+                ref.child("users/"+(userFireBase?.uid)!).updateChildValues(["fireBaseIstanceIDToken" : Messaging.messaging().fcmToken!])
                 onCompletion()
                 return
             }
@@ -110,7 +111,7 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                 "number of pending received products" : 0,
                 "account state" : "Active",
                 "merchantCode":"0",
-                "fireBaseIstanceIDToken" : FIRInstanceID.instanceID().token()!,
+                "fireBaseIstanceIDToken" : Messaging.messaging().fcmToken!, //InstanceID.instanceID().token()!,
                 "credits": 5
                 ] as [String : Any]
             ref.child("users").child((userFireBase?.uid)!).setValue(dataUser)
@@ -120,8 +121,8 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
     }
     
     private func createUserPointsStats(){
-        let userFireBase = FIRAuth.auth()?.currentUser
-        let ref = FIRDatabase.database().reference()
+        let userFireBase = Auth.auth().currentUser
+        let ref = Database.database().reference()
         
         ref.child("usersPointsStats/"+(userFireBase?.uid)!).observeSingleEvent(of: .value, with: { (snap) in
             guard !snap.exists() else {
@@ -150,7 +151,7 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                     print(error!)
                     return
                 }
-                ref.child("usersPointsStats/"+(userFireBase?.uid)!+"/"+"lastDateShopping").setValue(FIRServerValue.timestamp())
+                ref.child("usersPointsStats/"+(userFireBase?.uid)!+"/"+"lastDateShopping").setValue(ServerValue.timestamp())
                 print("userPointsSats salvate su Firebase")
             })
             
@@ -181,20 +182,20 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
             }
             if FBSDKAccessToken.current()?.tokenString != nil {
                 //log to FireBase
-                let credential = FIRFacebookAuthProvider.credential(withAccessToken: FBSDKAccessToken.current().tokenString)
+                let credential = FacebookAuthProvider.credential(withAccessToken: FBSDKAccessToken.current().tokenString)
                 
-                FIRAuth.auth()?.signIn(with: credential) { (user, error) in
+                Auth.auth().signIn(with: credential) { (user, error) in
                     if error != nil {
                         print(error!)
                     }else {
                         print("User logged on FireBase")
                         
-                        while FIRAuth.auth()?.currentUser == nil {
+                        while Auth.auth().currentUser == nil {
                             print("...waiting Firebase user id")
                         }
                         print("Success! User id is ready")
                         
-                        let fireBaseUser = FIRAuth.auth()?.currentUser
+                        let fireBaseUser = Auth.auth().currentUser
                         self.fireBaseToken.set((fireBaseUser?.uid)!, forKey: "FireBaseToken")
                         
                         if (result.token) != nil {

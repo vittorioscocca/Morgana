@@ -139,7 +139,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
     }
     
     private func updateSegmentControl(){
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         
         ref.child("users/" + (self.user?.idApp)!).observe(.value, with: { (snap) in
             
@@ -215,7 +215,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
     }
 
     private func readAndSolvePendingPayPalPayment(paymentId: String,onCompletion: @escaping () -> ()){
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         //self.pendingPayments.removeAll()
 
         ref.child("pendingPayments/" + (self.user?.idApp)! + "/" + paymentId).observeSingleEvent(of:.value, with: { (snap) in
@@ -717,7 +717,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         
         strLabel = UILabel(frame: CGRect(x: 50, y: 0, width: 170, height: 46))
         strLabel.text = title
-        strLabel.font = UIFont.systemFont(ofSize: 14, weight: UIFontWeightMedium)
+        strLabel.font = UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
         strLabel.textColor = UIColor(white: 0.9, alpha: 0.7)
         
         effectView.frame = CGRect(x: view.frame.midX - strLabel.frame.width/2, y: view.frame.midY - strLabel.frame.height/2 , width: 200, height: 46)
@@ -758,7 +758,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 {(paramAction:UIAlertAction!) in
                     print("Il messaggio di chiusura è stato premuto")
                     if let range = msg.range(of: "€ ") {
-                        let credit = msg.substring(from: range.upperBound).trimmingCharacters(in: .whitespaces).components(separatedBy: " ").first!
+                        let credit = msg[range.upperBound...].trimmingCharacters(in: .whitespaces).components(separatedBy: " ").first!
                         ManageCredits.updateCredits(newCredit: credit, userId: (self.user?.idApp)!, onCompletion: { (error) in
                             guard error == nil else {
                                 self.generateStandardAlert()

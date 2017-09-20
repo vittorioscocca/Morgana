@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "7A4D19A0BC14D6F7B0F22BFEB48FFE57"
+               BlueprintIdentifier = "D820F1F441936EC6B6960CE25285D35D"
                BuildableName = "Pods_MorganaMusic.framework"
                BlueprintName = "Pods-MorganaMusic"
                ReferencedContainer = "container:Pods.xcodeproj">
@@ -26,6 +26,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      language = ""
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
       </Testables>
@@ -36,6 +37,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      language = ""
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
       ignoresPersistentStateOnLaunch = "NO"
@@ -45,7 +47,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "7A4D19A0BC14D6F7B0F22BFEB48FFE57"
+            BlueprintIdentifier = "D820F1F441936EC6B6960CE25285D35D"
             BuildableName = "Pods_MorganaMusic.framework"
             BlueprintName = "Pods-MorganaMusic"
             ReferencedContainer = "container:Pods.xcodeproj">

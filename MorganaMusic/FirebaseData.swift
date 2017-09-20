@@ -60,7 +60,7 @@ class FirebaseData {
             "offerCreationDate": order.dataCreazioneOfferta!,
             "total": String(format:"%.2f", order.costoTotale),
             "IdAppUserDestination": (order.userDestination?.idApp)!,
-            "timestamp" : FIRServerValue.timestamp(),
+            "timestamp" : ServerValue.timestamp(),
             "orderOfferedAutoId" : order.orderOfferedAutoId,
             "orderNotificationIsScheduled": order.orderNotificationIsScheduled!,
             "orderAutoId": "",
@@ -355,7 +355,7 @@ class FirebaseData {
 
     func readOrdersSentOnFireBase(user: User, friendsList: [Friend]?,onCompletion: @escaping ([Order])->()){
         self.user = user
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         self.ordersSent.removeAll()
         
         ref.child("orderOffered/" + (self.user?.idApp)!).observeSingleEvent(of:.value, with: { (snap) in
@@ -438,7 +438,7 @@ class FirebaseData {
                         
                     }
                     
-                    ref.child("sessions").setValue(FIRServerValue.timestamp())
+                    ref.child("sessions").setValue(ServerValue.timestamp())
                     ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
                         let timeStamp = snap.value! as! TimeInterval
                         let date = NSDate(timeIntervalSince1970: timeStamp/1000)
@@ -487,7 +487,8 @@ class FirebaseData {
     }
     
     func readOrderReceivedOnFireBase(user: User, onCompletion: @escaping ([Order])->()) {
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
+        
         self.ordersReceived.removeAll()
         self.user = user
         ref.child("orderReceived/" + (self.user?.idApp)!).observeSingleEvent(of:.value, with: { (snap) in
@@ -560,7 +561,7 @@ class FirebaseData {
                         }
                     }
                     
-                    ref.child("sessions").setValue(FIRServerValue.timestamp())
+                    ref.child("sessions").setValue(ServerValue.timestamp())
                     ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
                         let timeStamp = snap.value! as! TimeInterval
                         
@@ -624,7 +625,7 @@ class FirebaseData {
     }
     
     private func readUserSender(onCompletion: @escaping ()->()){
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         for j in self.ordersReceived{
             ref.child("users/" + (j.userSender?.idApp)!).observeSingleEvent(of: .value, with: { (snap) in
                 
@@ -651,7 +652,7 @@ class FirebaseData {
     }
     
     private func readProductsSentDetails(ordersToRead: [Order], onCompletion: @escaping ()->()) {
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         ref.child("productsOffersDetails").observeSingleEvent(of: .value, with: { (snap) in
             
             guard snap.exists() else {return}
@@ -685,7 +686,7 @@ class FirebaseData {
     }
     
     func updateNumberPendingProductsOnFireBase(_ idAppUserDestination: String, recOrPurch: String){
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         ref.child("users/" + idAppUserDestination).observeSingleEvent(of: .value, with: { (snap) in
             guard snap.exists() else {return}
             guard snap.value != nil else {return}
@@ -751,7 +752,7 @@ class FirebaseData {
     }
     
     func deleteOrderReceveidOnFirebase(order: Order){
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         ref.child("orderReceived/" + (order.userDestination?.idApp)! + "/" + order.orderAutoId).removeValue()
     }
     

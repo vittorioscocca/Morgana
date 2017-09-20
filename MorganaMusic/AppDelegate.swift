@@ -34,7 +34,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let uidFB = fbToken.object(forKey: "FBToken") as? String
         
         //Firebase configuration
-        FIRApp.configure()
+        FirebaseApp.configure()
         
         //Firebase push notification
         if #available(iOS 10.0, *) {
@@ -48,7 +48,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             // For iOS 10 display notification (sent via APNS)
             UNUserNotificationCenter.current().delegate = self
             // For iOS 10 data message (sent via FCM)
-            FIRMessaging.messaging().remoteMessageDelegate = self
+            Messaging.messaging().delegate = self
             
         }
         
@@ -97,8 +97,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         print("APNs token retrieved: \(deviceToken)")
         
-        FIRInstanceID.instanceID().setAPNSToken(deviceToken, type: FIRInstanceIDAPNSTokenType.sandbox)
-        FIRInstanceID.instanceID().setAPNSToken(deviceToken, type: FIRInstanceIDAPNSTokenType.prod)
+
+        Messaging.messaging().apnsToken = deviceToken
+        /*
+        InstanceID.instanceID().setAPNSToken(deviceToken, type: InstanceIDAPNSTokenType.sandbox)
+        InstanceID.instanceID().setAPNSToken(deviceToken, type: InstanceIDAPNSTokenType.prod)*/
         
         /*
         let tokenChars = UnsafePointer<CChar>(deviceToken.bytes)
@@ -261,7 +264,6 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             print("Notification id \(response.notification.request.identifier) killed")
             break
         case "acceptOrder.action":
-            print("SIAMO QUIIIIIIIIIIIII")
             let fireBaseToken = UserDefaults.standard
             let uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
             let user = CoreDataController.sharedIstance.findUserForIdApp(uid)
@@ -302,14 +304,15 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
     }
 }
 
-
-
-
-extension AppDelegate : FIRMessagingDelegate {
+extension AppDelegate : MessagingDelegate {
+    func messaging(_ messaging: Messaging, didRefreshRegistrationToken fcmToken: String) {
+        print(fcmToken)
+    }
+    
     
     // Receive data message on iOS 10 devices.
-    func applicationReceivedRemoteMessage(_ remoteMessage: FIRMessagingRemoteMessage) {
+    func application(received remoteMessage: MessagingRemoteMessage) {
         
-        print("%@", remoteMessage.appData)
+        print("beheheheheeh", remoteMessage.appData)
     }
 }

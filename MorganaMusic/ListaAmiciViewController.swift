@@ -181,7 +181,7 @@ class ListaAmiciViewController: UIViewController,UITableViewDelegate, UITableVie
     }
     
     
-    func forwardAction(_ sender: UIButton!) {
+    @objc func forwardAction(_ sender: UIButton!) {
         performSegue(withIdentifier: "unwindFromFriendsListToMyDrinks", sender: sender)
     }
     
@@ -237,7 +237,7 @@ class ListaAmiciViewController: UIViewController,UITableViewDelegate, UITableVie
     }()
     
     
-    func handleRefresh(_ refreshControl: UIRefreshControl) {
+    @objc func handleRefresh(_ refreshControl: UIRefreshControl) {
         
         self.loadList()
         self.myTable.reloadData()

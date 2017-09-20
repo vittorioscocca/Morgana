@@ -51,6 +51,7 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
     var controller: UIAlertController?
     
     //Activity Indicator
+    var contentView: UIView = UIView()
     var activityIndicator: UIActivityIndicatorView = UIActivityIndicatorView()
     var strLabel = UILabel()
     let effectView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
@@ -154,15 +155,16 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
                 order.calcolaDataScadenzaOfferta(selfOrder: (self.user?.idApp! == order.userDestination?.idApp!))
                 order.pendingOffer()
             }
-            self.startActivityIndicator("Pagamento in validazione...")
-            
+            DispatchQueue.main.async {
+                self.startActivityIndicator("Pagamento in validazione...")
+            }
             FirebaseData.sharedIstance.saveCartOnFirebase(user: self.user!, badgeValue: self.productOfferedBadge.object(forKey: "paymentOfferedBadge") as! Int, onCompletion: {
                 print("ordine salvato su firebase")
                 DispatchQueue.main.async {
                     // ritorno sul main thread ed aggiorno la view
                     self.stopActivityIndicator()
-                    
                 }
+                
                 if Cart.sharedIstance.state == "Valid" {
                     print("Pagamento carrello valido")
                     
@@ -322,7 +324,7 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         strLabel = UILabel(frame: CGRect(x: 50, y: 0, width: 240, height: 66))
         strLabel.text = title
-        strLabel.font = UIFont.systemFont(ofSize: 14, weight: UIFontWeightMedium)
+        strLabel.font = UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
         strLabel.textColor = UIColor(white: 0.9, alpha: 0.7)
         
         effectView.frame = CGRect(x: view.frame.midX - strLabel.frame.width/2, y: view.frame.midY - strLabel.frame.height/2 , width: 240, height: 66)
@@ -335,8 +337,14 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
         activityIndicator.frame = CGRect(x: 0, y: 0, width: 46, height: 66)
         activityIndicator.startAnimating()
         
+        
+        effectView.contentView.addSubview(activityIndicator)
+        effectView.contentView.addSubview(strLabel)
+        
+        /*
         effectView.addSubview(activityIndicator)
-        effectView.addSubview(strLabel)
+        effectView.addSubview(strLabel)*/
+        
         self.view.addSubview(effectView)
         UIApplication.shared.beginIgnoringInteractionEvents()
         
