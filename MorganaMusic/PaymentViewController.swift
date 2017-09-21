@@ -51,7 +51,7 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
     var controller: UIAlertController?
     
     //Activity Indicator
-    var contentView: UIView = UIView()
+    
     var activityIndicator: UIActivityIndicatorView = UIActivityIndicatorView()
     var strLabel = UILabel()
     let effectView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
@@ -340,7 +340,6 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         effectView.contentView.addSubview(activityIndicator)
         effectView.contentView.addSubview(strLabel)
-        
         /*
         effectView.addSubview(activityIndicator)
         effectView.addSubview(strLabel)*/

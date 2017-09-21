@@ -352,6 +352,19 @@ class FirebaseData {
             onCompletion(payment)
         })
     }
+    
+    private func scheduleExpiryNotification(order: Order){
+        //scheduling notification appearing in expirationDate
+        if !order.orderNotificationIsScheduled! {
+            DispatchQueue.main.async {
+                NotitificationsCenter.scheduledExpiratedOrderLocalNotification(title: "Ordine scaduto", body: "Il prodotto che hai offerto a \((order.userDestination?.fullName)!) è scaduto", identifier: order.idOfferta!, expirationDate: self.stringTodateObject(date: order.expirationeDate!))
+                print("Notifica scadenza schedulata correttamente")
+                order.orderNotificationIsScheduled = true
+                FireBaseAPI.updateNode(node: "orderOffered/"+(self.user?.idApp)!+"/"+order.idOfferta!, value: ["orderNotificationIsScheduled":true])
+            }
+            
+        }
+    }
 
     func readOrdersSentOnFireBase(user: User, friendsList: [Friend]?,onCompletion: @escaping ([Order])->()){
         self.user = user
@@ -427,17 +440,7 @@ class FirebaseData {
                     }
                 }
                 if offerta.offerState != "Scaduta" {
-                    //scheduling notification appearing in expirationDate
-                    if !offerta.orderNotificationIsScheduled! {
-                        DispatchQueue.main.async {
-                            NotitificationsCenter.scheduledExpiratedOrderLocalNotification(title: "Ordine scaduto", body: "Il prodotto che hai offerto a \((offerta.userDestination?.fullName)!) è scaduto", identifier: offerta.idOfferta!, expirationDate: self.stringTodateObject(date: offerta.expirationeDate!))
-                            print("Notifica scadenza schedulata correttamente")
-                            offerta.orderNotificationIsScheduled = true
-                            FireBaseAPI.updateNode(node: "orderOffered/"+(self.user?.idApp)!+"/"+offerta.idOfferta!, value: ["orderNotificationIsScheduled":true])
-                        }
-                        
-                    }
-                    
+                    self.scheduleExpiryNotification(order: offerta)
                     ref.child("sessions").setValue(ServerValue.timestamp())
                     ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
                         let timeStamp = snap.value! as! TimeInterval
@@ -473,9 +476,11 @@ class FirebaseData {
                     self.ordersSent.append(offerta)
                 }
                 //if consumption is before expirationDate, scheduled notification is killed
+                //attenzione lo fa ogni volta che legge
                 if offerta.offerState == "Offerta consumata" {
                     let center = UNUserNotificationCenter.current()
                     center.removePendingNotificationRequests(withIdentifiers: [offerta.idOfferta!])
+                    print("scheduled notification killed")
                 }
             }
             self.ordersSent.sort(by: {self.timestampTodateObject(timestamp: $0.timeStamp) > self.timestampTodateObject(timestamp: $1.timeStamp)})
@@ -551,16 +556,6 @@ class FirebaseData {
                 }
                 
                 if offerta.offerState != "Scaduta" {
-                    //scheduling notification appearing in expirationDate
-                    if !offerta.orderNotificationIsScheduled! {
-                        DispatchQueue.main.async {
-                            NotitificationsCenter.scheduledExpiratedOrderLocalNotification(title: "Ordine scaduto", body: "Il prodotto che ti è stato offerto  è scaduto", identifier:"expirationDate-"+offerta.idOfferta!, expirationDate: self.stringTodateObject(date: offerta.expirationeDate!))
-                            print("Notifica scadenza schedulata correttamente")
-                            offerta.orderNotificationIsScheduled = true
-                            FireBaseAPI.updateNode(node: "orderReceived/"+(self.user?.idApp)!+"/"+offerta.orderAutoId, value: ["orderNotificationIsScheduled":true])
-                        }
-                    }
-                    
                     ref.child("sessions").setValue(ServerValue.timestamp())
                     ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
                         let timeStamp = snap.value! as! TimeInterval
@@ -589,18 +584,7 @@ class FirebaseData {
                             NotitificationsCenter.sendNotification(userDestinationIdApp: (offerta.userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
                             self.updateNumberPendingProductsOnFireBase((offerta.userSender?.idApp)!, recOrPurch: "purchased")
                             let center = UNUserNotificationCenter.current()
-                            center.removePendingNotificationRequests(withIdentifiers: ["RememberExpiration-"+offerta.idOfferta!])
-                        }else {
-                            let components = Calendar.current.dateComponents([.day], from: currentDate!, to: expirationDate!)
-                            print("difference is \(components.day ?? 0) days  ")
-                            //components.day! < 2
-                            if  components.day! <= 2 && !offerta.orderExpirationNotificationIsScheduled!{
-                                DispatchQueue.main.async {
-                                    NotitificationsCenter.scheduledRememberExpirationLocalNotification(title: "Ordine in scadenza", body: "l'ordine di € \(offerta.totalReadedFromFirebase) è in scadenza, affrettati a consumare", identifier: "RememberExpiration-"+offerta.idOfferta!)
-                                    offerta.orderExpirationNotificationIsScheduled = true
-                                    FireBaseAPI.updateNode(node: "orderReceived/"+(self.user?.idApp)!+"/"+offerta.orderAutoId, value: ["orderExpirationNotificationIsScheduled":true])
-                                }
-                            }
+                            center.removePendingNotificationRequests(withIdentifiers: ["expirationDate-"+offerta.idOfferta!, "RememberExpiration-"+offerta.idOfferta!])
                         }
                     })
                 }
@@ -610,8 +594,10 @@ class FirebaseData {
                 
                 //if consumption is before expirationDate, scheduled notification is killed
                 if offerta.offerState == "Offerta consumata" {
+                    //attenzione killa ogni volta che carica le offeerte, deve farlo una volta
                     let center = UNUserNotificationCenter.current()
-                    center.removePendingNotificationRequests(withIdentifiers: ["expirationDate-"+offerta.idOfferta!])
+                    center.removePendingNotificationRequests(withIdentifiers: ["expirationDate-"+offerta.idOfferta!,"RememberExpiration-"+offerta.idOfferta!])
+                    print("scheduled notification killed")
                 }
             }
             self.ordersReceived.sort(by: {self.timestampTodateObject(timestamp: $0.timeStamp) > self.timestampTodateObject(timestamp: $1.timeStamp)})

@@ -16,6 +16,7 @@ import UserNotifications
 
 
 
+
 class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
     @IBOutlet weak var myTable: UITableView!
@@ -54,7 +55,6 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
     var forwardOrder :Order?
     var oldFriendDestination: UserDestination?
     
-    
     var pendingPaymentId = String()
     
     override func viewDidLoad() {
@@ -71,6 +71,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         self.user = CoreDataController.sharedIstance.findUserForIdApp(self.uid)
         self.updateSegmentControl()
         
+       
         self.friendsList = CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: self.uid!)
         
         self.readOrdersSent()
@@ -481,6 +482,61 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         return cell!
     }
     
+    private func stringTodateObject(date: String)->Date {
+        let dateFormatter = DateFormatter()
+        dateFormatter.amSymbol = "AM"
+        dateFormatter.pmSymbol = "PM"
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
+        //let dateString = dateFormatter.string(from: date as Date)
+        
+        return dateFormatter.date(from: date)!
+    }
+    
+    private func scheduleExpiryNotification(order: Order){
+        //scheduling notification appearing in expirationDate
+        if !order.orderNotificationIsScheduled! {
+            DispatchQueue.main.async {
+                NotitificationsCenter.scheduledExpiratedOrderLocalNotification(title: "Ordine scaduto", body: "Il prodotto che ti è stato offerto  è scaduto", identifier:"expirationDate-"+order.idOfferta!, expirationDate: self.stringTodateObject(date: order.expirationeDate!))
+                print("Notifica scadenza schedulata correttamente")
+                order.orderNotificationIsScheduled = true
+                FireBaseAPI.updateNode(node: "orderReceived/"+(self.user?.idApp)!+"/"+order.orderAutoId, value: ["orderNotificationIsScheduled":true])
+            }
+        }
+    }
+    
+    private func schdeleRememberExpiryNotification(order: Order){
+        let ref = Database.database().reference()
+        ref.child("sessions").setValue(ServerValue.timestamp())
+        ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
+            let timeStamp = snap.value! as! TimeInterval
+            let date = NSDate(timeIntervalSince1970: timeStamp/1000)
+            
+            let dateFormatter = DateFormatter()
+            dateFormatter.amSymbol = "AM"
+            dateFormatter.pmSymbol = "PM"
+            dateFormatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
+            let dateString = dateFormatter.string(from: date as Date)
+            let currentDate = dateFormatter.date(from: dateString)
+            self.lastOrderReceivedReadedTimestamp.set(currentDate!, forKey: "lastOrderReceivedReadedTimestamp")
+            
+            let date1Formatter = DateFormatter()
+            date1Formatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
+            date1Formatter.locale = Locale.init(identifier: "it_IT")
+            
+            let expirationDate = date1Formatter.date(from: order.expirationeDate!)
+            let components = Calendar.current.dateComponents([.day], from: currentDate!, to: expirationDate!)
+            print("difference is \(components.day ?? 0) days  ")
+            //components.day! < 2
+            if  components.day! <= 2 && !order.orderExpirationNotificationIsScheduled!{
+                DispatchQueue.main.async {
+                    NotitificationsCenter.scheduledRememberExpirationLocalNotification(title: "Ordine in scadenza", body: "l'ordine di € \(order.totalReadedFromFirebase) è in scadenza, affrettati a consumare", identifier: "RememberExpiration-"+order.idOfferta!)
+                    order.orderExpirationNotificationIsScheduled = true
+                    FireBaseAPI.updateNode(node: "orderReceived/"+(self.user?.idApp)!+"/"+order.orderAutoId, value: ["orderExpirationNotificationIsScheduled":true])
+                }
+            }
+        })
+    }
+    
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
         
         let thisCell = tableView.cellForRow(at: indexPath)
@@ -503,6 +559,8 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                     (thisCell as? OrderReceivedTableViewCell)?.cellReaded = true 
                     FirebaseData.sharedIstance.user = self.user
                     FirebaseData.sharedIstance.acceptOrder(state: "Offerta accettata", userFullName: (self.user?.fullName)!, userIdApp: (self.user?.idApp)!, userSenderIdApp: (self.ordersReceived[indexPath.row].userSender?.idApp)!, idOrder: self.ordersReceived[indexPath.row].idOfferta!, autoIdOrder: self.ordersReceived[indexPath.row].orderAutoId)
+                    self.scheduleExpiryNotification(order: self.ordersReceived[indexPath.row])
+                    self.schdeleRememberExpiryNotification(order: self.ordersReceived[indexPath.row])
                     self.ordersReceived[indexPath.row].acceptOffer()
                     tableView.setEditing(false, animated: true)
                     self.performSegue(withIdentifier: "segueToOrderDetails", sender: indexPath)
@@ -730,8 +788,8 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         activityIndicator.frame = CGRect(x: 0, y: 0, width: 46, height: 46)
         activityIndicator.startAnimating()
         
-        effectView.addSubview(activityIndicator)
-        effectView.addSubview(strLabel)
+        effectView.contentView.addSubview(activityIndicator)
+        effectView.contentView.addSubview(strLabel)
         self.view.addSubview(effectView)
         UIApplication.shared.beginIgnoringInteractionEvents()
         
@@ -790,6 +848,9 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                     
                     self.ordersReceived.remove(at: (indexPath?.row)!)
                     self.myTable.deleteRows(at: [indexPath!], with: .fade)
+                    let center = UNUserNotificationCenter.current()
+                    //if user refuse order, delete expiration notification
+                    center.removePendingNotificationRequests(withIdentifiers: ["expirationDate-"+self.ordersReceived[(indexPath?.row)!].idOfferta!,"RememberExpiration-"+self.ordersReceived[(indexPath?.row)!].idOfferta!] )
             })
             actionAnnulla = UIAlertAction(title: "Annulla", style: UIAlertActionStyle.default, handler:
                 {(paramAction:UIAlertAction!) in
@@ -877,8 +938,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
     
     lazy var refreshControl1: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(ListaAmiciViewController.handleRefresh(_:)), for: UIControlEvents.valueChanged)
-        
+        refreshControl.addTarget(self, action: #selector(handleRefresh(_:)), for: UIControlEvents.valueChanged)
         return refreshControl
     }()
     
@@ -903,7 +963,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         
     }
 
-    func handleRefresh(_ refreshControl: UIRefreshControl) {
+    @objc func handleRefresh(_ refreshControl: UIRefreshControl) {
         if drinksList_segmentControl.selectedSegmentIndex == 0 {
             print("segment control clicked pari a 0")
             if shouldUpdateDrinksTable(SegmentControlBadge: self.productSendBadge.object(forKey: "paymentOfferedBadge") as? Int, timeReaded: self.lastOrderSentReadedTimestamp.object(forKey: "orderOfferedReadedTimestamp") as? Date){
