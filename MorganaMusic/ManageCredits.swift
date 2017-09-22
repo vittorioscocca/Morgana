@@ -10,7 +10,7 @@ import Foundation
 
 import UIKit
 
-//update credit data on FireBase
+//update credit data on FireBase improved by FireBaseApi
 class ManageCredits {
     
     static var credits = 0.0
