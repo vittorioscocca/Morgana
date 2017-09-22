@@ -9,9 +9,6 @@
 import Foundation
 
 import UIKit
-import FirebaseDatabase
-import FirebaseAuth
-import Firebase
 
 //update credit data on FireBase
 class ManageCredits {
