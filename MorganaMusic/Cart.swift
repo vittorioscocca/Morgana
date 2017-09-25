@@ -25,6 +25,8 @@ class Cart {
         return tot
     }
     
+    var company: Company?
+    
     var prodottiTotali:Int {
         var tot: Int = 0
         for i in carrello {
@@ -47,12 +49,14 @@ class Cart {
         self.carrello = []
         self.paymentMethod = nil
         self.state = offerState.initialized.rawValue
+        
     }
     
     func initializeCart() {
         self.carrello = []
         self.paymentMethod = nil
         self.state = offerState.initialized.rawValue
+        self.company = nil
     }
     
     func pendingPayPalOffer(){
