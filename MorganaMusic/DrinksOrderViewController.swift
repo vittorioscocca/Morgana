@@ -33,7 +33,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         case productsNotSelected_msg = "Devi selezionare almeno un prodotto prima di proseguire"
     }
     
-    var sectionTitle = ["Destinatario offerta", "Offri un drink"]
+    var sectionTitle = ["Offri a", "Locale", "Cosa vuoi offrire?"]
     
     var activityIndicator: UIActivityIndicatorView = UIActivityIndicatorView()
     var strLabel = UILabel()
@@ -51,16 +51,21 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
     var fbTokenString: String?
     var controller :UIAlertController?
     
-    //merchant products
+    //company products
     var elencoProdotti: [String] = []
     var dictionaryOfferte = [String:Double]()
     var offerteCaricate = false
     var isConnectedtoNetwork = true
     
+    //companies list
+    var companies: [Company]?
+    
     let queue = DispatchQueue.init(label: "it.morganamusic.queue", qos: .background)
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
+        navigationController?.navigationBar.shadowImage = UIImage()
         guard CheckConnection.isConnectedToNetwork() == true else{
             self.isConnectedtoNetwork = false
             self.quantità_label.text = "Quantità prodotti: " + "\(Order.sharedIstance.prodottiTotali)"
@@ -84,6 +89,8 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         self.myTable.delegate = self
         let token = Messaging.messaging().fcmToken
         print("FCM token: \(token ?? "")")
+        self.readCompanies()
+        
         
         //reset Firebase DB. only for simulator tests
         //FireBaseAPI.resetFirebaseDB()
@@ -110,20 +117,34 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         return self.sectionTitle.count
     }
     
+    private func readCompanies(){
+        FirebaseData.sharedIstance.readCompaniesOnFireBase { (companies) in
+            self.companies = companies
+            self.myTable.reloadData()
+        }
+    }
+    
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return self.sectionTitle[section]
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if section == 0 {
+        switch section {
+        case 0:
+            return 1
+        case 1:
+            if let localCompanies = companies {
+                return localCompanies.count
+            }else {return 1}
+        case 2:
+            if (Order.sharedIstance.prodotti?.isEmpty)! {
+                let product = Product(productName: "+    Aggiungi altro drink", price: 0, quantity: 0)
+                Order.sharedIstance.prodotti?.append(product)
+            }
+            return (Order.sharedIstance.prodotti?.count)!
+        default:
             return 1
         }
-        if (Order.sharedIstance.prodotti?.isEmpty)! {
-            let product = Product(productName: "+    Aggiungi altro drink", price: 0, quantity: 0)
-            Order.sharedIstance.prodotti?.append(product)
-        }
-        return (Order.sharedIstance.prodotti?.count)!
-        
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -156,7 +177,15 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
                 cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
             }
             
-        } else{
+        } else if (sectionTitle[indexPath.section] == sectionTitle[1]){
+            cell = tableView.dequeueReusableCell(withIdentifier: "cellOffer", for: indexPath)
+            if let company = companies?[indexPath.row] {
+                cell?.textLabel?.text = company.companyName
+            } else {
+                cell?.textLabel?.text = "Azienda non selezionata"
+            }
+            
+        } else {
             cell = tableView.dequeueReusableCell(withIdentifier: "cellOffer", for: indexPath)
             
             let elemento = Order.sharedIstance.prodotti?[indexPath.row]

@@ -117,10 +117,10 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
     //remove all observers utilized into controller
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        /*
+        
         FireBaseAPI.removeObserver(node: "users/" + (self.user?.idApp)!)
         FireBaseAPI.removeObserver(node: "orderOffered/" + (self.user?.idApp)!)
-        FireBaseAPI.removeObserver(node: "orderReceived/" + (self.user?.idApp)!)*/
+        FireBaseAPI.removeObserver(node: "orderReceived/" + (self.user?.idApp)!)
         self.firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
     }
     
@@ -620,7 +620,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 forwardOrderAction.backgroundColor = #colorLiteral(red: 0.6000000238, green: 0.6000000238, blue: 0.6000000238, alpha: 1)
                 
                 //Action ransom order
-                let ransomOrder = UITableViewRowAction(style: .default, title: "Riscatta") { (action, index) in
+                let ransomOrder = UITableViewRowAction(style: .destructive, title: "Riscatta") { (action, index) in
                     //tableView.setEditing(false, animated: true)
                     tableView.deselectRow(at: indexPath, animated: true)
                     self.generateAlert(title: "Attenzione", msg: "Cliccando su 'Riscatta' sarai tu stesso ad usufruire dell'ordine", indexPath: indexPath )

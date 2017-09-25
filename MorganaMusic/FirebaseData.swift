@@ -22,6 +22,7 @@ class FirebaseData {
     
     var ordersSent: [Order]
     var ordersReceived: [Order]
+    var companies: [Company]
     var lastOrderSentReadedTimestamp = UserDefaults.standard
     var lastOrderReceivedReadedTimestamp = UserDefaults.standard
     
@@ -34,6 +35,7 @@ class FirebaseData {
         self.ordersReceived = [Order]()
         self.paymentDetails = [String:String]()
         self.idOrder = [String]()
+        self.companies = [Company]()
     }
     
     
@@ -365,13 +367,47 @@ class FirebaseData {
             
         }
     }
+    
+    func readCompaniesOnFireBase(onCompletion: @escaping ([Company]?)->()){
+        let ref = Database.database().reference()
+        self.ordersSent.removeAll()
+        
+        ref.child("merchant").observeSingleEvent(of:.value, with: { (snap) in
+            guard snap.exists() else {return}
+            guard snap.value != nil else {return}
+            self.companies.removeAll()
+        
+            let companiesDictionary = snap.value! as! NSDictionary
+            
+            for (companyId, companiesData) in companiesDictionary{
+                
+                let company: Company = Company(userId: nil, city: nil, companyName: nil)
+                company.companyId = companyId as? String
+                
+                for (chiave,valore) in (companiesData as! NSDictionary) {
+                    switch chiave as! String {
+                    case "denominazione":
+                        company.companyName = valore as? String
+                        break
+                    case "via":
+                        company.address = valore as? String
+                        break
+                    default:
+                        break
+                    }
+                }
+                self.companies.append(company)
+            }
+            onCompletion(self.companies)
+        })
+    }
 
     func readOrdersSentOnFireBase(user: User, friendsList: [Friend]?,onCompletion: @escaping ([Order])->()){
         self.user = user
         let ref = Database.database().reference()
         self.ordersSent.removeAll()
         
-        ref.child("orderOffered/" + (self.user?.idApp)!).observeSingleEvent(of:.value, with: { (snap) in
+        ref.child("orderOffered/" + (self.user?.idApp)!).observe(.value, with: { (snap) in
             guard snap.exists() else {return}
             guard snap.value != nil else {return}
             self.ordersSent.removeAll()
@@ -496,7 +532,7 @@ class FirebaseData {
         
         self.ordersReceived.removeAll()
         self.user = user
-        ref.child("orderReceived/" + (self.user?.idApp)!).observeSingleEvent(of:.value, with: { (snap) in
+        ref.child("orderReceived/" + (self.user?.idApp)!).observe(.value, with: { (snap) in
             // controllo che lo snap dei dati non sia vuoto
             guard snap.exists() else {return}
             guard snap.value != nil else {return}
