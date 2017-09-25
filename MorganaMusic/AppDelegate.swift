@@ -267,8 +267,6 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             let fireBaseToken = UserDefaults.standard
             let uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
             let user = CoreDataController.sharedIstance.findUserForIdApp(uid)
-            
-            //Se funziona  evitare di passarlo nel messaggio
             let userFullName = user?.fullName
             let userIdApp = userInfo["userIdApp"] as? String
             let userSenderIdApp = userInfo["userSenderIdApp"] as? String
@@ -279,7 +277,17 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             print("Ordine ACCETTATO")
             break
         case "refuseOrder.action" :
+            let fireBaseToken = UserDefaults.standard
+            let uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
+            let user = CoreDataController.sharedIstance.findUserForIdApp(uid)
+            let userFullName = user?.fullName
+            let userIdApp = userInfo["userIdApp"] as? String
+            let userSenderIdApp = userInfo["userSenderIdApp"] as? String
+            let idOrder = userInfo["idOrder"] as? String
+            let autoIdOrder = userInfo["autoIdOrder"] as? String
             
+            FirebaseData.sharedIstance.refuseOrder(state: "Offerta rifiutata", userFullName: userFullName!, userIdApp: userIdApp!, userSenderIdApp: userSenderIdApp!, idOrder: idOrder!, autoIdOrder: autoIdOrder!)
+            print("Ordine Rifiutato")
             break
         default:
             break

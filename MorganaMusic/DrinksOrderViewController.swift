@@ -17,8 +17,8 @@ import FirebaseInstanceID
 class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableViewDataSource{
     
     @IBOutlet weak var myTable: UITableView!
-    @IBOutlet weak var quantità_label: UITextField!
-    @IBOutlet weak var totale_label: UITextField!
+    @IBOutlet weak var quantità_label: UILabel!
+    @IBOutlet weak var totale_label: UILabel!
     @IBOutlet weak var delete: UIBarButtonItem!
     @IBOutlet weak var carousel: UIBarButtonItem!
     
@@ -33,7 +33,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         case productsNotSelected_msg = "Devi selezionare almeno un prodotto prima di proseguire"
     }
     
-    var sectionTitle = ["Offri a", "Locale", "Cosa vuoi offrire?"]
+    var sectionTitle = ["A chi?", "Dove?", "Cosa?"]
     
     var activityIndicator: UIActivityIndicatorView = UIActivityIndicatorView()
     var strLabel = UILabel()
@@ -64,12 +64,12 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
-        navigationController?.navigationBar.shadowImage = UIImage()
+        //navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
+        //navigationController?.navigationBar.shadowImage = UIImage()
         guard CheckConnection.isConnectedToNetwork() == true else{
             self.isConnectedtoNetwork = false
-            self.quantità_label.text = "Quantità prodotti: " + "\(Order.sharedIstance.prodottiTotali)"
-            self.totale_label.text = " Totale: € " + String(format:"%.2f", Order.sharedIstance.costoTotale)
+            self.quantità_label.text = "   Quantità prodotti: " + "\(Order.sharedIstance.prodottiTotali)"
+            self.totale_label.text = "  Totale: € " + String(format:"%.2f", Order.sharedIstance.costoTotale)
             self.generateAlert(title: Alert.lostConnection_title.rawValue, msg: Alert.lostConnection_msg.rawValue)
             return
         }
@@ -85,6 +85,8 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         }
         UpdateBadgeInfo.sharedIstance.updateBadgeInformations(nsArray: self.tabBarController?.tabBar.items as NSArray!)
         self.getFriendsList()
+        self.quantità_label.text = "   Quantità prodotti: 0"
+        self.totale_label.text = "   Totale: € 0,00"
         self.myTable.dataSource = self
         self.myTable.delegate = self
         let token = Messaging.messaging().fcmToken
@@ -138,7 +140,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
             }else {return 1}
         case 2:
             if (Order.sharedIstance.prodotti?.isEmpty)! {
-                let product = Product(productName: "+    Aggiungi altro drink", price: 0, quantity: 0)
+                let product = Product(productName: "+    Aggiungi prodotto", price: 0, quantity: 0)
                 Order.sharedIstance.prodotti?.append(product)
             }
             return (Order.sharedIstance.prodotti?.count)!
@@ -150,8 +152,10 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if (sectionTitle[indexPath.section] == sectionTitle[0]) {
             return 78.0
-        } else {
-            return 42.0
+        } else if sectionTitle[indexPath.section] == sectionTitle[1]{
+            return 58.0
+        }else {
+            return 40.0
         }
     }
     
@@ -179,11 +183,13 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
             
         } else if (sectionTitle[indexPath.section] == sectionTitle[1]){
             cell = tableView.dequeueReusableCell(withIdentifier: "cellOffer", for: indexPath)
+            /*
             if let company = companies?[indexPath.row] {
                 cell?.textLabel?.text = company.companyName
             } else {
                 cell?.textLabel?.text = "Azienda non selezionata"
-            }
+            }*/
+            cell?.textLabel?.text = "Morgana Music Club"
             
         } else {
             cell = tableView.dequeueReusableCell(withIdentifier: "cellOffer", for: indexPath)
@@ -193,16 +199,18 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
                 if elemento?.quantity != 0 {
                     cell?.textLabel?.text = "(\(elemento!.quantity!))  " + (elemento?.productName)! + " € " + String(format:"%.2f", elemento!.price!)
                     
-                    self.quantità_label.text = "Quantità prodotti: " + "\(Order.sharedIstance.prodottiTotali)"
-                    self.totale_label.text = " Totale: € " + String(format:"%.2f", Order.sharedIstance.costoTotale)
+                    self.quantità_label.text = "   Quantità prodotti: " + "\(Order.sharedIstance.prodottiTotali)"
+                    self.totale_label.text = "   Totale: € " + String(format:"%.2f", Order.sharedIstance.costoTotale)
                 }else {
                     cell?.textLabel?.text = elemento?.productName
                 }
                 cell?.accessoryType = UITableViewCellAccessoryType.none
                 cell?.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
+                cell?.textLabel?.textColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
                 if indexPath.row == ((Order.sharedIstance.prodotti?.count)! - 1){
                     cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
-                    cell?.backgroundColor = UIColor(red: 248/255, green: 100/255, blue: 52/255, alpha: 1)
+                    cell?.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
+                    cell?.textLabel?.textColor = #colorLiteral(red: 0.7419371009, green: 0.1511851847, blue: 0.20955199, alpha: 1)
                 }
             }
         }
@@ -242,7 +250,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
             self.performSegue(withIdentifier: "segueToAmiciFromOffer", sender: nil)
             
         }else {
-            if (thisCell?.textLabel?.text == "+    Aggiungi altro drink") {
+            if (thisCell?.textLabel?.text == "+    Aggiungi prodotto") {
                 if !self.offerteCaricate {
                     thisCell?.selectionStyle = UITableViewCellSelectionStyle.none
                     self.myTable.reloadData()
@@ -275,8 +283,8 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
             
             Order.sharedIstance.prodotti?.remove(at: indexPath.row)
             
-            self.quantità_label.text = "Quantità prodotti: " + "\(Order.sharedIstance.prodottiTotali)"
-            self.totale_label.text = " Totale: € " + String(format:"%.2f", Order.sharedIstance.costoTotale)
+            self.quantità_label.text = "   Quantità prodotti: " + "\(Order.sharedIstance.prodottiTotali)"
+            self.totale_label.text = "   Totale: € " + String(format:"%.2f", Order.sharedIstance.costoTotale)
             
             tableView.deleteRows(at: [indexPath], with: .left)
             break
@@ -348,10 +356,8 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
     private func deleteOrdine(){
         Order.sharedIstance.userDestination?.idFB = nil
         Order.sharedIstance.prodotti?.removeAll()
-        self.quantità_label.text = "Quantità prodotti"
-        self.totale_label.text = "Totale €"
-        self.quantità_label.text = "Quantità prodotti: " + "\(Order.sharedIstance.prodottiTotali)"
-        self.totale_label.text = " Totale: € " + String(format:"%.2f", Order.sharedIstance.costoTotale)
+        self.quantità_label.text = "   Quantità prodotti: 0"
+        self.totale_label.text = "   Totale: € 0,00"
         self.delete.isEnabled = false
         self.myTable.reloadData()
     }
@@ -574,22 +580,22 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         
         //add new Order into Cart
         //Se l'Ordine è indirizzata ad un utente già presente nel carrello unisce i prodotti sotto lo stesso utente destinatario
-        for i in Cart.sharedIstance.carrello {
-            if i.userDestination?.idFB == order.userDestination?.idFB {
-                i.prodotti?.removeLast()
+        for cartOrder in Cart.sharedIstance.carrello {
+            if cartOrder.userDestination?.idFB == order.userDestination?.idFB {
+                cartOrder.prodotti?.removeLast()
                 //Se il prodotto è lo stesso cambia solo la quantità
-                for ii in i.prodotti! {
-                    var countjj = 0
-                    for jj in order.prodotti! {
-                        if ii.productName == jj.productName {
-                            ii.quantity = ii.quantity! +  jj.quantity!
-                            order.prodotti?.remove(at: countjj)
+                for productInOrder in cartOrder.prodotti! {
+                    var numberProducts = 0
+                    for product in order.prodotti! {
+                        if productInOrder.productName == product.productName {
+                            productInOrder.quantity = productInOrder.quantity! +  product.quantity!
+                            order.prodotti?.remove(at: numberProducts)
                         }
-                        countjj += 1
+                        numberProducts += 1
                     }
                     
                 }
-                i.prodotti = i.prodotti! + order.prodotti!
+                cartOrder.prodotti = cartOrder.prodotti! + order.prodotti!
                 insertOk = true
             }
         }

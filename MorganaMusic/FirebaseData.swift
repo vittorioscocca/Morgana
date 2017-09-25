@@ -143,7 +143,7 @@ class FirebaseData {
         for order in Cart.sharedIstance.carrello {
             if (order.userDestination?.idFB == idFBFriend) && (order.dataCreazioneOfferta == creationDate) {
                 for product in order.prodotti! {
-                    if product.productName != "+    Aggiungi altro drink" {
+                    if product.productName != "+    Aggiungi prodotto" {
                         orderDetails[product.productName!] = String(product.quantity!) + "x" + String(format:"%.2f", product.price!)
                     }
                 }

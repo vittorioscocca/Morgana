@@ -9,9 +9,11 @@
 import Foundation
 
 extension UISegmentedControl {
+    
     func removeBorders() {
         setBackgroundImage(imageWithColor(color: UIColor.clear), for: .normal, barMetrics: .default)
         setBackgroundImage(imageWithColor(color: tintColor!), for: .selected, barMetrics: .default)
+        
         setDividerImage(imageWithColor(color: UIColor.clear), forLeftSegmentState: .normal, rightSegmentState: .normal, barMetrics: .default)
     }
     
@@ -26,4 +28,27 @@ extension UISegmentedControl {
         UIGraphicsEndImageContext();
         return image!
     }
+    func addUnderlineForSelectedSegment(){
+        //removeBorders()
+        let underlineWidth: CGFloat = self.bounds.size.width / CGFloat(self.numberOfSegments)
+        let underlineHeight: CGFloat = 2.0
+        let underlineXPosition = CGFloat(selectedSegmentIndex) * underlineWidth
+        let underLineYPosition = self.bounds.size.height - 2.0
+        let underlineFrame = CGRect(x: underlineXPosition, y: underLineYPosition, width: underlineWidth, height: underlineHeight)
+        let underline = UIView(frame: underlineFrame)
+        underline.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
+        underline.tag = 1
+        self.addSubview(underline)
+    }
+    
+    func changeUnderlinePosition(){
+        guard let underline = self.viewWithTag(1) else {return}
+        let underlineFinalXPosition = (self.bounds.width / CGFloat(self.numberOfSegments)) * CGFloat(selectedSegmentIndex)
+        UIView.animate(withDuration: 0.2, animations: {
+            underline.frame.origin.x = underlineFinalXPosition
+        })
+    }
 }
+
+
+

@@ -73,9 +73,9 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
         } else {
             //products section
             cell = tableView.dequeueReusableCell(withIdentifier: "cartCell", for: indexPath)
-            cell?.textLabel?.text = "Prodotti: \(Cart.sharedIstance.prodottiTotali) \t\t Totale: € " +  String(format:"%.2f",Cart.sharedIstance.costoTotale)
+            cell?.textLabel?.text = "Prodotti: \(Cart.sharedIstance.prodottiTotali) \t\t\t Totale: € " +  String(format:"%.2f",Cart.sharedIstance.costoTotale)
             
-            cell?.backgroundColor = UIColor(red: 48/255, green: 248/255, blue: 52/255, alpha: 1)
+            cell?.textLabel?.textColor = #colorLiteral(red: 0.7411764706, green: 0.1529411765, blue: 0.2078431373, alpha: 1)
         }
         
         return cell!

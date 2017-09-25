@@ -62,11 +62,13 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         self.myTable.dataSource = self
         self.myTable.delegate = self
         
+        navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
+        navigationController?.navigationBar.shadowImage = UIImage()
+        
         self.nowReadingOrdersAndOffersOnFirebase = false
         
-        self.drinksList_segmentControl.selectedSegmentIndex = 0
-        self.drinksList_segmentControl.removeBorders()
-        
+        self.setSegmentcontrol()
+    
         self.uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
         self.user = CoreDataController.sharedIstance.findUserForIdApp(self.uid)
         self.updateSegmentControl()
@@ -122,6 +124,18 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         FireBaseAPI.removeObserver(node: "orderOffered/" + (self.user?.idApp)!)
         FireBaseAPI.removeObserver(node: "orderReceived/" + (self.user?.idApp)!)
         self.firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
+    }
+    
+    private func setSegmentcontrol() {
+        self.drinksList_segmentControl.selectedSegmentIndex = 0
+        //self.drinksList_segmentControl.removeBorders()
+        let segAttributes: NSDictionary = [
+            NSAttributedStringKey.foregroundColor: UIColor.white,
+            NSAttributedStringKey.font: UIFont.systemFont(ofSize: 17)
+            ]
+        self.drinksList_segmentControl.setTitleTextAttributes(segAttributes as? [AnyHashable : Any], for: UIControlState.selected)
+        self.drinksList_segmentControl.setTitleTextAttributes(segAttributes as? [AnyHashable : Any], for: UIControlState.normal)
+        self.drinksList_segmentControl.addUnderlineForSelectedSegment()
     }
     
     private func generateStandardAlert(){
@@ -677,6 +691,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
             print("non ho aggiornato gli Ordini-Ricevuti da Firebase")
         }
         UIApplication.shared.applicationIconBadgeNumber = 0
+        self.drinksList_segmentControl.changeUnderlinePosition()
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

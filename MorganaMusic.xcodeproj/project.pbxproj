@@ -21,6 +21,8 @@
 		2A53AB671EB0AC120018B8E9 /* Product.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A53AB661EB0AC120018B8E9 /* Product.swift */; };
 		2A53AB691EB0AC950018B8E9 /* Order.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A53AB681EB0AC950018B8E9 /* Order.swift */; };
 		2A53AB6D1EB135D60018B8E9 /* InitialSliderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A53AB6C1EB135D60018B8E9 /* InitialSliderViewController.swift */; };
+		2A6809AB1F79595200D813FF /* EventsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6809AA1F79595100D813FF /* EventsViewController.swift */; };
+		2A6809AD1F7962CD00D813FF /* TextFieldController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6809AC1F7962CC00D813FF /* TextFieldController.swift */; };
 		2A69711F1EB20E400036E3C5 /* UserDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A69711E1EB20E400036E3C5 /* UserDestination.swift */; };
 		2A6971211EB9CA7F0036E3C5 /* ListaAmiciViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6971201EB9CA7F0036E3C5 /* ListaAmiciViewController.swift */; };
 		2A6971231EB9D9A20036E3C5 /* DrinksOrderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6971221EB9D9A20036E3C5 /* DrinksOrderViewController.swift */; };
@@ -63,8 +65,6 @@
 		2AE35F971E93EF5800DF453F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2AE35F951E93EF5800DF453F /* LaunchScreen.storyboard */; };
 		2AE35FA21E93F00F00DF453F /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE35FA11E93F00F00DF453F /* LoginViewController.swift */; };
 		2AE35FAC1E93F99900DF453F /* UserViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE35FAB1E93F99900DF453F /* UserViewController.swift */; };
-		2AE35FAE1E93F9A600DF453F /* EventsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE35FAD1E93F9A600DF453F /* EventsViewController.swift */; };
-		2AE35FB21E93F9C600DF453F /* DrinksPricesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE35FB11E93F9C600DF453F /* DrinksPricesViewController.swift */; };
 		2AFA98851EC19BCA0007CA33 /* Cart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AFA98841EC19BCA0007CA33 /* Cart.swift */; };
 		2AFA98891EC1CE470007CA33 /* CartUserTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AFA98881EC1CE470007CA33 /* CartUserTableViewCell.swift */; };
 		2F93099F7E4305074AC52905 /* Pods_MorganaMusic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1F6C0F4D7B5B86B25C799B9 /* Pods_MorganaMusic.framework */; };
@@ -86,6 +86,8 @@
 		2A53AB661EB0AC120018B8E9 /* Product.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Product.swift; sourceTree = "<group>"; };
 		2A53AB681EB0AC950018B8E9 /* Order.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Order.swift; sourceTree = "<group>"; };
 		2A53AB6C1EB135D60018B8E9 /* InitialSliderViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InitialSliderViewController.swift; sourceTree = "<group>"; };
+		2A6809AA1F79595100D813FF /* EventsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsViewController.swift; sourceTree = "<group>"; };
+		2A6809AC1F7962CC00D813FF /* TextFieldController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldController.swift; sourceTree = "<group>"; };
 		2A69711E1EB20E400036E3C5 /* UserDestination.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserDestination.swift; sourceTree = "<group>"; };
 		2A6971201EB9CA7F0036E3C5 /* ListaAmiciViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListaAmiciViewController.swift; sourceTree = "<group>"; };
 		2A6971221EB9D9A20036E3C5 /* DrinksOrderViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrinksOrderViewController.swift; sourceTree = "<group>"; };
@@ -132,8 +134,6 @@
 		2AE35F981E93EF5800DF453F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2AE35FA11E93F00F00DF453F /* LoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		2AE35FAB1E93F99900DF453F /* UserViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserViewController.swift; sourceTree = "<group>"; };
-		2AE35FAD1E93F9A600DF453F /* EventsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventsViewController.swift; sourceTree = "<group>"; };
-		2AE35FB11E93F9C600DF453F /* DrinksPricesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrinksPricesViewController.swift; sourceTree = "<group>"; };
 		2AFA98841EC19BCA0007CA33 /* Cart.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cart.swift; sourceTree = "<group>"; };
 		2AFA98881EC1CE470007CA33 /* CartUserTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CartUserTableViewCell.swift; sourceTree = "<group>"; };
 		A55BBBAB2199BAA021B9C7F8 /* Pods-MorganaMusic.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MorganaMusic.release.xcconfig"; path = "Pods/Target Support Files/Pods-MorganaMusic/Pods-MorganaMusic.release.xcconfig"; sourceTree = "<group>"; };
@@ -249,12 +249,11 @@
 		2AE35F9F1E93EF7500DF453F /* Controller */ = {
 			isa = PBXGroup;
 			children = (
+				2A53AB6C1EB135D60018B8E9 /* InitialSliderViewController.swift */,
+				2A6809AA1F79595100D813FF /* EventsViewController.swift */,
 				2AE35FA11E93F00F00DF453F /* LoginViewController.swift */,
 				2AE35FAB1E93F99900DF453F /* UserViewController.swift */,
-				2AE35FAD1E93F9A600DF453F /* EventsViewController.swift */,
-				2AE35FB11E93F9C600DF453F /* DrinksPricesViewController.swift */,
 				2AD8C1421E9D486700017004 /* FriendActionViewController.swift */,
-				2A53AB6C1EB135D60018B8E9 /* InitialSliderViewController.swift */,
 				2A6971201EB9CA7F0036E3C5 /* ListaAmiciViewController.swift */,
 				2AC63AF21E9DFFCE00A9F91E /* FirendsListTableViewCell.swift */,
 				2A6971221EB9D9A20036E3C5 /* DrinksOrderViewController.swift */,
@@ -288,6 +287,7 @@
 				2AE1D9141F16844A000EC896 /* ManageCredits.swift */,
 				2A40AD141F1779A400864227 /* SegmentControlExtension.swift */,
 				2ABD93BA1F18DF5C00F28632 /* NotificationsCenter.swift */,
+				2A6809AC1F7962CC00D813FF /* TextFieldController.swift */,
 			);
 			name = SupportingFiles;
 			sourceTree = "<group>";
@@ -475,21 +475,21 @@
 				2AE35F921E93EF5800DF453F /* MorganaMusic.xcdatamodeld in Sources */,
 				2A0700F71EEB178100F701EC /* OrderReceivedTableViewCell.swift in Sources */,
 				2A86BB6E1F47432100CE336B /* OrderSentDetailsViewController.swift in Sources */,
+				2A6809AB1F79595200D813FF /* EventsViewController.swift in Sources */,
 				2A1863AE1F5055DB00505F20 /* FirebaseData.swift in Sources */,
 				2A1D14EC1F644DDC00C2F5E2 /* QrReaderViewControllerViewController.swift in Sources */,
 				2AC63AF31E9DFFCE00A9F91E /* FirendsListTableViewCell.swift in Sources */,
 				2A6E266C1E9BFCF600C1FC64 /* User+CoreDataClass.swift in Sources */,
 				2A40AD151F1779A400864227 /* SegmentControlExtension.swift in Sources */,
 				2AE35F8A1E93EF5800DF453F /* AppDelegate.swift in Sources */,
+				2A6809AD1F7962CD00D813FF /* TextFieldController.swift in Sources */,
 				2AFA98851EC19BCA0007CA33 /* Cart.swift in Sources */,
 				2A206B971F0B79990080235B /* FireBaseAPI.swift in Sources */,
-				2AE35FAE1E93F9A600DF453F /* EventsViewController.swift in Sources */,
 				2ABD93BB1F18DF5C00F28632 /* NotificationsCenter.swift in Sources */,
 				2AA4B96F1F755E9E00F4FD48 /* Company.swift in Sources */,
 				2A6E266D1E9BFCF600C1FC64 /* User+CoreDataProperties.swift in Sources */,
 				2A6971231EB9D9A20036E3C5 /* DrinksOrderViewController.swift in Sources */,
 				2A53AB6D1EB135D60018B8E9 /* InitialSliderViewController.swift in Sources */,
-				2AE35FB21E93F9C600DF453F /* DrinksPricesViewController.swift in Sources */,
 				2A69711F1EB20E400036E3C5 /* UserDestination.swift in Sources */,
 				2A53AB5D1EAE893F0018B8E9 /* TestConnection.swift in Sources */,
 			);
