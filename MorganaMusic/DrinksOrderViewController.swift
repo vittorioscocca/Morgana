@@ -467,7 +467,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         }
         switch identifier {
         case "segueToAmiciFromOffer":
-            (segue.destination as! ListaAmiciViewController).segueFrom = "offerView"
+            (segue.destination as! FriendsListViewController).segueFrom = "offerView"
             break
         case "segueToOfferta":
             (segue.destination as! FriendActionViewController).productsList = self.elencoProdotti

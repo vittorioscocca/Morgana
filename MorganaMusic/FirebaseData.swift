@@ -67,6 +67,7 @@ class FirebaseData {
             "orderNotificationIsScheduled": order.orderNotificationIsScheduled!,
             "orderAutoId": "",
             "pendingPaymentAutoId": "",
+            "userSender": self.user?.idApp!,
             "orderReaded":"false"
         ]
 
@@ -412,71 +413,50 @@ class FirebaseData {
             guard snap.value != nil else {return}
             self.ordersSent.removeAll()
             
-            let dizionario_offerte = snap.value! as! NSDictionary
+            let orderDictionary = snap.value! as! NSDictionary
             
-            for (id_offer, dati_pendingOffers) in dizionario_offerte{
+            for (id_offer, orderData) in orderDictionary{
                 
-                let offerta: Order = Order(prodotti: [], userDestination: UserDestination(nil,nil,nil,nil,nil), userSender: UserDestination(nil,nil,nil,nil,nil))
-                offerta.idOfferta = id_offer as? String
+                let order: Order = Order(prodotti: [], userDestination: UserDestination(nil,nil,nil,nil,nil), userSender: UserDestination(nil,nil,nil,nil,nil))
                 
-                for (chiave,valore) in (dati_pendingOffers as! NSDictionary) {
-                    switch chiave as! String {
-                    case "expirationDate":
-                        offerta.expirationeDate = valore as? String
-                        break
-                    case "paymentState":
-                        offerta.paymentState = valore as? String
-                        break
-                    case "offerState":
-                        offerta.offerState = valore as? String
-                        break
-                    case "facebookUserDestination":
-                        offerta.userDestination?.idFB = valore as? String
-                        if offerta.userDestination?.idFB == self.user?.idFB {
-                            offerta.userDestination?.fullName = self.user?.fullName
-                            offerta.userDestination?.pictureUrl = self.user?.pictureUrl
-                        } else if !(friendsList?.isEmpty)! {
-                            for i in friendsList! {
-                                if i.idFB == valore as? String {
-                                    offerta.userDestination?.fullName = i.fullName
-                                    offerta.userDestination?.pictureUrl = i.pictureUrl
+                order.idOfferta = id_offer as? String
+                
+                let orderDataDictionary = orderData as? NSDictionary
+                
+                order.expirationeDate = orderDataDictionary?["expirationDate"] as? String
+                order.paymentState = orderDataDictionary?["paymentState"] as? String
+                order.offerState = orderDataDictionary?["offerState"] as? String
+                order.userDestination?.idFB = orderDataDictionary?["facebookUserDestination"] as? String
+                order.dataCreazioneOfferta = orderDataDictionary?["offerCreationDate"] as? String
+                order.userDestination?.idApp = orderDataDictionary?["IdAppUserDestination"] as? String
+                order.timeStamp = orderDataDictionary?["timestamp"] as! TimeInterval
+                order.pendingPaymentAutoId = orderDataDictionary?["pendingPaymentAutoId"] as! String
+                order.orderOfferedAutoId = orderDataDictionary?["orderOfferedAutoId"] as! String
+                order.userSender?.idApp = orderDataDictionary?["userSender"] as? String
+                order.orderNotificationIsScheduled = orderDataDictionary?["orderNotificationIsScheduled"] as? Bool
+                
+                if  orderDataDictionary?["orderReaded"] as? String == "true"{
+                    order.orderReaded = true
+                } else {
+                    order.orderReaded = false
+                }
+                
+                if order.userDestination?.idFB == self.user?.idFB {
+                    order.userDestination?.fullName = self.user?.fullName
+                    order.userDestination?.pictureUrl = self.user?.pictureUrl
+                    
+                } else if !(friendsList?.isEmpty)! {
+                        for friend in friendsList! {
+                            if friend.idFB == order.userDestination?.idFB {
+                                    order.userDestination?.fullName = friend.fullName
+                                    order.userDestination?.pictureUrl = friend.pictureUrl
                                     break
-                                }
                             }
                         }
-                        break
-                    case "offerCreationDate":
-                        offerta.dataCreazioneOfferta = valore as? String
-                        break
-                    case "IdAppUserDestination":
-                        offerta.userDestination?.idApp = valore as? String
-                        break
-                    case "timestamp":
-                        offerta.timeStamp = (valore as? TimeInterval)!
-                        break
-                    case "pendingPaymentAutoId":
-                        offerta.pendingPaymentAutoId = (valore as? String)!
-                        break
-                    case "orderOfferedAutoId":
-                        offerta.orderOfferedAutoId = (valore as? String)!
-                        break
-                    case "userSender":
-                        offerta.userSender?.idApp = (valore as? String)!
-                        break
-                    case "orderReaded":
-                        if (valore as? String) == "false" {
-                            offerta.orderReaded = false
-                        } else {offerta.orderReaded = true}
-                        break
-                    case "orderNotificationIsScheduled":
-                        offerta.orderNotificationIsScheduled = (valore as? Bool)!
-                        break
-                    default:
-                        break
-                    }
                 }
-                if offerta.offerState != "Scaduta" {
-                    self.scheduleExpiryNotification(order: offerta)
+                
+                if order.offerState != "Scaduta" {
+                    self.scheduleExpiryNotification(order: order)
                     ref.child("sessions").setValue(ServerValue.timestamp())
                     ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
                         let timeStamp = snap.value! as! TimeInterval
@@ -494,36 +474,36 @@ class FirebaseData {
                         date1Formatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
                         date1Formatter.locale = Locale.init(identifier: "it_IT")
                         
-                        let dateObj = date1Formatter.date(from: offerta.expirationeDate!)
+                        let dateObj = date1Formatter.date(from: order.expirationeDate!)
                         if dateObj! < finalDate! {
-                            offerta.offerState = "Scaduta"
-                            ref.child("orderOffered/" + (self.user?.idApp)! + "/" + offerta.idOfferta!).updateChildValues(["offerState" : "Scaduta"])
-                            ref.child("orderReceived/" + (offerta.userDestination?.idApp)! + "/" + offerta.orderOfferedAutoId).updateChildValues(["offerState" : "Scaduta"])
+                            order.offerState = "Scaduta"
+                            ref.child("orderOffered/" + (self.user?.idApp)! + "/" + order.idOfferta!).updateChildValues(["offerState" : "Scaduta"])
+                            ref.child("orderReceived/" + (order.userDestination?.idApp)! + "/" + order.orderOfferedAutoId).updateChildValues(["offerState" : "Scaduta"])
                             
                             let msg = "Il prodotto che ti è stato offerto da \((self.user?.fullName)!) è scaduto"
-                            NotitificationsCenter.sendNotification(userDestinationIdApp: (offerta.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
-                            self.updateNumberPendingProductsOnFireBase((offerta.userDestination?.idApp)!, recOrPurch: "received")
+                            NotitificationsCenter.sendNotification(userDestinationIdApp: (order.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
+                            self.updateNumberPendingProductsOnFireBase((order.userDestination?.idApp)!, recOrPurch: "received")
                         }
                     })
                 }
-                if offerta.paymentState != "Valid"  {
-                    self.ordersSent.append(offerta)
-                }else if self.user?.idApp != offerta.userDestination?.idApp   {
-                    self.ordersSent.append(offerta)
+                if order.paymentState != "Valid"  {
+                    self.ordersSent.append(order)
+                }else if self.user?.idApp != order.userDestination?.idApp   {
+                    self.ordersSent.append(order)
                 }
                 //if consumption is before expirationDate, scheduled notification is killed
                 //attenzione lo fa ogni volta che legge
-                if offerta.offerState == "Offerta consumata" {
+                if order.offerState == "Offerta consumata" {
                     let center = UNUserNotificationCenter.current()
-                    center.removePendingNotificationRequests(withIdentifiers: [offerta.idOfferta!])
+                    center.removePendingNotificationRequests(withIdentifiers: [order.idOfferta!])
                     print("scheduled notification killed")
                 }
             }
             self.ordersSent.sort(by: {self.timestampTodateObject(timestamp: $0.timeStamp) > self.timestampTodateObject(timestamp: $1.timeStamp)})
-            self.readProductsSentDetails(ordersToRead:self.ordersSent, onCompletion: {
-                onCompletion(self.ordersSent)
-            })
             
+            self.readProductsSentDetails(ordersToRead: self.ordersSent,onCompletion: {(ordersSentElaborated) in
+                onCompletion(ordersSentElaborated)
+            })
         })
     }
     
@@ -637,64 +617,98 @@ class FirebaseData {
                 }
             }
             self.ordersReceived.sort(by: {self.timestampTodateObject(timestamp: $0.timeStamp) > self.timestampTodateObject(timestamp: $1.timeStamp)})
-           
+
+            
             self.readUserSender(onCompletion: {
-                self.readProductsSentDetails(ordersToRead: self.ordersReceived ,onCompletion: {
-                    onCompletion(self.ordersReceived)
+                self.readProductsSentDetails(ordersToRead: self.ordersReceived, onCompletion: { (ordersReceivedElaborated) in
+                    onCompletion(ordersReceivedElaborated)
                 })
             })
         })
     }
     
     private func readUserSender(onCompletion: @escaping ()->()){
-        let ref = Database.database().reference()
+        var node = String()
+        
+        let dispatchGroup = DispatchGroup.init()
+        let queue = DispatchQueue.init(label: "it.xcoding.queueReadUsers", attributes: .concurrent, target: .main)
+        
         for singleOrder in self.ordersReceived{
-            ref.child("users/" + (singleOrder.userSender?.idApp)!).observeSingleEvent(of: .value, with: { (snap) in
-                guard snap.exists() else {return}
-                guard snap.value != nil else {return}
-                
-                let dati_user = snap.value! as! NSDictionary
-                singleOrder.userSender?.fullName = dati_user["nome completo"] as? String
-                singleOrder.userSender?.pictureUrl = dati_user["picture url"] as? String
-                onCompletion()
-            })
+            node = "users/" + (singleOrder.userSender?.idApp)!
             
+            FireBaseAPI.readNodeOnFirebaseWithOutAutoIdHandler(node: node, beginHandler: {
+                dispatchGroup.enter()
+                
+            }, completionHandler: {(error, userData) in
+                    
+                    guard error == nil else {return}
+                    guard userData != nil else {return}
+                
+                    singleOrder.userSender?.fullName = userData!["nome completo"] as? String
+                    print("full name letto")
+                    singleOrder.userSender?.pictureUrl = userData!["picture url"] as? String
+                    print("picturUrl letta")
+                
+                    print("letto uno user")
+                    dispatchGroup.leave()
+            })
+        }
+        queue.async(group: dispatchGroup){
+            print("user letto")
+        }
+        dispatchGroup.notify(queue: DispatchQueue.main) {
+            print("group operation ended")
+            onCompletion()
         }
         
     }
     
-    private func readProductsSentDetails(ordersToRead: [Order], onCompletion: @escaping ()->()) {
-        let ref = Database.database().reference()
-        ref.child("productsOffersDetails").observeSingleEvent(of: .value, with: { (snap) in
-            
-            guard snap.exists() else {return}
-            guard snap.value != nil else {return}
-            
-            let dati_products = snap.value! as! NSDictionary
-            
-            for (id_offerF, dizionario_products) in dati_products {
-                for j in ordersToRead {
-                    if (id_offerF as! String) == j.idOfferta {
-                        for (_, dati_products) in (dizionario_products as! NSDictionary){
-                            var prodotto: Product = Product(productName: nil, price: nil, quantity: nil)
-                            for (chiave,valore) in (dati_products as! NSDictionary) {
-                                prodotto.productName = chiave as? String
-                                let token = (valore as? String)?.components(separatedBy: "x")
-                                prodotto.quantity = Int((token?[0])!)
-                                prodotto.price = Double((token?[1])!)
-                                if (prodotto.price != nil) && (prodotto.productName != nil) && (prodotto.quantity != nil){
-                                    j.prodotti?.append(prodotto)
-                                    prodotto = Product(productName: nil, price: nil, quantity: nil)
-                                    
-                                }
-                            }
+    private func readProductsSentDetails(ordersToRead: [Order], onCompletion: @escaping ([Order])->()) {
+        var node = String()
+        
+        let dispatchGroup = DispatchGroup.init()
+        let queue = DispatchQueue.init(label: "it.xcoding.queueReadProductsSentDetails", attributes: .concurrent, target: .main)
+        
+        for singleOrder in ordersToRead{
+            node = "productsOffersDetails/" + singleOrder.idOfferta!
+            //readNodeOnFireBase con Autoid
+            FireBaseAPI.readNodeOnFirebaseHandler(node: node, beginHandler: {
+                dispatchGroup.enter()
+                
+            }, onCompletion: { (error, productData) in
+                
+                guard error == nil else {return}
+                guard productData != nil else {return}
+                
+                var product: Product = Product(productName: nil, price: nil, quantity: nil)
+                
+                for (chiave,valore) in productData! {
+                    if chiave != "autoId" {
+                        product.productName = chiave
+                        print("nome prodotto letto")
+                        let token = (valore as? String)?.components(separatedBy: "x")
+                        product.quantity = Int((token?[0])!)
+                        print("quantità letta")
+                        product.price = Double((token?[1])!)
+                        print("prezzo letto")
+                        if (product.price != nil) && (product.productName != nil) && (product.quantity != nil){
+                            singleOrder.prodotti?.append(product)
+                            product = Product(productName: nil, price: nil, quantity: nil)
                         }
+                        
                     }
                 }
-            }
-            onCompletion()
-        })
-        
+                dispatchGroup.leave()
+                
+            })
+        }
+        queue.async(group: dispatchGroup){
+            print("eseguo lettura")
+        }
+        dispatchGroup.notify(queue: DispatchQueue.main) {
+            print("lettura prodotti terminata")
+            onCompletion(ordersToRead)
+        }
     }
     
     func updateNumberPendingProductsOnFireBase(_ idAppUserDestination: String, recOrPurch: String){
@@ -756,11 +770,6 @@ class FirebaseData {
         
         FireBaseAPI.updateNode(node: "orderReceived/" + userIdApp + "/" + autoIdOrder, value: ["orderReaded" : "true", "offerState":state])
         FireBaseAPI.updateNode(node: "orderOffered/" + userSenderIdApp + "/" + idOrder, value: ["offerState":state])
-        
-        /*
-        FireBaseAPI.updateNode(node: "orderReceived/" + (self.user?.idApp)! + "/" + order.orderAutoId, value: ["orderReaded" : "true", "offerState":state])
-        FireBaseAPI.updateNode(node: "orderOffered/" + (order.userSender?.idApp)! + "/" + order.idOfferta!, value: ["offerState":state])*/
-        
     }
     
     func deleteOrderReceveidOnFirebase(order: Order){

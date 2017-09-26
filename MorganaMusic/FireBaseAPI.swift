@@ -47,6 +47,9 @@ class FireBaseAPI {
         onCompletion(error)
     }
     
+    
+    
+    
     //read node withOut AutoId
     class func readNodeOnFirebaseWithOutAutoId(node: String, onCompletion: @escaping (String?,[String:Any]?) -> ()){
         
@@ -80,6 +83,83 @@ class FireBaseAPI {
             }
             
             onCompletion(error,dictionary)
+            
+        })
+    }
+    
+    //read node withOut AutoId
+    class func readNodeOnFirebaseWithOutAutoIdHandler(node: String, beginHandler: @escaping ()->(),completionHandler: @escaping (String?,[String:Any]?) -> ()){
+        
+        beginHandler()
+        guard CheckConnection.isConnectedToNetwork() == true else {
+            error = "Connessione Internet Assente"
+            completionHandler(error,dictionary)
+            return
+        }
+        ref.child(node).observeSingleEvent(of: .value, with: { (snap) in
+            // controllo che lo snap dei dati non sia vuoto
+            guard snap.exists() else {
+                print("snap "+node+" non esiste")
+                completionHandler(error,dictionary)
+                return
+            }
+            
+            guard snap.value != nil else {
+                print("snap "+node+" non ha valori")
+                completionHandler(error,dictionary)
+                return
+            }
+            
+            // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
+            let nodeDictionary = snap.value! as! NSDictionary
+            dictionary = [:]
+            
+            // leggo i dati dell'ordine o offerte
+            
+            for (chiave,valore) in nodeDictionary {
+                dictionary?[chiave as! String] = valore
+            }
+            
+            completionHandler(error,dictionary)
+            
+        })
+    }
+    
+    //read node
+    class func readNodeOnFirebaseHandler(node: String, beginHandler: @escaping ()->(),onCompletion: @escaping (String?,[String:Any]?) -> ()){
+        
+        beginHandler()
+        guard CheckConnection.isConnectedToNetwork() == true else {
+            error = "Connessione Internet Assente"
+            onCompletion(error,dictionary)
+            return
+        }
+        ref.child(node).observeSingleEvent(of: .value, with: { (snap) in
+            // controllo che lo snap dei dati non sia vuoto
+            guard snap.exists() else {
+                print("snap "+node+" non esiste")
+                onCompletion(error,dictionary)
+                return
+            }
+            guard snap.value != nil else {
+                print("snap "+node+" non ha valori")
+                onCompletion(error,dictionary)
+                return
+            }
+            
+            // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
+            let nodeDictionary = snap.value! as! NSDictionary
+            dictionary = [:]
+            
+            // leggo i dati dell'ordine o offerte
+            for (autoId, childDictionary) in nodeDictionary{
+                dictionary?["autoId"] = autoId
+                for (chiave,valore) in (childDictionary as! NSDictionary) {
+                    dictionary?[chiave as! String] = valore
+                }
+                
+                onCompletion(error,dictionary)
+            }
             
         })
     }

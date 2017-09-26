@@ -417,7 +417,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 }
 
             }else {
-                print("Attenzione URL immagine User non presente")
+                print("Attenzione URL immagine Utente destinatario non presente")
             }
             if (orderSent!.paymentState!) == "Valid" {
                 cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
@@ -486,7 +486,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                     task.resume()
                 }
             }else {
-                print("Attenzione URL immagine User non presente")
+                print("Attenzione URL immagine Mittente non presente")
             }
             if (offertaRicevuta!.offerState!) == "Offerta accettata" { //"Pending"
                 cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
@@ -558,6 +558,23 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         })
     }
     
+    /*
+    DISABLE FULL SWIPE
+     
+    @available(iOS 11.0, *)
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let refuseOrderAction = UIContextualAction(style: .destructive, title: "Rifiuta") { (action, sourceView, completionHandler) in
+            completionHandler(true)
+        }
+        let acceptOrderAction = UIContextualAction(style: .normal, title: "Accetta") { (action, sourceView, completionHandler) in
+            completionHandler(true)
+        }
+        
+        let swipeAction = UISwipeActionsConfiguration(actions: [refuseOrderAction,acceptOrderAction])
+        swipeAction.performsFirstActionWithFullSwipe = false // This is the line which disables full swipe
+        return swipeAction
+    }*/
+    
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
         
         let thisCell = tableView.cellForRow(at: indexPath)
@@ -576,7 +593,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 refuseOrderAction.backgroundColor = #colorLiteral(red: 0.501960814, green: 0.501960814, blue: 0.501960814, alpha: 1)
                 
                 //Action accept order
-                let acceptOrderAction = UITableViewRowAction(style: .default, title: "Accetta") { (action, index) in
+                let acceptOrderAction = UITableViewRowAction(style: .normal, title: "Accetta") { (action, index) in
                     (thisCell as? OrderReceivedTableViewCell)?.cellReaded = true 
                     FirebaseData.sharedIstance.user = self.user
                     FirebaseData.sharedIstance.acceptOrder(state: "Offerta accettata", userFullName: (self.user?.fullName)!, userIdApp: (self.user?.idApp)!, userSenderIdApp: (self.ordersReceived[indexPath.row].userSender?.idApp)!, idOrder: self.ordersReceived[indexPath.row].idOfferta!, autoIdOrder: self.ordersReceived[indexPath.row].orderAutoId)
@@ -781,8 +798,8 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
             break
             
         case "segueToForwardToFriend":
-            (segue.destination as! ListaAmiciViewController).segueFrom = "myDrinks"
-            (segue.destination as! ListaAmiciViewController).order = self.forwardOrder
+            (segue.destination as! FriendsListViewController).segueFrom = "myDrinks"
+            (segue.destination as! FriendsListViewController).order = self.forwardOrder
             break
         default:
             break

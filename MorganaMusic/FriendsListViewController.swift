@@ -1,5 +1,5 @@
 //
-//  ListaAmiciViewController.swift
+//  FriendsListViewController.swift
 //  MorganaMusic
 //
 //  Created by Vittorio Scocca on 03/05/17.
@@ -9,7 +9,7 @@
 import UIKit
 
 //User Facebook Friends List that use the app
-class ListaAmiciViewController: UIViewController,UITableViewDelegate, UITableViewDataSource, UISearchResultsUpdating {
+class FriendsListViewController: UIViewController,UITableViewDelegate, UITableViewDataSource, UISearchResultsUpdating {
 
     @IBOutlet weak var myTable: UITableView!
     @IBOutlet weak var numAmici: UIBarButtonItem!
@@ -239,7 +239,7 @@ class ListaAmiciViewController: UIViewController,UITableViewDelegate, UITableVie
     
     lazy var refreshControl1: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(ListaAmiciViewController.handleRefresh(_:)), for: UIControlEvents.valueChanged)
+        refreshControl.addTarget(self, action: #selector(FriendsListViewController.handleRefresh(_:)), for: UIControlEvents.valueChanged)
         return refreshControl
     }()
     

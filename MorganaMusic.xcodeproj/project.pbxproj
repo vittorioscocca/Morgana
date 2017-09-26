@@ -24,7 +24,7 @@
 		2A6809AB1F79595200D813FF /* EventsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6809AA1F79595100D813FF /* EventsViewController.swift */; };
 		2A6809AD1F7962CD00D813FF /* TextFieldController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6809AC1F7962CC00D813FF /* TextFieldController.swift */; };
 		2A69711F1EB20E400036E3C5 /* UserDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A69711E1EB20E400036E3C5 /* UserDestination.swift */; };
-		2A6971211EB9CA7F0036E3C5 /* ListaAmiciViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6971201EB9CA7F0036E3C5 /* ListaAmiciViewController.swift */; };
+		2A6971211EB9CA7F0036E3C5 /* FriendsListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6971201EB9CA7F0036E3C5 /* FriendsListViewController.swift */; };
 		2A6971231EB9D9A20036E3C5 /* DrinksOrderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6971221EB9D9A20036E3C5 /* DrinksOrderViewController.swift */; };
 		2A6971271EBA673A0036E3C5 /* addbadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6971261EBA673A0036E3C5 /* addbadge.swift */; };
 		2A6B073D1ED6E8620054FFD3 /* OrderSentTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6B073C1ED6E8620054FFD3 /* OrderSentTableViewCell.swift */; };
@@ -89,7 +89,7 @@
 		2A6809AA1F79595100D813FF /* EventsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsViewController.swift; sourceTree = "<group>"; };
 		2A6809AC1F7962CC00D813FF /* TextFieldController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldController.swift; sourceTree = "<group>"; };
 		2A69711E1EB20E400036E3C5 /* UserDestination.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserDestination.swift; sourceTree = "<group>"; };
-		2A6971201EB9CA7F0036E3C5 /* ListaAmiciViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListaAmiciViewController.swift; sourceTree = "<group>"; };
+		2A6971201EB9CA7F0036E3C5 /* FriendsListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendsListViewController.swift; sourceTree = "<group>"; };
 		2A6971221EB9D9A20036E3C5 /* DrinksOrderViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrinksOrderViewController.swift; sourceTree = "<group>"; };
 		2A6971261EBA673A0036E3C5 /* addbadge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = addbadge.swift; sourceTree = "<group>"; };
 		2A6B073C1ED6E8620054FFD3 /* OrderSentTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderSentTableViewCell.swift; sourceTree = "<group>"; };
@@ -254,7 +254,7 @@
 				2AE35FA11E93F00F00DF453F /* LoginViewController.swift */,
 				2AE35FAB1E93F99900DF453F /* UserViewController.swift */,
 				2AD8C1421E9D486700017004 /* FriendActionViewController.swift */,
-				2A6971201EB9CA7F0036E3C5 /* ListaAmiciViewController.swift */,
+				2A6971201EB9CA7F0036E3C5 /* FriendsListViewController.swift */,
 				2AC63AF21E9DFFCE00A9F91E /* FirendsListTableViewCell.swift */,
 				2A6971221EB9D9A20036E3C5 /* DrinksOrderViewController.swift */,
 				2A8576F61EC456E800D41949 /* CartViewController.swift */,
@@ -449,7 +449,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2A6971211EB9CA7F0036E3C5 /* ListaAmiciViewController.swift in Sources */,
+				2A6971211EB9CA7F0036E3C5 /* FriendsListViewController.swift in Sources */,
 				2A1A5EC41ECCAD4500A0144A /* PaymentTableViewCell.swift in Sources */,
 				2AE1D9151F16844A000EC896 /* ManageCredits.swift in Sources */,
 				2A53AB671EB0AC120018B8E9 /* Product.swift in Sources */,

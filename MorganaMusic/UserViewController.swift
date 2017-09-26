@@ -230,7 +230,7 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         }
         switch identifier {
         case "segueToFriendsList":
-            (segue.destination as! ListaAmiciViewController).segueFrom = "userView"
+            (segue.destination as! FriendsListViewController).segueFrom = "userView"
             break
         default:
             break

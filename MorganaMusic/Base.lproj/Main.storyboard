@@ -1175,10 +1175,10 @@
             </objects>
             <point key="canvasLocation" x="2100" y="-1917.3913043478262"/>
         </scene>
-        <!--Lista Amici View Controller-->
+        <!--Friends List View Controller-->
         <scene sceneID="w7y-C1-6Gh">
             <objects>
-                <viewController id="dgd-bC-OJe" customClass="ListaAmiciViewController" customModule="MorganaMusic" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="dgd-bC-OJe" customClass="FriendsListViewController" customModule="MorganaMusic" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="U0M-CR-yd9"/>
                         <viewControllerLayoutGuide type="bottom" id="ur4-iE-WbZ"/>
