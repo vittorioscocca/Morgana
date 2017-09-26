@@ -648,29 +648,19 @@ class FirebaseData {
     
     private func readUserSender(onCompletion: @escaping ()->()){
         let ref = Database.database().reference()
-        for j in self.ordersReceived{
-            ref.child("users/" + (j.userSender?.idApp)!).observeSingleEvent(of: .value, with: { (snap) in
-                
+        for singleOrder in self.ordersReceived{
+            ref.child("users/" + (singleOrder.userSender?.idApp)!).observeSingleEvent(of: .value, with: { (snap) in
                 guard snap.exists() else {return}
                 guard snap.value != nil else {return}
                 
                 let dati_user = snap.value! as! NSDictionary
-                
-                for (chiave,valore) in dati_user{
-                    switch chiave as! String {
-                    case "nome completo" :
-                        j.userSender?.fullName = valore as? String
-                        break
-                    case "picture url":
-                        j.userSender?.pictureUrl = valore as? String
-                        break
-                    default:
-                        break
-                    }
-                }
+                singleOrder.userSender?.fullName = dati_user["nome completo"] as? String
+                singleOrder.userSender?.pictureUrl = dati_user["picture url"] as? String
+                onCompletion()
             })
+            
         }
-        onCompletion()
+        
     }
     
     private func readProductsSentDetails(ordersToRead: [Order], onCompletion: @escaping ()->()) {

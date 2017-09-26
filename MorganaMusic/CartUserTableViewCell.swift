@@ -19,10 +19,9 @@ class CartUserTableViewCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         
-        //self.friendImageView.layer.borderWidth = 0.5
+        self.friendImageView.layer.borderWidth = 2.5
+        self.friendImageView.layer.borderColor = #colorLiteral(red: 0.7419371009, green: 0.1511851847, blue: 0.20955199, alpha: 1)
         self.friendImageView.layer.masksToBounds = false
-        //self.friendImageView.layer.borderColor = UIColor.red.cgColor
-        //self.self.friendImageView.layer.borderWidth
         self.friendImageView.layer.cornerRadius = friendImageView.frame.height/2
         self.friendImageView.clipsToBounds = true
         

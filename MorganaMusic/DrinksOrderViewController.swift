@@ -105,15 +105,17 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         }
         self.isConnectedtoNetwork = true
         self.myTable.reloadData()
-        
+        UIApplication.shared.statusBarStyle = UIStatusBarStyle.lightContent
         //Update badge info
         UpdateBadgeInfo.sharedIstance.updateBadgeInformations(nsArray: self.tabBarController?.tabBar.items as NSArray!)
+        
     }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return self.sectionTitle.count
@@ -191,6 +193,9 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
             }*/
             cell?.textLabel?.text = "Morgana Music Club"
             
+            
+            cell?.textLabel?.font = UIFont.systemFont(ofSize: 16, weight: UIFont.Weight.light)
+            
         } else {
             cell = tableView.dequeueReusableCell(withIdentifier: "cellOffer", for: indexPath)
             
@@ -207,10 +212,12 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
                 cell?.accessoryType = UITableViewCellAccessoryType.none
                 cell?.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
                 cell?.textLabel?.textColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
+                cell?.textLabel?.font = UIFont.systemFont(ofSize: 16, weight: UIFont.Weight.light)
                 if indexPath.row == ((Order.sharedIstance.prodotti?.count)! - 1){
                     cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
                     cell?.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
                     cell?.textLabel?.textColor = #colorLiteral(red: 0.7419371009, green: 0.1511851847, blue: 0.20955199, alpha: 1)
+                    cell?.textLabel?.font = UIFont.systemFont(ofSize: 16, weight: UIFont.Weight.light)
                 }
             }
         }

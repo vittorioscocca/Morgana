@@ -67,11 +67,18 @@ class ListaAmiciViewController: UIViewController,UITableViewDelegate, UITableVie
         
         self.myTable.addSubview(refreshControl1)
         self.numAmici.title = String(self.friendsListPaginated!.count)
+        
     }
+    
+    
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
     }
     
     func contentsFilter(text: String) {

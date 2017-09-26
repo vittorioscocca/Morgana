@@ -24,10 +24,16 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
         
         self.myTable.dataSource = self
         self.myTable.delegate = self
+        
     }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -73,9 +79,11 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
         } else {
             //products section
             cell = tableView.dequeueReusableCell(withIdentifier: "cartCell", for: indexPath)
-            cell?.textLabel?.text = "Prodotti: \(Cart.sharedIstance.prodottiTotali) \t\t\t Totale: € " +  String(format:"%.2f",Cart.sharedIstance.costoTotale)
+            cell?.textLabel?.text = "Prodotti: \(Cart.sharedIstance.prodottiTotali) \t\t\t\t Totale: € " +  String(format:"%.2f",Cart.sharedIstance.costoTotale)
             
-            cell?.textLabel?.textColor = #colorLiteral(red: 0.7411764706, green: 0.1529411765, blue: 0.2078431373, alpha: 1)
+            cell?.textLabel?.textColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
+            cell?.textLabel?.font =  UIFont.systemFont(ofSize: 17)
+            cell?.backgroundColor =  #colorLiteral(red: 0.7411764706, green: 0.1529411765, blue: 0.2078431373, alpha: 1)
         }
         
         return cell!

@@ -59,6 +59,8 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
         self.imageFriend_Picture.layer.masksToBounds = false
         self.imageFriend_Picture.layer.cornerRadius = imageFriend_Picture.frame.height/2
         self.imageFriend_Picture.clipsToBounds = true
+        self.imageFriend_Picture.layer.borderWidth = 2.5
+        self.imageFriend_Picture.layer.borderColor = #colorLiteral(red: 0.7419371009, green: 0.1511851847, blue: 0.20955199, alpha: 1)
         
         // Connect data:
         self.pickerView.delegate = self
@@ -80,6 +82,7 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
     
     // The number of columns of data
     func numberOfComponents(in pickerView: UIPickerView) -> Int {

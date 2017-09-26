@@ -30,6 +30,10 @@ class OrderSentDetailsViewController: UIViewController, UITableViewDelegate, UIT
         // Dispose of any resources that can be recreated.
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+    }
+    
     func numberOfSections(in tableView: UITableView) -> Int {
         return 2
     }
@@ -111,11 +115,9 @@ class OrderSentDetailsViewController: UIViewController, UITableViewDelegate, UIT
                 let product = offertaInviata?.prodotti?[indexPath.row]
                 
                 cell?.textLabel?.text = "(\((product?.quantity)!))  " + (product?.productName)! + " € " + String(format:"%.2f", (product?.price!)!)
+                cell?.textLabel?.textColor = #colorLiteral(red: 0.7419371009, green: 0.1511851847, blue: 0.20955199, alpha: 1)
             }
-            
-            
         }
-        
         return cell!
     }
 

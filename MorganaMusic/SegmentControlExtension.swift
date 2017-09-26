@@ -28,9 +28,11 @@ extension UISegmentedControl {
         UIGraphicsEndImageContext();
         return image!
     }
-    func addUnderlineForSelectedSegment(){
+    func addUnderlineForSelectedSegment(underlineWidth: CGFloat){
         //removeBorders()
-        let underlineWidth: CGFloat = self.bounds.size.width / CGFloat(self.numberOfSegments)
+        
+        //let underlineWidth: CGFloat = (self.bounds.size.width - 15.0) / CGFloat(self.numberOfSegments)
+        
         let underlineHeight: CGFloat = 2.0
         let underlineXPosition = CGFloat(selectedSegmentIndex) * underlineWidth
         let underLineYPosition = self.bounds.size.height - 2.0

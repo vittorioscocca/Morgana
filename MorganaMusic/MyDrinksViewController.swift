@@ -80,6 +80,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         self.readOrderReceived()
         self.firebaseObserverKilled.set(false, forKey: "firebaseObserverKilled")
  
+        
         self.myTable.addSubview(refreshControl1)
         successView.isHidden = true
     }
@@ -116,6 +117,11 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+    }
+    
     //remove all observers utilized into controller
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
@@ -135,7 +141,8 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
             ]
         self.drinksList_segmentControl.setTitleTextAttributes(segAttributes as? [AnyHashable : Any], for: UIControlState.selected)
         self.drinksList_segmentControl.setTitleTextAttributes(segAttributes as? [AnyHashable : Any], for: UIControlState.normal)
-        self.drinksList_segmentControl.addUnderlineForSelectedSegment()
+        let underlineWidth = self.view.frame.width / CGFloat(self.drinksList_segmentControl.numberOfSegments)
+        self.drinksList_segmentControl.addUnderlineForSelectedSegment(underlineWidth: underlineWidth)
     }
     
     private func generateStandardAlert(){
@@ -432,7 +439,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
             } else {
                 (cell as! OrderReceivedTableViewCell).cellReaded = true
             }
-            (cell as! OrderReceivedTableViewCell).friendFullName.text = offertaRicevuta?.userSender?.fullName
+            
             (cell as! OrderReceivedTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: (offertaRicevuta?.dataCreazioneOfferta)!)
             
             if offertaRicevuta?.offerState == "Scaduta" {
@@ -451,7 +458,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
             (cell as! OrderReceivedTableViewCell).cost.text = "€ " + String(format:"%.2f",(offertaRicevuta?.costoTotale)!)
             (cell as! OrderReceivedTableViewCell).orderOfferedAutoId = offertaRicevuta?.idOfferta
             (cell as! OrderReceivedTableViewCell).orderReceivedAutoId = offertaRicevuta?.orderAutoId
-            
+            (cell as! OrderReceivedTableViewCell).friendFullName.text = offertaRicevuta?.userSender?.fullName
             if let pictureUrl = offertaRicevuta?.userSender?.pictureUrl{
                 if let img = imageCache[pictureUrl] {
                     (cell as! OrderReceivedTableViewCell).friendImageView.image = img
@@ -863,9 +870,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                     
                     self.ordersReceived.remove(at: (indexPath?.row)!)
                     self.myTable.deleteRows(at: [indexPath!], with: .fade)
-                    let center = UNUserNotificationCenter.current()
-                    //if user refuse order, delete expiration notification
-                    center.removePendingNotificationRequests(withIdentifiers: ["expirationDate-"+self.ordersReceived[(indexPath?.row)!].idOfferta!,"RememberExpiration-"+self.ordersReceived[(indexPath?.row)!].idOfferta!] )
+                    
             })
             actionAnnulla = UIAlertAction(title: "Annulla", style: UIAlertActionStyle.default, handler:
                 {(paramAction:UIAlertAction!) in

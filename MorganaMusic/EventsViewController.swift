@@ -36,14 +36,14 @@ class EventsViewController: UIViewController, UITextFieldDelegate{
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(true)
-        
+        super.viewDidAppear(animated)
         self.setWebView()
     }
     
+    
+    
     override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(true)
-        
+        super.viewWillDisappear(animated)
         self.webView?.removeObserver(self, forKeyPath: "estimatedProgress")
     }
     

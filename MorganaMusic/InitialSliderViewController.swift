@@ -49,12 +49,15 @@ class InitialSliderViewController: UIViewController {
         
         view.addGestureRecognizer(leftSwipe)
         view.addGestureRecognizer(rightSwipe)
+        
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+    
     
     @objc func handleSwipes(_ sender: UISwipeGestureRecognizer) {
         
