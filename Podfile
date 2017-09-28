@@ -2,12 +2,19 @@
 # platform :ios, ‘7.0’
 
 target 'MorganaMusic' do
-  # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
-  use_frameworks!
-
-  # Pods for MorganaMusic
-	pod ‘PayPal-iOS-SDK’	
-	pod ’Firebase/Database’
-	pod ’Firebase/Auth’
-	pod ‘Firebase/Messaging’
+    # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
+    use_frameworks!
+    inhibit_all_warnings!
+    
+    # Pods for MorganaMusic
+    pod ‘PayPal-iOS-SDK’
+    pod ’Firebase/Database’
+    pod ’Firebase/Auth’
+    pod ‘Firebase/Messaging’
+    
+    target 'MorganaMusicTests' do
+        inherit! :search_paths
+        pod 'Firebase'
+        pod 'PayPal-iOS-SDK'
+    end
 end

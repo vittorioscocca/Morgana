@@ -29,6 +29,26 @@
       language = ""
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "2A01EBAE1F7C741400EB49C1"
+               BuildableName = "MorganaMusicTests.xctest"
+               BlueprintName = "MorganaMusicTests"
+               ReferencedContainer = "container:MorganaMusic.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "2A01EBBC1F7C743B00EB49C1"
+               BuildableName = "MorganaMusicUITests.xctest"
+               BlueprintName = "MorganaMusicUITests"
+               ReferencedContainer = "container:MorganaMusic.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference

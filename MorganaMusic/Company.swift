@@ -10,6 +10,7 @@ import Foundation
 
 class Company {
     static let sharedInstance = Company()
+    
     var companyId: String?
     var userId: String?
     var city: String?

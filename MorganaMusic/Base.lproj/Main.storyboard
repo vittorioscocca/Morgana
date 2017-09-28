@@ -355,10 +355,10 @@
                                                             <rect key="frame" x="63" y="0.0" width="302" height="53"/>
                                                             <subviews>
                                                                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" translatesAutoresizingMaskIntoConstraints="NO" id="DtA-ZS-2a7">
-                                                                    <rect key="frame" x="0.0" y="0.0" width="267.5" height="39.5"/>
+                                                                    <rect key="frame" x="0.0" y="0.0" width="234.5" height="39.5"/>
                                                                     <subviews>
-                                                                        <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" spacing="5" baselineRelativeArrangement="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Qwh-YO-zBT">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="267.5" height="19.5"/>
+                                                                        <stackView opaque="NO" contentMode="scaleToFill" spacing="5" baselineRelativeArrangement="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Qwh-YO-zBT">
+                                                                            <rect key="frame" x="0.0" y="0.0" width="234.5" height="19.5"/>
                                                                             <subviews>
                                                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Vittorio Scocca" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LBG-mc-gb7">
                                                                                     <rect key="frame" x="0.0" y="0.0" width="190.5" height="19.5"/>
@@ -367,7 +367,7 @@
                                                                                     <nil key="highlightedColor"/>
                                                                                 </label>
                                                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="€ 5,00" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7b5-ex-uxd">
-                                                                                    <rect key="frame" x="195.5" y="0.0" width="72" height="19.5"/>
+                                                                                    <rect key="frame" x="195.5" y="0.0" width="39" height="19.5"/>
                                                                                     <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                                                                     <nil key="textColor"/>
                                                                                     <nil key="highlightedColor"/>
@@ -446,19 +446,19 @@
                                                             <rect key="frame" x="63" y="0.0" width="294" height="53"/>
                                                             <subviews>
                                                                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" translatesAutoresizingMaskIntoConstraints="NO" id="xZL-Zf-2mY">
-                                                                    <rect key="frame" x="0.0" y="0.0" width="260.5" height="39.5"/>
+                                                                    <rect key="frame" x="0.0" y="0.0" width="229" height="39.5"/>
                                                                     <subviews>
-                                                                        <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" spacing="5" baselineRelativeArrangement="YES" translatesAutoresizingMaskIntoConstraints="NO" id="okt-zx-QU3">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="260.5" height="19.5"/>
+                                                                        <stackView opaque="NO" contentMode="scaleToFill" spacing="5" baselineRelativeArrangement="YES" translatesAutoresizingMaskIntoConstraints="NO" id="okt-zx-QU3">
+                                                                            <rect key="frame" x="0.0" y="0.0" width="229" height="19.5"/>
                                                                             <subviews>
                                                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Vittorio Scocca" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HLD-Sd-9Wv">
-                                                                                    <rect key="frame" x="0.0" y="0.0" width="185.5" height="19.5"/>
+                                                                                    <rect key="frame" x="0.0" y="0.0" width="185" height="19.5"/>
                                                                                     <fontDescription key="fontDescription" type="system" weight="light" pointSize="16"/>
                                                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                                                     <nil key="highlightedColor"/>
                                                                                 </label>
                                                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="€ 5,00" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BiC-YF-Ohg">
-                                                                                    <rect key="frame" x="190.5" y="0.0" width="70" height="19.5"/>
+                                                                                    <rect key="frame" x="190" y="0.0" width="39" height="19.5"/>
                                                                                     <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                                                                     <nil key="textColor"/>
                                                                                     <nil key="highlightedColor"/>
@@ -1834,6 +1834,6 @@
         <image name="userDefault" width="245" height="232"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="B23-cs-HaJ"/>
+        <segue reference="OXA-AZ-LfE"/>
     </inferredMetricsTieBreakers>
 </document>

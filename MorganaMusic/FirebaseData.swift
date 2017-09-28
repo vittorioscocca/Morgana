@@ -38,7 +38,6 @@ class FirebaseData {
         self.companies = [Company]()
     }
     
-    
     private func updatePendingProducts(order: Order,badgeValue: Int ) {
         if order.userDestination?.idApp != (self.user?.idApp)! {
             FireBaseAPI.updateNode(node: "users/"+(self.user?.idApp)!, value: ["number of pending purchased products" : badgeValue + 1])
@@ -49,7 +48,7 @@ class FirebaseData {
         if (self.user?.idApp)! == (orderDetails["IdAppUserDestination"] as! String) {
             return "Offerta accettata"
         }
-        
+
         return orderDetails["offerState"] as! String
     }
     
@@ -67,14 +66,13 @@ class FirebaseData {
             "orderNotificationIsScheduled": order.orderNotificationIsScheduled!,
             "orderAutoId": "",
             "pendingPaymentAutoId": "",
-            "userSender": self.user?.idApp!,
+            "userSender": (self.user?.idApp)!,
             "orderReaded":"false"
         ]
 
     }
     
     private func saveOrdersSentOnFireBase (badgeValue: Int, order: Order, onCompletion: @escaping ()->()){
-      
             var orderDetails = buildOrderDataDictionary(order: order)
             orderDetails["offerState"] = updateOfferState(orderDetails: orderDetails)
             FireBaseAPI.saveNodeOnFirebaseWithAutoId(node: "orderOffered", child: (self.user?.idApp)!, dictionaryToSave: orderDetails, onCompletion: {(error) in
@@ -93,12 +91,10 @@ class FirebaseData {
             self.idOrder?.append(dictionary?["autoId"] as! String)
             onCompletion(dictionary!)
         })
-        
     }
 
     func saveCartOnFirebase(user: User, badgeValue: Int,  onCompletion: @escaping ()->()){
         self.user = user
-        
         var workItems = [DispatchWorkItem]()
         
         for order in Cart.sharedIstance.carrello{
@@ -120,8 +116,6 @@ class FirebaseData {
                 currentWorkItem.perform()
             }
         }
-        
-        
         self.saveOrderDictionaryStoredOnFirebase(onCompletion: { (dictionary) in
             self.saveProductOnFireBase(dictionary: dictionary)
             self.saveOrderAsReceivedOnFireBase(dictionary: dictionary)
@@ -164,7 +158,6 @@ class FirebaseData {
     }
     
     private func prepareProductDetails(orderDetailsSent: [String:Any]?, onCompletion: @escaping ([String:String]?, String?)->()) {
-        
         var idFBFriend: String?
         var creationDate: String?
         var autoId_orderOffered: String?
@@ -174,8 +167,6 @@ class FirebaseData {
         autoId_orderOffered = orderDetailsSent?["autoId"] as? String
         let currentDetails = self.buildProductOrderDetailsDictionary(idFBFriend: idFBFriend, creationDate: creationDate)
         onCompletion(currentDetails, autoId_orderOffered)
-    
-        
     }
     
     private func saveProductOnFireBase(dictionary: [String:Any]?){
@@ -191,15 +182,11 @@ class FirebaseData {
             
             self.saveOrderDetails(currentDetails: currentDetails!, autoId_orderOffered: autoId_orderOffered!)
         })
-        
     }
     
-
     //SAVE ORDER AS RECEIVED ON FIREBASE
     private func buildOrderDetailsReceivedDictionary(dictionary:[String:Any] )->[String:Any]{
-        
         var offerDetails: [String:Any] = dictionary
-        
         // leggo i dati dell'ordine o offerte
         offerDetails["offerId"] = offerDetails["autoId"]
         offerDetails.removeValue(forKey: "autoId")
@@ -212,12 +199,8 @@ class FirebaseData {
     
     private func updateOrderOfferedWithOrderReceivedAutoId(iDAppUserDestination: String, offerId: String){
         FireBaseAPI.readNodeOnFirebase(node: "orderReceived/"+iDAppUserDestination, onCompletion: { (error,dictionary) in
-            guard error == nil else {
-                return
-            }
-            guard dictionary != nil else {
-                return
-            }
+            guard error == nil else {return}
+            guard dictionary != nil else {return}
             //for dictionary in dictionaries! {
             if (dictionary?["offerId"] as! String) == (offerId) {
                 FireBaseAPI.updateNode(node: "orderOffered/" + (self.user?.idApp)! + "/" + offerId, value: ["orderOfferedAutoId": (dictionary?["autoId"])!])
@@ -227,7 +210,6 @@ class FirebaseData {
     }
     
     private func updateOrderSentAndReceivedAutoId (orderDetails: [String:Any]) {
-        
         FireBaseAPI.updateNode(node: "orderOffered/" + (self.user?.idApp)! + "/" + (orderDetails["offerId"] as! String), value: ["orderAutoId":orderDetails["offerId"]!])
         self.updateOrderOfferedWithOrderReceivedAutoId(iDAppUserDestination: orderDetails["IdAppUserDestination"]! as! String, offerId: orderDetails["offerId"] as! String)
         
@@ -246,18 +228,15 @@ class FirebaseData {
     }
     
     func saveOrderAsReceivedOnFireBase(dictionary: [String:Any]?) {
-        
-        
         var orderDetails = buildOrderDetailsReceivedDictionary(dictionary: dictionary!)
     
         orderDetails["offerState"] = updateOfferState(orderDetails: orderDetails)
         saveOrderOnFirebase(orderDetails: orderDetails, onCompletion: {
             self.updateOrderSentAndReceivedAutoId(orderDetails: orderDetails)
         })
-        
     }
     
-    
+    //SAVE PAYMENT ON FIREBAASE
     private func buildPaymentIdOrders(){
         for numberOfpaymentIdOrders in 0...(idOrder?.count)! - 1 {
             self.paymentDetails?["offerID"+String(numberOfpaymentIdOrders)] = idOrder?[numberOfpaymentIdOrders]
@@ -265,7 +244,6 @@ class FirebaseData {
         self.idOrder?.removeAll()
     }
     
-    //SAVE PAYMENT ON FIREBAASE
     private func savePaymentOnFireBase (onCompletion: @escaping ()->()){
         
         buildPaymentIdOrders()
@@ -365,7 +343,7 @@ class FirebaseData {
                 order.orderNotificationIsScheduled = true
                 FireBaseAPI.updateNode(node: "orderOffered/"+(self.user?.idApp)!+"/"+order.idOfferta!, value: ["orderNotificationIsScheduled":true])
             }
-            
+
         }
     }
     
@@ -403,6 +381,7 @@ class FirebaseData {
         })
     }
 
+    //READ ORDERS ON FIREBASE
     func readOrdersSentOnFireBase(user: User, friendsList: [Friend]?,onCompletion: @escaping ([Order])->()){
         self.user = user
         let ref = Database.database().reference()
@@ -638,7 +617,9 @@ class FirebaseData {
             
             FireBaseAPI.readNodeOnFirebaseWithOutAutoIdHandler(node: node, beginHandler: {
                 dispatchGroup.enter()
-                
+                queue.async(group: dispatchGroup){
+                    print("user letto")
+                }
             }, completionHandler: {(error, userData) in
                     
                     guard error == nil else {return}
@@ -653,9 +634,7 @@ class FirebaseData {
                     dispatchGroup.leave()
             })
         }
-        queue.async(group: dispatchGroup){
-            print("user letto")
-        }
+        
         dispatchGroup.notify(queue: DispatchQueue.main) {
             print("group operation ended")
             onCompletion()
@@ -674,7 +653,9 @@ class FirebaseData {
             //readNodeOnFireBase con Autoid
             FireBaseAPI.readNodeOnFirebaseHandler(node: node, beginHandler: {
                 dispatchGroup.enter()
-                
+                queue.async(group: dispatchGroup){
+                    print("eseguo lettura")
+                }
             }, onCompletion: { (error, productData) in
                 
                 guard error == nil else {return}
@@ -702,9 +683,7 @@ class FirebaseData {
                 
             })
         }
-        queue.async(group: dispatchGroup){
-            print("eseguo lettura")
-        }
+        
         dispatchGroup.notify(queue: DispatchQueue.main) {
             print("lettura prodotti terminata")
             onCompletion(ordersToRead)
@@ -740,6 +719,7 @@ class FirebaseData {
         })
     }
 
+    //Date method
     private func timestampTodateObject(timestamp: TimeInterval)->Date {
         
         let date = NSDate(timeIntervalSince1970: timestamp/1000)
@@ -753,8 +733,6 @@ class FirebaseData {
     }
     
     private func stringTodateObject(date: String)->Date {
-        
-        
         let dateFormatter = DateFormatter()
         dateFormatter.amSymbol = "AM"
         dateFormatter.pmSymbol = "PM"
@@ -762,7 +740,6 @@ class FirebaseData {
         //let dateString = dateFormatter.string(from: date as Date)
         
         return dateFormatter.date(from: date)!
-        
     }
     
     //func updateStateOnFirebase (order: Order, state: String){

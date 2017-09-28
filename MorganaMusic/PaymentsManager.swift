@@ -21,6 +21,18 @@ class PaymentManager {
     
     func resolvePendingPayPalPayment(user: User, payment: Payment, onCompleted: @escaping (Bool)->()){
         self.payment = payment
+        
+        //******ENTER IN TESTING CASE*************
+        //Code for testing, exclude Payments  for Test
+        guard payment.idPayment?.range(of: "test")  == nil else {
+            self.setPaymentAndOrderCompletedOnFirebase(user: user)
+            self.prepareNotification(user: user)
+            self.sendReceiptByEmail()
+            self.saveReceiptOnFireBase()
+            onCompleted(true)
+            return
+        }
+        
         self.getPayPalAccessToken(){ (payPalAccessToken) in
             guard payPalAccessToken != nil else {
                 onCompleted(false)
@@ -93,12 +105,14 @@ class PaymentManager {
     private func verifyPendingPaypalPayment(user: User, access_token: String?, onCompleted: @escaping (Bool)->()){
         guard access_token != "" else {
             print("token non esistente")
+            onCompleted(false)
             return
         }
         self.lookUpPayPalPayment(access_token: access_token){ (PayPalPaymentDataDictionary) in
             guard PayPalPaymentDataDictionary != nil else {
                 return
             }
+            
             var stateResponse: String?
             var totalResponse: String?
             var currencyResponse: String?

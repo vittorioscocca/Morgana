@@ -47,6 +47,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
     let fbToken = UserDefaults.standard
     var productOfferedBadge = UserDefaults.standard
     let defaults = UserDefaults.standard
+    var firebaseObserverKilled = UserDefaults.standard
     
     var fbTokenString: String?
     var controller :UIAlertController?
@@ -78,6 +79,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
             self.loadOfferte()
         }
         self.uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
+        
         self.user = CoreDataController.sharedIstance.findUserForIdApp(uid)
         guard user != nil else{
             print("User non esiste")
@@ -92,6 +94,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         let token = Messaging.messaging().fcmToken
         print("FCM token: \(token ?? "")")
         self.readCompanies()
+        self.firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
         
         
         //reset Firebase DB. only for simulator tests
@@ -124,8 +127,10 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
     private func readCompanies(){
         FirebaseData.sharedIstance.readCompaniesOnFireBase { (companies) in
             self.companies = companies
-            self.myTable.reloadData()
+            //self.myTable.reloadData()
+            Cart.sharedIstance.company = self.companies?[0]
         }
+        
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {

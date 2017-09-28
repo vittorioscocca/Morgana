@@ -78,8 +78,6 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         
         self.readOrdersSent()
         self.readOrderReceived()
-        self.firebaseObserverKilled.set(false, forKey: "firebaseObserverKilled")
- 
         
         self.myTable.addSubview(refreshControl1)
         successView.isHidden = true
@@ -109,6 +107,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
             var currentDate = Date()
             currentDate = Calendar.current.date(byAdding:.hour,value: 2,to: currentDate)!
             self.lastOrderSentReadedTimestamp.set(currentDate, forKey: "lastOrderReceivedReadedTimestamp")
+            
             if self.firebaseObserverKilled.bool(forKey: "firebaseObserverKilled") {
                 self.firebaseObserverKilled.set(false, forKey: "firebaseObserverKilled")
             }
@@ -125,11 +124,11 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
     //remove all observers utilized into controller
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        
+        /*
         FireBaseAPI.removeObserver(node: "users/" + (self.user?.idApp)!)
         FireBaseAPI.removeObserver(node: "orderOffered/" + (self.user?.idApp)!)
         FireBaseAPI.removeObserver(node: "orderReceived/" + (self.user?.idApp)!)
-        self.firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
+        self.firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")*/
     }
     
     private func setSegmentcontrol() {
@@ -996,26 +995,30 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         print("dayLimit:  \(dayLimit!)")
         print("current Date: \(currentDate)")
 
-        return SegmentControlBadge != 0 || (currentDate >= dayLimit!)
+        return SegmentControlBadge != 0 || (currentDate >= dayLimit!) || firebaseObserverKilled.bool(forKey: "firebaseObserverKilled")
         
     }
 
     @objc func handleRefresh(_ refreshControl: UIRefreshControl) {
         if drinksList_segmentControl.selectedSegmentIndex == 0 {
             print("segment control clicked pari a 0")
-            if shouldUpdateDrinksTable(SegmentControlBadge: self.productSendBadge.object(forKey: "paymentOfferedBadge") as? Int, timeReaded: self.lastOrderSentReadedTimestamp.object(forKey: "orderOfferedReadedTimestamp") as? Date){
+            if shouldUpdateDrinksTable(SegmentControlBadge: self.productSendBadge.object(forKey: "paymentOfferedBadge") as? Int, timeReaded: lastOrderSentReadedTimestamp.object(forKey: "orderOfferedReadedTimestamp") as? Date){
                 self.readOrdersSent()
                 print("refresh effettuato")
                 self.productSendBadge.set(0, forKey: "paymentOfferedBadge")
+                
             } else {print("refresh non effettuato")}
             
         } else if drinksList_segmentControl.selectedSegmentIndex == 1{
             print("segment control clicked pari a 1")
-            if shouldUpdateDrinksTable(SegmentControlBadge: self.productSendBadge.object(forKey: "productOfferedBadge") as? Int, timeReaded: self.lastOrderReceivedReadedTimestamp.object(forKey: "lastOrderReceivedReadedTimestamp") as? Date){
+            if shouldUpdateDrinksTable(SegmentControlBadge: self.productSendBadge.object(forKey: "productOfferedBadge") as? Int, timeReaded: lastOrderReceivedReadedTimestamp.object(forKey: "lastOrderReceivedReadedTimestamp") as? Date){
                 self.readOrderReceived()
                 print("refresh effettuato")
                 self.productSendBadge.set(0, forKey: "productOfferedBadge")
             } else {print("refresh non effettuato")}
+        }
+        if firebaseObserverKilled.bool(forKey: "firebaseObserverKilled") {
+            firebaseObserverKilled.set(false, forKey: "firebaseObserverKilled")
         }
         refreshControl.endRefreshing()
         
@@ -1047,7 +1050,6 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
     @IBAction func unwindToMyDrinksWitoutValue(_ sender: UIStoryboardSegue) {
         print("unwind eseguito")
     }
-    
     
     
     @IBAction func unwindToMyDrinks(_ sender: UIStoryboardSegue) {
