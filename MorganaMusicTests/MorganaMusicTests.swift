@@ -8,7 +8,8 @@
 
 import XCTest
 @testable import MorganaMusic
-
+import FirebaseAuth
+import FirebaseDatabase
 
 class MorganaMusicTests: XCTestCase {
     
@@ -77,14 +78,16 @@ class MorganaMusicTests: XCTestCase {
         Cart.sharedIstance.carrello.append(self.order!)
         Cart.sharedIstance.state = "Valid"
         Cart.sharedIstance.company = self.company
-        
+        print(Cart.sharedIstance.carrello.count)
     }
     func testFirebaseData_SaveCartOnFirebase() {
         print("testFirebaseData_SaveCartOnFirebase")
         createCart()
         
-        let user = CoreDataController.sharedIstance.findUserForIdApp(userSender_idApp)
+        let fireBaseUser = Auth.auth().currentUser
         
+        let user = CoreDataController.sharedIstance.findUserForIdApp((fireBaseUser?.uid))
+        /*
         FirebaseData.sharedIstance.saveCartOnFirebase(user: user!, badgeValue: 1, onCompletion: {
             print("ordine salvato su firebase")
             
@@ -109,6 +112,18 @@ class MorganaMusicTests: XCTestCase {
                 print("Pagamento carrello non valido, riprova")
             }
         })
+        FireBaseAPI.saveNodeOnFirebaseWithAutoId(node: "orderSentTest", child: (user?.idApp)!, dictionaryToSave: ["test": 1], onCompletion: {
+            (error) in
+            
+        })
+        
+        FireBaseAPI.readNodeOnFirebase(node: "users/"+(user?.idApp)!, onCompletion: { (error,dictionary) in
+            print(dictionary!["nome completo"] as! String)
+        })*/
+        let ref = Database.database().reference()
+        ref.child("orderSentTest").child((user?.idApp)!).setValue(["test": 1])
+        
+        //XCTAssert(done, "Completion should be called")
     }
     
     

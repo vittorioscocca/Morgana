@@ -30,8 +30,9 @@ class FireBaseAPI {
             onCompletion(error)
             return
         }
-        
+        print("\(node)/\(child)")
         ref.child(node).child(child).childByAutoId().setValue(dictionaryToSave)
+        
         onCompletion(error)
     }
     

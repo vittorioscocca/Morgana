@@ -122,6 +122,7 @@ class FirebaseData {
             if self.idOrder?.count == Cart.sharedIstance.carrello.count {
                 self.savePaymentOnFireBase(onCompletion: {
                     onCompletion()
+                    print("Payment Saved on Firebase")
                 })
             }
             

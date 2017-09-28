@@ -98,7 +98,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         
         
         //reset Firebase DB. only for simulator tests
-        //FireBaseAPI.resetFirebaseDB()
+        FireBaseAPI.resetFirebaseDB()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -110,7 +110,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         self.myTable.reloadData()
         UIApplication.shared.statusBarStyle = UIStatusBarStyle.lightContent
         //Update badge info
-        UpdateBadgeInfo.sharedIstance.updateBadgeInformations(nsArray: self.tabBarController?.tabBar.items as NSArray!)
+        //UpdateBadgeInfo.sharedIstance.updateBadgeInformations(nsArray: self.tabBarController?.tabBar.items as NSArray!)
         
     }
     
