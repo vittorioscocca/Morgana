@@ -85,9 +85,8 @@ class MorganaMusicTests: XCTestCase {
         createCart()
         
         let fireBaseUser = Auth.auth().currentUser
-        
         let user = CoreDataController.sharedIstance.findUserForIdApp((fireBaseUser?.uid))
-        /*
+        
         FirebaseData.sharedIstance.saveCartOnFirebase(user: user!, badgeValue: 1, onCompletion: {
             print("ordine salvato su firebase")
             
@@ -111,20 +110,32 @@ class MorganaMusicTests: XCTestCase {
             } else {
                 print("Pagamento carrello non valido, riprova")
             }
+            XCTAssertEqual(Cart.sharedIstance.state, "Valid")
         })
-        FireBaseAPI.saveNodeOnFirebaseWithAutoId(node: "orderSentTest", child: (user?.idApp)!, dictionaryToSave: ["test": 1], onCompletion: {
-            (error) in
+    }
+    
+    func testFirebaseData_ReadOrderSent(){
+        let fireBaseUser = Auth.auth().currentUser
+        let user = CoreDataController.sharedIstance.findUserForIdApp((fireBaseUser?.uid))
+        let friendsList = CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: (fireBaseUser?.uid)!)
+        
+        FirebaseData.sharedIstance.readOrdersSentOnFireBase(user: user!, friendsList: friendsList, onCompletion: {(ordersSent) in
+            for order in ordersSent {
+                XCTAssertEqual(order.userDestination?.fullName, "Vittorio Scocca")
+                XCTAssertEqual(order.userDestination?.idApp, "i2bwMowu4tcmJ3tCV68vdiMMWpQ2")
+                XCTAssertEqual(order.userDestination?.idFB, "10212636768259173")
+                XCTAssertEqual(order.userDestination?.fireBaseIstanceIDToken, "eNGzn53t8uY:APA91bHVhMrxmfsqxy-h_HlDqAE4wgXbn6YKK5tdY5gHd2y7EOox9QlCZyhLRhKXAoLl6x72xB1yNR7x8F5_05SoRUd4d9lcmtxf5GV8zNEPwER7XphpCK_BDAXEqSOFezRYGbkalLsS")
+                XCTAssertEqual(order.userDestination?.pictureUrl, "https://goo.gl/v5FFC9")
+                XCTAssertEqual(order.prodotti![0].productName, "Birra")
+                
+            }
             
         })
-        
-        FireBaseAPI.readNodeOnFirebase(node: "users/"+(user?.idApp)!, onCompletion: { (error,dictionary) in
-            print(dictionary!["nome completo"] as! String)
-        })*/
-        let ref = Database.database().reference()
-        ref.child("orderSentTest").child((user?.idApp)!).setValue(["test": 1])
-        
-        //XCTAssert(done, "Completion should be called")
     }
+    
+    
+    
+    
     
     
 }

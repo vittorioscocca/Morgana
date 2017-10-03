@@ -29,7 +29,7 @@ class FirebaseData {
     var paymentDetails: [String:String]?
     
     var idOrder: [String]?
-
+    
     private init(){
         self.ordersSent = [Order]()
         self.ordersReceived = [Order]()
