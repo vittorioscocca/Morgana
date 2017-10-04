@@ -245,19 +245,19 @@ class PaymentManager {
         let ref = Database.database().reference()
         ref.child("pendingPayments/" + (user.idApp)! + "/" + (self.payment?.autoId)!).updateChildValues(["stateCartPayment":"Valid","statePayment" : "terminated"])
         for i in (self.payment?.relatedOrders)! {
-            ref.child("orderOffered/" + (user.idApp)! + "/" + i).updateChildValues(["paymentState" : "Valid"])
+            ref.child("ordersSent/" + (user.idApp)! + "/" + i).updateChildValues(["paymentState" : "Valid"])
             self.setOrderReceivedCompletedOnFirebase(user: user, autiIdOrderReceived: i)
         }
     }
     
     private func setOrderReceivedCompletedOnFirebase(user: User, autiIdOrderReceived: String){
         let ref = Database.database().reference()
-        ref.child("orderOffered/" + (user.idApp)! + "/" + autiIdOrderReceived).observeSingleEvent(of: .value, with: { (snap) in
+        ref.child("ordersSent/" + (user.idApp)! + "/" + autiIdOrderReceived).observeSingleEvent(of: .value, with: { (snap) in
             guard snap.exists() else {return}
             guard snap.value != nil else {return}
             
             var userDestination: String?
-            var orderOfferedAutoId : String?
+            var ordersSentAutoId : String?
             let dizionario_offerte = snap.value! as! NSDictionary
             
             for (chiave,valore) in dizionario_offerte {
@@ -266,15 +266,15 @@ class PaymentManager {
                 case "IdAppUserDestination":
                     userDestination = valore as? String
                     break
-                case "orderOfferedAutoId":
-                    orderOfferedAutoId = valore as? String
+                case "ordersSentAutoId":
+                    ordersSentAutoId = valore as? String
                     break
                 default:
                     break
                 }
             }
-            if  userDestination != nil && orderOfferedAutoId != nil {
-                ref.child("orderReceived/" + userDestination! + "/" + orderOfferedAutoId!).updateChildValues(["paymentState" : "Valid"])
+            if  userDestination != nil && ordersSentAutoId != nil {
+                ref.child("ordersReceived/" + userDestination! + "/" + ordersSentAutoId!).updateChildValues(["paymentState" : "Valid"])
             }
         })
     }
@@ -282,7 +282,7 @@ class PaymentManager {
     private func prepareNotification(user: User){
         let ref = Database.database().reference()
         for i in (self.payment?.relatedOrders)! {
-            ref.child("orderOffered/" + (user.idApp)! + "/" + i).observeSingleEvent(of: .value, with: { (snap) in
+            ref.child("ordersSent/" + (user.idApp)! + "/" + i).observeSingleEvent(of: .value, with: { (snap) in
                 guard snap.exists() else {return}
                 guard snap.value != nil else {return}
                 
@@ -294,7 +294,7 @@ class PaymentManager {
                 let userIdApp = user.idApp
                 let userSenderIdApp = user.idApp
                 let idOrder = dizionario_offerte["orderAutoId"] as? String
-                let autoIdOrder = dizionario_offerte["orderOfferedAutoId"] as? String
+                let autoIdOrder = dizionario_offerte["ordersSentAutoId"] as? String
                 
                 
                 if  idAppUserDestination != user.idApp {
@@ -318,9 +318,9 @@ class PaymentManager {
             
             var badgeValueToUpdate = ""
             if recOrPurch == "received" {
-                badgeValueToUpdate = "number of pending received products"
+                badgeValueToUpdate = "numberOfPendingReceivedProducts"
             } else if recOrPurch == "purchased" {
-                badgeValueToUpdate = "number of pending purchased products"
+                badgeValueToUpdate = "numberOfPendingOurchasedProducts"
             }
             let dizionario_users = snap.value! as! NSDictionary
             var badgeValue = 0
@@ -357,7 +357,7 @@ class PaymentManager {
                 return
             }
             let emailUser = dictionary?["email"]
-            let fullName = dictionary?["nome completo"]
+            let fullName = dictionary?["fullName"]
             if let url = NSURL(string: "https://api.mailgun.net/v3/sandbox.morganazone.it/messages") {
                 
                 let request = NSMutableURLRequest(url: url as URL)

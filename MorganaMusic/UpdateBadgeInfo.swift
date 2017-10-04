@@ -51,10 +51,10 @@ class UpdateBadgeInfo {
             // read offers data
             for (chiave,valore) in datiUtente {
                 switch chiave as! String {
-                case "number of pending received products":
+                case "numberOfPendingReceivedProducts":
                     self.productOfferedBadge.set(valore as! Int, forKey: "productOfferedBadge")
                     break
-                case "number of pending purchased products":
+                case "numberOfPendingPurchasedProducts":
                     self.productOfferedBadge.set(valore as! Int, forKey: "paymentOfferedBadge")
                     break
                 default:

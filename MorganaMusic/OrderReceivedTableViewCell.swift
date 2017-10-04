@@ -18,7 +18,7 @@ class OrderReceivedTableViewCell: UITableViewCell {
     @IBOutlet var cost: UILabel!
     
     var cellReaded = false
-    var orderOfferedAutoId: String!
+    var ordersSentAutoId: String!
     var orderReceivedAutoId: String!
     
     override func awakeFromNib() {

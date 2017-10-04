@@ -272,7 +272,7 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
     private func completeCartInformation(){
         for j in Cart.sharedIstance.carrello {
                 //Get idApp
-            FirebaseData.sharedIstance.readUserIdAppFromIdFB(node: "users", child: "id FB", idFB: (j.userDestination?.idFB)!, onCompletion: { (error,idApp) in
+            FirebaseData.sharedIstance.readUserIdAppFromIdFB(node: "users", child: "idFB", idFB: (j.userDestination?.idFB)!, onCompletion: { (error,idApp) in
                 guard error == nil else {
                     print(error!)
                     return

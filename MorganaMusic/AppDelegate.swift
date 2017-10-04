@@ -130,8 +130,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             let user = CoreDataController.sharedIstance.findUserForIdApp(uid)
             
             FireBaseAPI.removeObserver(node: "users/" + (user?.idApp)!)
-            FireBaseAPI.removeObserver(node: "orderOffered/" + (user?.idApp)!)
-            FireBaseAPI.removeObserver(node: "orderReceived/" + (user?.idApp)!)
+            FireBaseAPI.removeObserver(node: "ordersSent/" + (user?.idApp)!)
+            FireBaseAPI.removeObserver(node: "ordersReceived/" + (user?.idApp)!)
             firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
             print("Firebase Observer Killed")
         }

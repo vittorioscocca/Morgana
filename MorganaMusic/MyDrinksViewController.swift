@@ -76,8 +76,6 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
        
         self.friendsList = CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: self.uid!)
         
-        self.readOrdersSent()
-        self.readOrderReceived()
         
         self.myTable.addSubview(refreshControl1)
         successView.isHidden = true
@@ -101,7 +99,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         //Daily control for order expiration date
         let itsTimeToUpdate = shouldUpdateDrinksTable(SegmentControlBadge: 0, timeReaded: self.lastOrderReceivedReadedTimestamp.object(forKey: "lastOrderReceivedReadedTimestamp") as? Date)
         
-        if (itsTimeToUpdate && !self.nowReadingOrdersAndOffersOnFirebase!) ||  self.firebaseObserverKilled.bool(forKey: "firebaseObserverKilled"){
+        if (itsTimeToUpdate || self.firebaseObserverKilled.bool(forKey: "firebaseObserverKilled")) && !self.nowReadingOrdersAndOffersOnFirebase! {
             self.readOrdersSent()
             self.readOrderReceived()
             var currentDate = Date()
@@ -126,7 +124,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         super.viewDidDisappear(animated)
         /*
         FireBaseAPI.removeObserver(node: "users/" + (self.user?.idApp)!)
-        FireBaseAPI.removeObserver(node: "orderOffered/" + (self.user?.idApp)!)
+        FireBaseAPI.removeObserver(node: "ordersSent/" + (self.user?.idApp)!)
         FireBaseAPI.removeObserver(node: "orderReceived/" + (self.user?.idApp)!)
         self.firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")*/
     }
@@ -171,10 +169,10 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
             
             for (chiave,valore) in datiUtente {
                 switch chiave as! String {
-                case "number of pending received products":
+                case "numberOfPendingReceivedProducts":
                     self.productSendBadge.set(valore as! Int, forKey: "productOfferedBadge")
                     break
-                case "number of pending purchased products":
+                case "numberOfPendingPurchasedProducts":
                     self.productSendBadge.set(valore as! Int, forKey: "paymentOfferedBadge")
                     break
                 default:
@@ -198,12 +196,12 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
     }
     
     private func resetSegmentControl1(){
-        FireBaseAPI.updateNode(node: "users/" + (self.user?.idApp)!, value: ["number of pending received products" : 0])
+        FireBaseAPI.updateNode(node: "users/" + (self.user?.idApp)!, value: ["numberOfPendingReceivedProducts" : 0])
         self.drinksList_segmentControl.setTitle("Ricevuti", forSegmentAt: 1)
     }
     
     private func resetSegmentControl0(){
-        FireBaseAPI.updateNode(node: "users/" + (self.user?.idApp)!, value: ["number of pending purchased products" : 0])
+        FireBaseAPI.updateNode(node: "users/" + (self.user?.idApp)!, value: ["numberOfPendingPurchasedProducts" : 0])
         self.drinksList_segmentControl.setTitle("Inviati", forSegmentAt: 0)
     }
     
@@ -455,7 +453,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
             }
             (cell as! OrderReceivedTableViewCell).productus.text = "Prodotti totali: " + String(offertaRicevuta!.prodottiTotali)
             (cell as! OrderReceivedTableViewCell).cost.text = "€ " + String(format:"%.2f",(offertaRicevuta?.costoTotale)!)
-            (cell as! OrderReceivedTableViewCell).orderOfferedAutoId = offertaRicevuta?.idOfferta
+            (cell as! OrderReceivedTableViewCell).ordersSentAutoId = offertaRicevuta?.idOfferta
             (cell as! OrderReceivedTableViewCell).orderReceivedAutoId = offertaRicevuta?.orderAutoId
             (cell as! OrderReceivedTableViewCell).friendFullName.text = offertaRicevuta?.userSender?.fullName
             if let pictureUrl = offertaRicevuta?.userSender?.pictureUrl{
@@ -519,7 +517,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 NotitificationsCenter.scheduledExpiratedOrderLocalNotification(title: "Ordine scaduto", body: "Il prodotto che ti è stato offerto  è scaduto", identifier:"expirationDate-"+order.idOfferta!, expirationDate: self.stringTodateObject(date: order.expirationeDate!))
                 print("Notifica scadenza schedulata correttamente")
                 order.orderNotificationIsScheduled = true
-                FireBaseAPI.updateNode(node: "orderReceived/"+(self.user?.idApp)!+"/"+order.orderAutoId, value: ["orderNotificationIsScheduled":true])
+                FireBaseAPI.updateNode(node: "ordersReceived/"+(self.user?.idApp)!+"/"+order.orderAutoId, value: ["orderNotificationIsScheduled":true])
             }
         }
     }
@@ -551,7 +549,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 DispatchQueue.main.async {
                     NotitificationsCenter.scheduledRememberExpirationLocalNotification(title: "Ordine in scadenza", body: "l'ordine di € \(order.totalReadedFromFirebase) è in scadenza, affrettati a consumare", identifier: "RememberExpiration-"+order.idOfferta!)
                     order.orderExpirationNotificationIsScheduled = true
-                    FireBaseAPI.updateNode(node: "orderReceived/"+(self.user?.idApp)!+"/"+order.orderAutoId, value: ["orderExpirationNotificationIsScheduled":true])
+                    FireBaseAPI.updateNode(node: "ordersReceived/"+(self.user?.idApp)!+"/"+order.orderAutoId, value: ["orderExpirationNotificationIsScheduled":true])
                 }
             }
         })
@@ -729,7 +727,9 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 }
                 self.performSegue(withIdentifier: "segueToOrderDetails", sender: indexPath)
                 tableView.deselectRow(at: indexPath, animated: true)
-                self.resetSegmentControl1()
+                
+                (thisCell as? OrderReceivedTableViewCell)?.cellReaded = true
+                FireBaseAPI.updateNode(node: "ordersReceived/" + (self.user?.idApp)! + "/" + orderReceived.orderAutoId, value: ["orderReaded" : "true"])
                 
             }else if orderReceived.offerState == "Pending" {
                 var msg = "Dettaglio:\n"
@@ -739,8 +739,8 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 msg += "\nFai swipe sulla riga:\nAccetta o Rifiuta l'offerta"
                 self.generateAlert(title: "Guarda cosa ti ha offerto \((orderReceived.userSender?.fullName)!)", msg: msg, indexPath: indexPath )
             }
-            (thisCell as? OrderReceivedTableViewCell)?.cellReaded = true
-            FireBaseAPI.updateNode(node: "orderReceived/" + (self.user?.idApp)! + "/" + orderReceived.orderAutoId, value: ["orderReaded" : "true"])
+            self.resetSegmentControl1()
+            
         }else if thisCell is OrderSentTableViewCell {
             let orderSent = self.ordersSent[indexPath.row]
             if (thisCell as! OrderSentTableViewCell).createDate.text == "Clicca per verificare il pagamento" {
@@ -760,7 +760,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 self.resetSegmentControl0()
             }
             (thisCell as? OrderSentTableViewCell)?.cellReaded = true
-            FireBaseAPI.updateNode(node: "orderOffered/" + (self.user?.idApp)! + "/" + orderSent.idOfferta!, value: ["orderReaded" : "true"])
+            FireBaseAPI.updateNode(node: "ordersSent/" + (self.user?.idApp)! + "/" + orderSent.idOfferta!, value: ["orderReaded" : "true"])
         }
     }
 
@@ -901,7 +901,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                     self.oldFriendDestination = UserDestination(nil, self.forwardOrder?.userDestination?.idFB, nil, self.forwardOrder?.userDestination?.idApp, nil)
                     self.forwardOrder?.userDestination?.idApp = self.user?.idApp
                     self.forwardOrder?.userDestination?.idFB = self.user?.idFB
-                    FireBaseAPI.updateNode(node: "orderOffered/" + (self.user?.idApp)! + "/" + (self.forwardOrder?.idOfferta)!, value: ["IdAppUserDestination" : (self.user?.idApp)!, "facebookUserDestination":(self.user?.idFB)!,"offerState":"Offerta riscattata"])
+                    FireBaseAPI.updateNode(node: "ordersSent/" + (self.user?.idApp)! + "/" + (self.forwardOrder?.idOfferta)!, value: ["IdAppUserDestination" : (self.user?.idApp)!, "facebookUserDestination":(self.user?.idFB)!,"offerState":"Offerta riscattata"])
                     
                     FirebaseData.sharedIstance.moveFirebaseRecord(userApp: self.user!,user: self.oldFriendDestination!, order: self.forwardOrder!, onCompletion: { (error) in
                         guard error == nil else {
@@ -1002,7 +1002,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
     @objc func handleRefresh(_ refreshControl: UIRefreshControl) {
         if drinksList_segmentControl.selectedSegmentIndex == 0 {
             print("segment control clicked pari a 0")
-            if shouldUpdateDrinksTable(SegmentControlBadge: self.productSendBadge.object(forKey: "paymentOfferedBadge") as? Int, timeReaded: lastOrderSentReadedTimestamp.object(forKey: "orderOfferedReadedTimestamp") as? Date){
+            if shouldUpdateDrinksTable(SegmentControlBadge: self.productSendBadge.object(forKey: "paymentOfferedBadge") as? Int, timeReaded: lastOrderSentReadedTimestamp.object(forKey: "ordersSentReadedTimestamp") as? Date){
                 self.readOrdersSent()
                 print("refresh effettuato")
                 self.productSendBadge.set(0, forKey: "paymentOfferedBadge")
@@ -1060,13 +1060,13 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         switch sender.identifier! {
         case "unwindFromFriendsListToMyDrinks":
             
-            FirebaseData.sharedIstance.readUserIdAppFromIdFB(node: "users", child: "id FB", idFB: (self.forwardOrder?.userDestination?.idFB)!, onCompletion: { (error,idApp) in
+            FirebaseData.sharedIstance.readUserIdAppFromIdFB(node: "users", child: "idFB", idFB: (self.forwardOrder?.userDestination?.idFB)!, onCompletion: { (error,idApp) in
                 guard error == nil else {
                     print(error!)
                     return
                 }
                 self.forwardOrder?.userDestination?.idApp = idApp!
-                FireBaseAPI.updateNode(node: "orderOffered/" + (self.user?.idApp)! + "/" + (self.forwardOrder?.idOfferta)!, value: ["IdAppUserDestination" : (self.forwardOrder?.userDestination?.idApp)!, "facebookUserDestination":(self.forwardOrder?.userDestination?.idFB)!,"offerState":"Pending"])
+                FireBaseAPI.updateNode(node: "ordersSent/" + (self.user?.idApp)! + "/" + (self.forwardOrder?.idOfferta)!, value: ["IdAppUserDestination" : (self.forwardOrder?.userDestination?.idApp)!, "facebookUserDestination":(self.forwardOrder?.userDestination?.idFB)!,"offerState":"Pending"])
                 FirebaseData.sharedIstance.moveFirebaseRecord(userApp: self.user!,user: self.oldFriendDestination!, order: self.forwardOrder!, onCompletion: { (error) in
                     guard error == nil else {
                         self.generateAlert(title: "Errore", msg: error!, indexPath: nil)

@@ -36,6 +36,19 @@ class FireBaseAPI {
         onCompletion(error)
     }
     
+    class func saveNodeOnFirebaseWithPassedAutoId(node: String, child: String, passedAutoId: String, dictionaryToSave: [String:Any],onCompletion: @escaping (String?) -> ()) {
+        
+        guard CheckConnection.isConnectedToNetwork() == true else{
+            error = "Connessione Internet Assente"
+            onCompletion(error)
+            return
+        }
+        print("\(node)/\(child)")
+        ref.child(node).child(child).child(passedAutoId).setValue(dictionaryToSave)
+        
+        onCompletion(error)
+    }
+    
     class func saveNodeOnFirebaseWithoutAutoId (node: String, child: String, dictionaryToSave: [String:Any],onCompletion: @escaping (String?) -> ()) {
         
         guard CheckConnection.isConnectedToNetwork() == true else{
@@ -60,21 +73,17 @@ class FireBaseAPI {
             return
         }
         ref.child(node).observeSingleEvent(of: .value, with: { (snap) in
+            
             // controllo che lo snap dei dati non sia vuoto
-            guard snap.exists() else {
+            guard let snap_value = snap.value, snap.exists() else {
                 print("snap "+node+" non esiste")
                 onCompletion(error,dictionary)
                 return
             }
             
-            guard snap.value != nil else {
-                print("snap "+node+" non ha valori")
-                onCompletion(error,dictionary)
-                return
-            }
             
             // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
-            let nodeDictionary = snap.value! as! NSDictionary
+            let nodeDictionary = snap_value as! NSDictionary
             dictionary = [:]
             
             // leggo i dati dell'ordine o offerte
@@ -88,6 +97,10 @@ class FireBaseAPI {
         })
     }
     
+    class func setId(node:String)->String {
+        return ref.child(node).childByAutoId().key
+    }
+    
     //read node withOut AutoId
     class func readNodeOnFirebaseWithOutAutoIdHandler(node: String, beginHandler: @escaping ()->(),completionHandler: @escaping (String?,[String:Any]?) -> ()){
         
@@ -99,20 +112,14 @@ class FireBaseAPI {
         }
         ref.child(node).observeSingleEvent(of: .value, with: { (snap) in
             // controllo che lo snap dei dati non sia vuoto
-            guard snap.exists() else {
+            guard let snap_value = snap.value, snap.exists() else {
                 print("snap "+node+" non esiste")
                 completionHandler(error,dictionary)
                 return
             }
             
-            guard snap.value != nil else {
-                print("snap "+node+" non ha valori")
-                completionHandler(error,dictionary)
-                return
-            }
-            
             // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
-            let nodeDictionary = snap.value! as! NSDictionary
+            let nodeDictionary = snap_value as! NSDictionary
             dictionary = [:]
             
             // leggo i dati dell'ordine o offerte
@@ -137,19 +144,14 @@ class FireBaseAPI {
         }
         ref.child(node).observeSingleEvent(of: .value, with: { (snap) in
             // controllo che lo snap dei dati non sia vuoto
-            guard snap.exists() else {
+            guard let snap_value = snap.value, snap.exists() else {
                 print("snap "+node+" non esiste")
-                onCompletion(error,dictionary)
-                return
-            }
-            guard snap.value != nil else {
-                print("snap "+node+" non ha valori")
                 onCompletion(error,dictionary)
                 return
             }
             
             // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
-            let nodeDictionary = snap.value! as! NSDictionary
+            let nodeDictionary = snap_value as! NSDictionary
             dictionary = [:]
             
             // leggo i dati dell'ordine o offerte
@@ -176,19 +178,14 @@ class FireBaseAPI {
         }
         ref.child(node).observeSingleEvent(of: .value, with: { (snap) in
             // controllo che lo snap dei dati non sia vuoto
-            guard snap.exists() else {
+            guard let snap_value = snap.value, snap.exists() else {
                 print("snap "+node+" non esiste")
-                onCompletion(error,dictionary)
-                return
-            }
-            guard snap.value != nil else {
-                print("snap "+node+" non ha valori")
                 onCompletion(error,dictionary)
                 return
             }
             
             // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
-            let nodeDictionary = snap.value! as! NSDictionary
+            let nodeDictionary = snap_value as! NSDictionary
             dictionary = [:]
             
             // leggo i dati dell'ordine o offerte
@@ -217,19 +214,14 @@ class FireBaseAPI {
         query.observeSingleEvent(of: .value, with: { (snap) in
             
             // controllo che lo snap dei dati non sia vuoto
-            guard snap.exists() else {
+            guard let snap_value = snap.value, snap.exists() else {
                 print("snap "+node+" non esiste")
-                onCompletion(error,dictionary)
-                return
-            }
-            guard snap.value != nil else {
-                print("snap "+node+" non ha valori")
                 onCompletion(error,dictionary)
                 return
             }
 
             // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
-            let nodeDictionary = snap.value! as! NSDictionary
+            let nodeDictionary = snap_value as! NSDictionary
             dictionary = [:]
             
             // leggo i dati dell'ordine o offerte
@@ -257,13 +249,10 @@ class FireBaseAPI {
         }
         let query = ref.child(node).queryOrdered(byChild: child).queryEqual(toValue: value)
         query.observeSingleEvent(of: .childAdded, with: { (snap) in
-            guard snap.exists() else {
+            
+            guard let _ = snap.value, snap.exists() else {
                 error = "Valore \(child) non trovato"
                 onCompletion(error,nil)
-                return
-            }
-            guard snap.value != nil else {
-                error = "Valore \(child) non trovato"
                 return
             }
             onCompletion(error,snap.key)
@@ -307,13 +296,13 @@ class FireBaseAPI {
     
     //remove FireBase DB
     class func resetFirebaseDB(){
-        //remove orderOffered
-        ref.child("orderOffered").removeValue()
+        //remove ordersSent
+        ref.child("ordersSent").removeValue()
+        
+        //remove ordersReceived
+        ref.child("ordersReceived").removeValue()
         
         //remove Payement
-        ref.child("orderReceived").removeValue()
-        
-        //remove orderReceived
         ref.child("pendingPayments").removeValue()
         
         //remove OrderDetails
@@ -345,19 +334,14 @@ class FireBaseAPI {
             return
         }
         ref.child(sourceChild).observeSingleEvent(of: .value, with: { (snap) in
-            guard snap.exists() else {
+            guard let snap_value = snap.value, snap.exists() else {
                 print("snap "+sourceChild+" non esiste")
-                onCompletion(error)
-                return
-            }
-            guard snap.value != nil else {
-                print("snap "+sourceChild+" non ha valori")
                 onCompletion(error)
                 return
             }
             
             // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
-            let nodeDictionary = snap.value! as! NSMutableDictionary
+            let nodeDictionary = snap_value as! NSMutableDictionary
             
             for (chiave,valore) in newValues {
                 nodeDictionary[chiave] = valore

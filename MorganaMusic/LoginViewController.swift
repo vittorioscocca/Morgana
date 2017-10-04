@@ -100,17 +100,17 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
             }
             //create user data on Firebase
             let dataUser = [
-                "nome" : user.firstName!,
-                "cognome" : user.lastName!,
-                "nome completo" : user.fullName!,
-                "id FB" : user.idFB!,
+                "name" : user.firstName!,
+                "surname" : user.lastName!,
+                "fullName" : user.fullName!,
+                "idFB" : user.idFB!,
                 "email" : user.email!,
-                "sesso" : user.gender!,
-                "picture url" : user.pictureUrl!,
-                "number of pending purchased products": 0,
-                "number of pending received products" : 0,
-                "account state" : "Active",
-                "merchantCode":"0",
+                "gender" : user.gender!,
+                "pictureUrl" : user.pictureUrl!,
+                "numberOfPendingPurchasedProducts": 0,
+                "numberOfPendingReceivedProducts" : 0,
+                "accountState" : "Active",
+                "companyCode":"0",
                 "fireBaseIstanceIDToken" : Messaging.messaging().fcmToken!, //InstanceID.instanceID().token()!,
                 "credits": 5
                 ] as [String : Any]

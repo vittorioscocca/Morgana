@@ -41,7 +41,7 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
     var strLabel = UILabel()
     let effectView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
     
-    var merchantCode: String?
+    var companyCode: String?
     
     //alert
     var controller :UIAlertController?
@@ -76,9 +76,9 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
                 return
             }
             self.userCredits_label.text = "€ " + String(format:"%.2f", dictionary?["credits"] as! Double)
-            if dictionary?["merchantCode"] as! String != "0" {
+            if dictionary?["companyCode"] as! String != "0" {
                 self.qrOrder.isEnabled = true
-                self.merchantCode = dictionary?["merchantCode"] as? String
+                self.companyCode = dictionary?["companyCode"] as? String
                 
             }
         })
@@ -319,8 +319,8 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         do {
             //kill firebase observer
             FireBaseAPI.removeObserver(node: "users/" + (self.user?.idApp)!)
-            FireBaseAPI.removeObserver(node: "orderOffered/" + (self.user?.idApp)!)
-            FireBaseAPI.removeObserver(node: "orderReceived/" + (self.user?.idApp)!)
+            FireBaseAPI.removeObserver(node: "ordersSent/" + (self.user?.idApp)!)
+            FireBaseAPI.removeObserver(node: "ordersReceived/" + (self.user?.idApp)!)
             try firebaseAuth.signOut()
             self.fireBaseToken.removeObject(forKey: "FireBaseToken")
             

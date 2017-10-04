@@ -98,7 +98,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         
         
         //reset Firebase DB. only for simulator tests
-        FireBaseAPI.resetFirebaseDB()
+        //FireBaseAPI.resetFirebaseDB()
     }
     
     override func viewDidAppear(_ animated: Bool) {

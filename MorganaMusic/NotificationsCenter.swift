@@ -39,9 +39,9 @@ class NotitificationsCenter{
             var valuePendingProduct = ""
             
             if controlBadgeFrom == "received" {
-                valuePendingProduct = "number of pending received products"
+                valuePendingProduct = "numberOfPendingReceivedProducts"
             } else if controlBadgeFrom == "purchased" {
-                valuePendingProduct = "number of pending purchased products"
+                valuePendingProduct = "numberOfPendingPurchasedProducts"
             }
             userDestinationBadgeValue = dictionary?[valuePendingProduct] as! Int
             userDestinationBadgeValue = userDestinationBadgeValue + 1
@@ -91,9 +91,9 @@ class NotitificationsCenter{
             var valuePendingProduct = ""
             
             if controlBadgeFrom == "received" {
-                valuePendingProduct = "number of pending received products"
+                valuePendingProduct = "numberOfPendingReceivedProducts"
             } else if controlBadgeFrom == "purchased" {
-                valuePendingProduct = "number of pending purchased products"
+                valuePendingProduct = "numberOfPendingPurchasedProducts"
             }
             userDestinationBadgeValue = dictionary?[valuePendingProduct] as! Int
             userDestinationBadgeValue = userDestinationBadgeValue + 1

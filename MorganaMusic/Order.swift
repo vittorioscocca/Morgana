@@ -20,7 +20,7 @@ class Order {
     var userSender: UserDestination?
     var orderReaded :Bool?
     var orderAutoId = ""
-    var orderOfferedAutoId = ""
+    var ordersSentAutoId = ""
     var pendingPaymentAutoId = ""
     var timeStamp : TimeInterval = 0
     var orderNotificationIsScheduled :Bool?
@@ -72,7 +72,7 @@ class Order {
         self.paymentState = paymentStates.pending.rawValue
         self.offerState = offerStates.pending.rawValue
         self.userSender = UserDestination(nil,nil,nil,nil,nil)
-        self.orderOfferedAutoId = ""
+        self.ordersSentAutoId = ""
     }
     
     
@@ -84,7 +84,7 @@ class Order {
         self.dataCreazioneOfferta = ""
         self.paymentState = paymentStates.pending.rawValue
         self.offerState = offerStates.pending.rawValue
-        self.orderOfferedAutoId = ""
+        self.ordersSentAutoId = ""
         self.orderNotificationIsScheduled = false
         self.orderReaded = false
         self.orderExpirationNotificationIsScheduled = false
