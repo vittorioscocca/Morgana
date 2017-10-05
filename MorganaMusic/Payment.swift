@@ -19,6 +19,7 @@ class Payment {
     var total : String?
     var relatedOrders: [String]
     var pendingUserIdApp: String
+    var company: Company?
     
     
     init( platform: String, paymentType: String, createTime: String, idPayment: String, statePayment: String, autoId: String, total: String) {
@@ -32,6 +33,7 @@ class Payment {
         self.total = total
         self.relatedOrders = []
         self.pendingUserIdApp = ""
+        self.company = Company()
     }
     
 }

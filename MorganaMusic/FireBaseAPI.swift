@@ -61,6 +61,18 @@ class FireBaseAPI {
         onCompletion(error)
     }
     
+    class func saveNodeOnFirebase(node: String, dictionaryToSave: [String:Any],onCompletion: @escaping (String?) -> ()) {
+        
+        guard CheckConnection.isConnectedToNetwork() == true else{
+            error = "Connessione Internet Assente"
+            onCompletion(error)
+            return
+        }
+        
+        ref.child(node).setValue(dictionaryToSave)
+        onCompletion(error)
+    }
+    
     
     
     
@@ -69,7 +81,7 @@ class FireBaseAPI {
         
         guard CheckConnection.isConnectedToNetwork() == true else {
             error = "Connessione Internet Assente"
-            onCompletion(error,dictionary)
+            onCompletion(error,nil)
             return
         }
         ref.child(node).observeSingleEvent(of: .value, with: { (snap) in
@@ -77,7 +89,7 @@ class FireBaseAPI {
             // controllo che lo snap dei dati non sia vuoto
             guard let snap_value = snap.value, snap.exists() else {
                 print("snap "+node+" non esiste")
-                onCompletion(error,dictionary)
+                onCompletion(error,nil)
                 return
             }
             
@@ -144,6 +156,7 @@ class FireBaseAPI {
         }
         ref.child(node).observeSingleEvent(of: .value, with: { (snap) in
             // controllo che lo snap dei dati non sia vuoto
+            
             guard let snap_value = snap.value, snap.exists() else {
                 print("snap "+node+" non esiste")
                 onCompletion(error,dictionary)

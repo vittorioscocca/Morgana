@@ -588,6 +588,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         
         let order = Order(prodotti: Order.sharedIstance.prodotti!, userDestination: userDestination, userSender: UserDestination(nil,self.user?.idApp,nil,nil,nil))
         
+        order.company = self.companies?[0]  //insert Morgana Company Order
         var insertOk = false
         
         //add new Order into Cart

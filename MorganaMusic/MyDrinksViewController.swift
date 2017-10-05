@@ -205,7 +205,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         self.drinksList_segmentControl.setTitle("Inviati", forSegmentAt: 0)
     }
     
-    private func readOrdersSent(){
+    func readOrdersSent(){
         self.nowReadingOrdersAndOffersOnFirebase = true
 
         FirebaseData.sharedIstance.readOrdersSentOnFireBase(user: self.user!, friendsList: friendsList, onCompletion: { (ordersSent) in
@@ -219,7 +219,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         })
     }
     
-    private func readOrderReceived() {
+    func readOrderReceived() {
         self.nowReadingOrdersAndOffersOnFirebase = true
         
         FirebaseData.sharedIstance.readOrderReceivedOnFireBase(user: self.user!, onCompletion: { (ordersReceived) in
@@ -233,11 +233,11 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         })
     }
 
-    private func readAndSolvePendingPayPalPayment(paymentId: String,onCompletion: @escaping () -> ()){
+    private func readAndSolvePendingPayPalPayment(order: Order, paymentId: String,onCompletion: @escaping () -> ()){
         let ref = Database.database().reference()
         //self.pendingPayments.removeAll()
 
-        ref.child("pendingPayments/" + (self.user?.idApp)! + "/" + paymentId).observeSingleEvent(of:.value, with: { (snap) in
+        ref.child("pendingPayments/\((self.user?.idApp)!)/\((order.company?.companyId)!)/\(paymentId)").observeSingleEvent(of:.value, with: { (snap) in
             
             guard snap.exists() else {return}
             guard snap.value != nil else {return}
@@ -517,7 +517,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 NotitificationsCenter.scheduledExpiratedOrderLocalNotification(title: "Ordine scaduto", body: "Il prodotto che ti è stato offerto  è scaduto", identifier:"expirationDate-"+order.idOfferta!, expirationDate: self.stringTodateObject(date: order.expirationeDate!))
                 print("Notifica scadenza schedulata correttamente")
                 order.orderNotificationIsScheduled = true
-                FireBaseAPI.updateNode(node: "ordersReceived/"+(self.user?.idApp)!+"/"+order.orderAutoId, value: ["orderNotificationIsScheduled":true])
+                FireBaseAPI.updateNode(node: "ordersReceived/\((self.user?.idApp)!)/\((order.company?.companyId)!)/\(order.orderAutoId)", value: ["orderNotificationIsScheduled":true])
             }
         }
     }
@@ -549,7 +549,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 DispatchQueue.main.async {
                     NotitificationsCenter.scheduledRememberExpirationLocalNotification(title: "Ordine in scadenza", body: "l'ordine di € \(order.totalReadedFromFirebase) è in scadenza, affrettati a consumare", identifier: "RememberExpiration-"+order.idOfferta!)
                     order.orderExpirationNotificationIsScheduled = true
-                    FireBaseAPI.updateNode(node: "ordersReceived/"+(self.user?.idApp)!+"/"+order.orderAutoId, value: ["orderExpirationNotificationIsScheduled":true])
+                    FireBaseAPI.updateNode(node: "ordersReceived/\((self.user?.idApp)!)/\((order.company?.companyId)!)/\(order.orderAutoId)", value: ["orderExpirationNotificationIsScheduled":true])
                 }
             }
         })
@@ -593,7 +593,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 let acceptOrderAction = UITableViewRowAction(style: .normal, title: "Accetta") { (action, index) in
                     (thisCell as? OrderReceivedTableViewCell)?.cellReaded = true 
                     FirebaseData.sharedIstance.user = self.user
-                    FirebaseData.sharedIstance.acceptOrder(state: "Offerta accettata", userFullName: (self.user?.fullName)!, userIdApp: (self.user?.idApp)!, userSenderIdApp: (self.ordersReceived[indexPath.row].userSender?.idApp)!, idOrder: self.ordersReceived[indexPath.row].idOfferta!, autoIdOrder: self.ordersReceived[indexPath.row].orderAutoId)
+                    FirebaseData.sharedIstance.acceptOrder(state: "Offerta accettata", userFullName: (self.user?.fullName)!, userIdApp: (self.user?.idApp)!, comapanyId: (self.ordersReceived[indexPath.row].company?.companyId)!, userSenderIdApp: (self.ordersReceived[indexPath.row].userSender?.idApp)!, idOrder: self.ordersReceived[indexPath.row].idOfferta!, autoIdOrder: self.ordersReceived[indexPath.row].orderAutoId)
                     self.scheduleExpiryNotification(order: self.ordersReceived[indexPath.row])
                     self.schdeleRememberExpiryNotification(order: self.ordersReceived[indexPath.row])
                     self.ordersReceived[indexPath.row].acceptOffer()
@@ -729,7 +729,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 tableView.deselectRow(at: indexPath, animated: true)
                 
                 (thisCell as? OrderReceivedTableViewCell)?.cellReaded = true
-                FireBaseAPI.updateNode(node: "ordersReceived/" + (self.user?.idApp)! + "/" + orderReceived.orderAutoId, value: ["orderReaded" : "true"])
+                FireBaseAPI.updateNode(node: "ordersReceived/\((self.user?.idApp)!)/\((orderReceived.company?.companyId)!)/\( orderReceived.orderAutoId)", value: ["orderReaded" : "true"])
                 
             }else if orderReceived.offerState == "Pending" {
                 var msg = "Dettaglio:\n"
@@ -746,7 +746,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
             if (thisCell as! OrderSentTableViewCell).createDate.text == "Clicca per verificare il pagamento" {
                 self.startActivityIndicator("Processing...")
                 self.pendingPaymentId = orderSent.pendingPaymentAutoId
-                self.readAndSolvePendingPayPalPayment(paymentId: pendingPaymentId){
+                self.readAndSolvePendingPayPalPayment(order: orderSent,paymentId: pendingPaymentId){
                     print("Pending payments resolved")
                 }
                 tableView.deselectRow(at: indexPath, animated: true)
@@ -760,7 +760,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 self.resetSegmentControl0()
             }
             (thisCell as? OrderSentTableViewCell)?.cellReaded = true
-            FireBaseAPI.updateNode(node: "ordersSent/" + (self.user?.idApp)! + "/" + orderSent.idOfferta!, value: ["orderReaded" : "true"])
+            FireBaseAPI.updateNode(node: "ordersSent/\((self.user?.idApp)!)/\((orderSent.company?.companyId)!)/\(orderSent.idOfferta!)", value: ["orderReaded" : "true"])
         }
     }
 
@@ -880,7 +880,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 action = UIAlertAction(title: "Rifiuta", style: UIAlertActionStyle.default, handler: {(paramAction:UIAlertAction!) in
                     print("'Rifiuta' è stato cliccato")
                     FirebaseData.sharedIstance.user = self.user
-                    FirebaseData.sharedIstance.refuseOrder(state: "Offerta rifiutata", userFullName: (self.user?.fullName)!, userIdApp: (self.user?.idApp)!, userSenderIdApp: (self.ordersReceived[(indexPath?.row)!].userSender?.idApp)!, idOrder: self.ordersReceived[(indexPath?.row)!].idOfferta!, autoIdOrder: self.ordersReceived[(indexPath?.row)!].orderAutoId)
+                    FirebaseData.sharedIstance.refuseOrder(state: "Offerta rifiutata", userFullName: (self.user?.fullName)!, userIdApp: (self.user?.idApp)!, comapanyId: (self.ordersReceived[(indexPath?.row)!].company?.companyId)!, userSenderIdApp: (self.ordersReceived[(indexPath?.row)!].userSender?.idApp)!, idOrder: self.ordersReceived[(indexPath?.row)!].idOfferta!, autoIdOrder: self.ordersReceived[(indexPath?.row)!].orderAutoId)
                     self.ordersReceived[(indexPath?.row)!].refuseOffer()
                     //FirebaseData.sharedIstance.deleteOrderReceveidOnFirebase(order: self.ordersReceived[(indexPath?.row)!])
                     
@@ -901,7 +901,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                     self.oldFriendDestination = UserDestination(nil, self.forwardOrder?.userDestination?.idFB, nil, self.forwardOrder?.userDestination?.idApp, nil)
                     self.forwardOrder?.userDestination?.idApp = self.user?.idApp
                     self.forwardOrder?.userDestination?.idFB = self.user?.idFB
-                    FireBaseAPI.updateNode(node: "ordersSent/" + (self.user?.idApp)! + "/" + (self.forwardOrder?.idOfferta)!, value: ["IdAppUserDestination" : (self.user?.idApp)!, "facebookUserDestination":(self.user?.idFB)!,"offerState":"Offerta riscattata"])
+                    FireBaseAPI.updateNode(node: "ordersSent/\((self.user?.idApp)!)/\((self.forwardOrder?.company?.companyId)!)/\((self.forwardOrder?.idOfferta)!)", value: ["IdAppUserDestination" : (self.user?.idApp)!, "facebookUserDestination":(self.user?.idFB)!,"offerState":"Offerta riscattata"])
                     
                     FirebaseData.sharedIstance.moveFirebaseRecord(userApp: self.user!,user: self.oldFriendDestination!, order: self.forwardOrder!, onCompletion: { (error) in
                         guard error == nil else {
@@ -946,7 +946,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 {(paramAction:UIAlertAction!) in
                     print("Riprova è stato premuto")
                     self.startActivityIndicator("Processing...")
-                    self.readAndSolvePendingPayPalPayment(paymentId: self.pendingPaymentId){
+                    self.readAndSolvePendingPayPalPayment(order: self.ordersSent[(indexPath?.row)!] , paymentId: self.pendingPaymentId){
                         print("Pending payments resolved")
                     }
             })
@@ -1066,7 +1066,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                     return
                 }
                 self.forwardOrder?.userDestination?.idApp = idApp!
-                FireBaseAPI.updateNode(node: "ordersSent/" + (self.user?.idApp)! + "/" + (self.forwardOrder?.idOfferta)!, value: ["IdAppUserDestination" : (self.forwardOrder?.userDestination?.idApp)!, "facebookUserDestination":(self.forwardOrder?.userDestination?.idFB)!,"offerState":"Pending"])
+                FireBaseAPI.updateNode(node: "ordersSent/\((self.user?.idApp)!)/\((self.forwardOrder?.company?.companyId)!)/\((self.forwardOrder?.idOfferta)!)", value: ["IdAppUserDestination" : (self.forwardOrder?.userDestination?.idApp)!, "facebookUserDestination":(self.forwardOrder?.userDestination?.idFB)!,"offerState":"Pending"])
                 FirebaseData.sharedIstance.moveFirebaseRecord(userApp: self.user!,user: self.oldFriendDestination!, order: self.forwardOrder!, onCompletion: { (error) in
                     guard error == nil else {
                         self.generateAlert(title: "Errore", msg: error!, indexPath: nil)

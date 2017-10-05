@@ -31,6 +31,8 @@ class Order {
     var dataCreazioneOfferta: String?
     var idOfferta: String?
     var totalReadedFromFirebase: String = ""
+    var company: Company?
+    
     enum offerStates: String {
         case rifiutata = "Offerta rifiutata" //l'utente destinatario dell'offerta rifiuta l'offerta
         case accettata = "Offerta accettata" // l'utente destinatario dell'offerta accetta l'offerta
@@ -41,6 +43,8 @@ class Order {
         case ransom = "Offerta riscattata"
     
     }   //Valid, notValid, Terminated
+    
+    
     
     enum paymentStates: String {
         case offertaValida = "Valid" // pagamento avvenuto con successo l'amico ha consumato l'offerta
@@ -73,6 +77,7 @@ class Order {
         self.offerState = offerStates.pending.rawValue
         self.userSender = UserDestination(nil,nil,nil,nil,nil)
         self.ordersSentAutoId = ""
+        self.company = Company()
     }
     
     
@@ -88,6 +93,7 @@ class Order {
         self.orderNotificationIsScheduled = false
         self.orderReaded = false
         self.orderExpirationNotificationIsScheduled = false
+        self.company = Company()
     }
     
     

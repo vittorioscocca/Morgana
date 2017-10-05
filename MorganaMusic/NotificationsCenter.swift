@@ -78,7 +78,7 @@ class NotitificationsCenter{
         })
     }
     
-    class func sendOrderNotification(userDestinationIdApp: String, msg: String, controlBadgeFrom: String, userFullName: String, userIdApp: String, userSenderIdApp: String, idOrder: String, autoIdOrder: String) {
+    class func sendOrderNotification(userDestinationIdApp: String, msg: String, controlBadgeFrom: String, companyId: String, userFullName: String, userIdApp: String, userSenderIdApp: String, idOrder: String, autoIdOrder: String) {
         
         FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + userDestinationIdApp, onCompletion: {(error,dictionary) in
             guard error == nil else {
@@ -109,7 +109,7 @@ class NotitificationsCenter{
                 
                 request.setValue(authorizationKey, forHTTPHeaderField: "Authorization")//This is where you add your HTTP headers like Content-Type, Accept and so on
                 request.timeoutInterval = 200000.0
-                let params = ["to" : fireBaseIstanceIDToken, "data" : ["identifier" : "OrderSent","userFullName": userFullName, "userIdApp": userDestinationIdApp, "userSenderIdApp": userSenderIdApp, "idOrder": idOrder, "autoIdOrder": autoIdOrder], "notification" :["title" : "", "body": msg, "click_action":"OrderSent", "sound" : "default", "badge" : String(userDestinationBadgeValue)], "priority" : "high" ] as [String : Any]
+                let params = ["to" : fireBaseIstanceIDToken, "data" : ["identifier" : "OrderSent","userFullName": userFullName, "userIdApp": userDestinationIdApp, "userSenderIdApp": userSenderIdApp, "idOrder": idOrder, "autoIdOrder": autoIdOrder, "companyId": companyId], "notification" :["title" : "", "body": msg, "click_action":"OrderSent", "sound" : "default", "badge" : String(userDestinationBadgeValue)], "priority" : "high" ] as [String : Any]
                 var httpData :Data = Data()
                 do {
                     httpData = try JSONSerialization.data(withJSONObject: params, options: .prettyPrinted)

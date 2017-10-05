@@ -31,6 +31,7 @@
 		2A6971231EB9D9A20036E3C5 /* DrinksOrderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6971221EB9D9A20036E3C5 /* DrinksOrderViewController.swift */; };
 		2A6971271EBA673A0036E3C5 /* addbadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6971261EBA673A0036E3C5 /* addbadge.swift */; };
 		2A6B073D1ED6E8620054FFD3 /* OrderSentTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6B073C1ED6E8620054FFD3 /* OrderSentTableViewCell.swift */; };
+		2A6CC8AC1F85BD310056129C /* MorganaMusicSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6CC8AB1F85BD310056129C /* MorganaMusicSettings.swift */; };
 		2A6E266C1E9BFCF600C1FC64 /* User+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6E26681E9BFCF600C1FC64 /* User+CoreDataClass.swift */; };
 		2A6E266D1E9BFCF600C1FC64 /* User+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6E26691E9BFCF600C1FC64 /* User+CoreDataProperties.swift */; };
 		2A6E266E1E9BFCF600C1FC64 /* Friend+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6E266A1E9BFCF600C1FC64 /* Friend+CoreDataClass.swift */; };
@@ -120,6 +121,7 @@
 		2A6971221EB9D9A20036E3C5 /* DrinksOrderViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrinksOrderViewController.swift; sourceTree = "<group>"; };
 		2A6971261EBA673A0036E3C5 /* addbadge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = addbadge.swift; sourceTree = "<group>"; };
 		2A6B073C1ED6E8620054FFD3 /* OrderSentTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderSentTableViewCell.swift; sourceTree = "<group>"; };
+		2A6CC8AB1F85BD310056129C /* MorganaMusicSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorganaMusicSettings.swift; sourceTree = "<group>"; };
 		2A6E26681E9BFCF600C1FC64 /* User+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "User+CoreDataClass.swift"; sourceTree = "<group>"; };
 		2A6E26691E9BFCF600C1FC64 /* User+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "User+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		2A6E266A1E9BFCF600C1FC64 /* Friend+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Friend+CoreDataClass.swift"; sourceTree = "<group>"; };
@@ -354,6 +356,7 @@
 				2A40AD141F1779A400864227 /* SegmentControlExtension.swift */,
 				2ABD93BA1F18DF5C00F28632 /* NotificationsCenter.swift */,
 				2A6809AC1F7962CC00D813FF /* TextFieldController.swift */,
+				2A6CC8AB1F85BD310056129C /* MorganaMusicSettings.swift */,
 			);
 			name = SupportingFiles;
 			sourceTree = "<group>";
@@ -666,6 +669,7 @@
 				2AD8C1431E9D486700017004 /* FriendActionViewController.swift in Sources */,
 				2AE35FAC1E93F99900DF453F /* UserViewController.swift in Sources */,
 				2AD5C80E1ECED68A001951C3 /* MyDrinksViewController.swift in Sources */,
+				2A6CC8AC1F85BD310056129C /* MorganaMusicSettings.swift in Sources */,
 				2A6E266F1E9BFCF600C1FC64 /* Friend+CoreDataProperties.swift in Sources */,
 				2A1863B01F5055EA00505F20 /* PaymentsManager.swift in Sources */,
 				2A53AB691EB0AC950018B8E9 /* Order.swift in Sources */,

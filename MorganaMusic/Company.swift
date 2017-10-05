@@ -9,7 +9,7 @@
 import Foundation
 
 class Company {
-    static let sharedInstance = Company()
+    
     
     var companyId: String?
     var userId: String?
@@ -20,10 +20,9 @@ class Company {
     var vat: String?
     var address: String?
     
-    private init() {
+    init(){
         
     }
-    
     init(userId: String?, city: String?, companyName: String?){
         self.userId = userId
         self.city = city

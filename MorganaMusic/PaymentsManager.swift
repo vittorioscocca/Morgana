@@ -243,16 +243,16 @@ class PaymentManager {
     
     private func setPaymentAndOrderCompletedOnFirebase(user: User){
         let ref = Database.database().reference()
-        ref.child("pendingPayments/" + (user.idApp)! + "/" + (self.payment?.autoId)!).updateChildValues(["stateCartPayment":"Valid","statePayment" : "terminated"])
-        for i in (self.payment?.relatedOrders)! {
-            ref.child("ordersSent/" + (user.idApp)! + "/" + i).updateChildValues(["paymentState" : "Valid"])
-            self.setOrderReceivedCompletedOnFirebase(user: user, autiIdOrderReceived: i)
+        ref.child("pendingPayments/\((user.idApp)!)/\((self.payment?.company?.companyId)!)/\((self.payment?.autoId)!)").updateChildValues(["stateCartPayment":"Valid","statePayment" : "terminated"])
+        for relatedOrders in (self.payment?.relatedOrders)! {
+            ref.child("ordersSent/\((user.idApp)!)/\((self.payment?.company?.companyId)!)/\(relatedOrders)").updateChildValues(["paymentState" : "Valid"])
+            self.setOrderReceivedCompletedOnFirebase(user: user, autiIdOrderReceived: relatedOrders)
         }
     }
     
     private func setOrderReceivedCompletedOnFirebase(user: User, autiIdOrderReceived: String){
         let ref = Database.database().reference()
-        ref.child("ordersSent/" + (user.idApp)! + "/" + autiIdOrderReceived).observeSingleEvent(of: .value, with: { (snap) in
+        ref.child("ordersSent/\((user.idApp)!)/\((self.payment?.company?.companyId)!)/\(autiIdOrderReceived)").observeSingleEvent(of: .value, with: { (snap) in
             guard snap.exists() else {return}
             guard snap.value != nil else {return}
             
@@ -274,15 +274,15 @@ class PaymentManager {
                 }
             }
             if  userDestination != nil && ordersSentAutoId != nil {
-                ref.child("ordersReceived/" + userDestination! + "/" + ordersSentAutoId!).updateChildValues(["paymentState" : "Valid"])
+                ref.child("ordersReceived/\((userDestination!))/\((self.payment?.company?.companyId)!)/\((ordersSentAutoId!))").updateChildValues(["paymentState" : "Valid"])
             }
         })
     }
     
     private func prepareNotification(user: User){
         let ref = Database.database().reference()
-        for i in (self.payment?.relatedOrders)! {
-            ref.child("ordersSent/" + (user.idApp)! + "/" + i).observeSingleEvent(of: .value, with: { (snap) in
+        for relatedOrders in (self.payment?.relatedOrders)! {
+            ref.child("ordersSent/\((user.idApp)!)/\((self.payment?.company?.companyId)!)/\(relatedOrders)").observeSingleEvent(of: .value, with: { (snap) in
                 guard snap.exists() else {return}
                 guard snap.value != nil else {return}
                 
@@ -300,7 +300,7 @@ class PaymentManager {
                 if  idAppUserDestination != user.idApp {
                     let msg = "Il tuo amico " + (user.fullName)! + " ti ha appena offerto qualcosa"
                     //push notification and App badge value for Receiver
-                    NotitificationsCenter.sendOrderNotification(userDestinationIdApp: idAppUserDestination!, msg: msg, controlBadgeFrom: "received", userFullName: userFullName!, userIdApp: userIdApp!, userSenderIdApp: userSenderIdApp!,idOrder: idOrder!, autoIdOrder: autoIdOrder!)
+                    NotitificationsCenter.sendOrderNotification(userDestinationIdApp: idAppUserDestination!, msg: msg, controlBadgeFrom: "received", companyId: (self.payment?.company?.companyId)!, userFullName: userFullName!, userIdApp: userIdApp!, userSenderIdApp: userSenderIdApp!,idOrder: idOrder!, autoIdOrder: autoIdOrder!)
                 }
                 self.updateNumberPendingProducts(idAppUserDestination!, recOrPurch: "received")
                 

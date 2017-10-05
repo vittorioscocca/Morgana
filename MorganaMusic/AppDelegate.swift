@@ -54,11 +54,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         application.registerForRemoteNotifications()
         guard (( uidFB == nil) && (uidFiB == nil)) else{
-            
             print("[DEBUG] Salto il login iniziale")
-            let storybard = UIStoryboard(name: "Main", bundle: nil)
-            let vc = storybard.instantiateViewController(withIdentifier: "HomeViewController") //HomeViewController
-            self.window!.rootViewController = vc
+            MorganaMusicActivate()
             return true
         }
         //FBSDKLoginButton.classForCoder()
@@ -134,7 +131,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             FireBaseAPI.removeObserver(node: "ordersReceived/" + (user?.idApp)!)
             firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
             print("Firebase Observer Killed")
-        }
+        } else {print("no observer killed")}
         
     }
 
@@ -142,16 +139,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
         killFirebaseObserver()
+        
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
         // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
-        killFirebaseObserver()
+        //activeFirebaseObserver()
+        
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
         FBSDKAppEvents.activateApp()
+        MorganaMusicActivate()
+        
     }
     
     func applicationWillTerminate(_ application: UIApplication) {
@@ -160,6 +161,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         self.saveContext()
         killFirebaseObserver()
+        
         
     }
     
@@ -292,8 +294,9 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             let userSenderIdApp = userInfo["userSenderIdApp"] as? String
             let idOrder = userInfo["idOrder"] as? String
             let autoIdOrder = userInfo["autoIdOrder"] as? String
+            let companyId = userInfo["companyId"] as? String
                 
-            FirebaseData.sharedIstance.acceptOrder(state: "Offerta accettata", userFullName: userFullName!, userIdApp: userIdApp!, userSenderIdApp: userSenderIdApp!, idOrder: idOrder!, autoIdOrder: autoIdOrder!)
+            FirebaseData.sharedIstance.acceptOrder(state: "Offerta accettata", userFullName: userFullName!, userIdApp: userIdApp!, comapanyId: companyId!, userSenderIdApp: userSenderIdApp!, idOrder: idOrder!, autoIdOrder: autoIdOrder!)
             print("Ordine ACCETTATO")
             break
         case "refuseOrder.action" :
@@ -305,8 +308,9 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             let userSenderIdApp = userInfo["userSenderIdApp"] as? String
             let idOrder = userInfo["idOrder"] as? String
             let autoIdOrder = userInfo["autoIdOrder"] as? String
+            let companyId = userInfo["companyId"] as? String
             
-            FirebaseData.sharedIstance.refuseOrder(state: "Offerta rifiutata", userFullName: userFullName!, userIdApp: userIdApp!, userSenderIdApp: userSenderIdApp!, idOrder: idOrder!, autoIdOrder: autoIdOrder!)
+            FirebaseData.sharedIstance.refuseOrder(state: "Offerta rifiutata", userFullName: userFullName!, userIdApp: userIdApp!, comapanyId: companyId!, userSenderIdApp: userSenderIdApp!, idOrder: idOrder!, autoIdOrder: autoIdOrder!)
             print("Ordine Rifiutato")
             break
         default:
