@@ -303,6 +303,25 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         
     }
     
+    private func killFirebaseObserver (){
+        let firebaseObserverKilled = UserDefaults.standard
+        if !firebaseObserverKilled.bool(forKey: "firebaseObserverKilled") {
+            firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
+            let fireBaseToken = UserDefaults.standard
+            let uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
+            let user = CoreDataController.sharedIstance.findUserForIdApp(uid)
+            if user != nil {
+                FireBaseAPI.removeObserver(node: "users/" + (user?.idApp)!)
+                FireBaseAPI.removeObserver(node: "ordersSent/" + (user?.idApp)!)
+                FireBaseAPI.removeObserver(node: "ordersReceived/" + (user?.idApp)!)
+                firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
+                print("Firebase Observer Killed")
+            }
+            
+        } else {print("no observer killed")}
+        
+    }
+    
     @IBAction func logoutFBButton(_ sender: UIButton) {
         guard CheckConnection.isConnectedToNetwork() == true else {
             self.generateAlert()
@@ -318,9 +337,7 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         let firebaseAuth = Auth.auth()
         do {
             //kill firebase observer
-            FireBaseAPI.removeObserver(node: "users/" + (self.user?.idApp)!)
-            FireBaseAPI.removeObserver(node: "ordersSent/" + (self.user?.idApp)!)
-            FireBaseAPI.removeObserver(node: "ordersReceived/" + (self.user?.idApp)!)
+            self.killFirebaseObserver() 
             try firebaseAuth.signOut()
             self.fireBaseToken.removeObject(forKey: "FireBaseToken")
             

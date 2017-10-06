@@ -105,7 +105,8 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
     private func generateQrCode(){
         if qrcodeImage == nil {
             
-            let information = (self.user?.idApp)! + " - " + (self.offertaRicevuta?.idOfferta)!
+            let information = (self.user?.idApp)! + "//" + (self.offertaRicevuta?.orderAutoId)! + "||*" + (self.offertaRicevuta?.expirationeDate)! + "*" + (self.offertaRicevuta?.company?.companyId)!
+            
             let data = information.data(using: String.Encoding.isoLatin2, allowLossyConversion: false)
             let filter = CIFilter(name: "CIQRCodeGenerator")
             

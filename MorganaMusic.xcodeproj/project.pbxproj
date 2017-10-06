@@ -49,6 +49,8 @@
 		2A86BB6E1F47432100CE336B /* OrderSentDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A86BB6D1F47432100CE336B /* OrderSentDetailsViewController.swift */; };
 		2A8CA5A51EFC230300B0DF55 /* UpdateBadgeInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8CA5A41EFC230300B0DF55 /* UpdateBadgeInfo.swift */; };
 		2A9B63BE1E96731B00862AC5 /* CoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9B63BD1E96731B00862AC5 /* CoreData.swift */; };
+		2AA135F81F863FCD003B1507 /* AuthOrderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA135F71F863FCD003B1507 /* AuthOrderViewController.swift */; };
+		2AA135FA1F868298003B1507 /* AutOrderTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA135F91F868298003B1507 /* AutOrderTableViewCell.swift */; };
 		2AA4B96F1F755E9E00F4FD48 /* Company.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA4B96E1F755E9E00F4FD48 /* Company.swift */; };
 		2ABD93BB1F18DF5C00F28632 /* NotificationsCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ABD93BA1F18DF5C00F28632 /* NotificationsCenter.swift */; };
 		2AC5A6781E94E83E0081CAA0 /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2AC5A6741E94E83E0081CAA0 /* Bolts.framework */; };
@@ -141,6 +143,8 @@
 		2A8CA5A41EFC230300B0DF55 /* UpdateBadgeInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateBadgeInfo.swift; sourceTree = "<group>"; };
 		2A9B63BD1E96731B00862AC5 /* CoreData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreData.swift; sourceTree = "<group>"; };
 		2A9E9DA91EEF269000E8383B /* MorganaMusic.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MorganaMusic.entitlements; sourceTree = "<group>"; };
+		2AA135F71F863FCD003B1507 /* AuthOrderViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthOrderViewController.swift; sourceTree = "<group>"; };
+		2AA135F91F868298003B1507 /* AutOrderTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutOrderTableViewCell.swift; sourceTree = "<group>"; };
 		2AA4B96E1F755E9E00F4FD48 /* Company.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Company.swift; sourceTree = "<group>"; };
 		2ABD93BA1F18DF5C00F28632 /* NotificationsCenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationsCenter.swift; sourceTree = "<group>"; };
 		2AC5A6741E94E83E0081CAA0 /* Bolts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Bolts.framework; sourceTree = "<group>"; };
@@ -336,6 +340,8 @@
 				2A2A39AF1F40EA8200D59476 /* MapViewController.swift */,
 				2A86BB6D1F47432100CE336B /* OrderSentDetailsViewController.swift */,
 				2A1D14EB1F644DDC00C2F5E2 /* QrReaderViewControllerViewController.swift */,
+				2AA135F71F863FCD003B1507 /* AuthOrderViewController.swift */,
+				2AA135F91F868298003B1507 /* AutOrderTableViewCell.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -685,6 +691,7 @@
 				2AE35F8A1E93EF5800DF453F /* AppDelegate.swift in Sources */,
 				2A6809AD1F7962CD00D813FF /* TextFieldController.swift in Sources */,
 				2AFA98851EC19BCA0007CA33 /* Cart.swift in Sources */,
+				2AA135F81F863FCD003B1507 /* AuthOrderViewController.swift in Sources */,
 				2A206B971F0B79990080235B /* FireBaseAPI.swift in Sources */,
 				2ABD93BB1F18DF5C00F28632 /* NotificationsCenter.swift in Sources */,
 				2AA4B96F1F755E9E00F4FD48 /* Company.swift in Sources */,
@@ -693,6 +700,7 @@
 				2A53AB6D1EB135D60018B8E9 /* InitialSliderViewController.swift in Sources */,
 				2A69711F1EB20E400036E3C5 /* UserDestination.swift in Sources */,
 				2A53AB5D1EAE893F0018B8E9 /* TestConnection.swift in Sources */,
+				2AA135FA1F868298003B1507 /* AutOrderTableViewCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

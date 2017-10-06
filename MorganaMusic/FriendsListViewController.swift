@@ -133,7 +133,6 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
         if self.segueFrom == "myDrinks" {
             (cell as! FirendsListTableViewCell).forwardButton.isHidden = false
             (cell as! FirendsListTableViewCell).forwardButton.tag = indexPath.row
-            //(cell as! FirendsListTableViewCell).forwardButton.addTarget(self, action: "forwardAction:", for: .touchUpInside)
             (cell as! FirendsListTableViewCell).forwardButton.addTarget(self, action: #selector(forwardAction(_:)), for: .touchUpInside)
         } 
         
