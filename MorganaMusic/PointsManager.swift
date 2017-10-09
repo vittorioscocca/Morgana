@@ -161,23 +161,30 @@ class PointsManager {
         
     }
     
-    func addPointsForStandardConsumption() {
+    private func addPointsForStandardConsumption(_ numberOfProducts: Int) {
         totalStandardConsumptions! += 1
-        balanceCurrentPoints +=  1
+        balanceCurrentPoints += numberOfProducts
     }
     
-    func addPointsForDiversifiedConsumption(date: Date) {
+    private func addPointsForDiversifiedConsumption(_ numberOfProducts: Int){
+        totalDiversifiedConsumptions! =   1
+        balanceCurrentPoints = 2 * numberOfProducts
+    }
+    
+    func addPointsForConsumption(date: Date, numberOfProducts: Int)->Int {
+        
         let weekday = Calendar.current.component(.weekday, from: date)
+        
         let isAnIndicatedDay = days.contains(where: { (value)-> Bool in
             value == weekday
         })
         
         if isAnIndicatedDay {
-            totalDiversifiedConsumptions! =   1
-            balanceCurrentPoints = 2
+            addPointsForDiversifiedConsumption(numberOfProducts)
         }else {
-            addPointsForStandardConsumption()
+            addPointsForStandardConsumption(numberOfProducts)
         }
+        return balanceCurrentPoints
     }
     
     

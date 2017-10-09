@@ -344,7 +344,6 @@ extension AppDelegate : MessagingDelegate {
     
     // Receive data message on iOS 10 devices.
     func application(received remoteMessage: MessagingRemoteMessage) {
-        
-        print("beheheheheeh", remoteMessage.appData)
+    
     }
 }

@@ -441,12 +441,21 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
             
             if offertaRicevuta?.offerState == "Scaduta" {
                 (cell as! OrderReceivedTableViewCell).lastDate.text = "Offerta scaduta"
-                
                 (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
             } else if offertaRicevuta?.offerState == "Offerta rifiutata"{
                 (cell as! OrderReceivedTableViewCell).lastDate.text = "Offerta rifiutata"
-                
                 (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
+            } else if offertaRicevuta?.offerState == "Offerta consumata"{
+                (cell as! OrderReceivedTableViewCell).lastDate.text = "Offerta consumata"
+                (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
+                
+                //when tap on notification user go to view notification target
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                let rootVC = storyboard.instantiateViewController(withIdentifier: "HomeViewController") as! UITabBarController
+                rootVC.selectedIndex = 2 // Index of the tab bar item you want to present, as shown in question it seems is item 2
+                let appDelegate = UIApplication.shared.delegate as! AppDelegate
+                appDelegate.window!.rootViewController = rootVC
+                
             } else {
                 (cell as! OrderReceivedTableViewCell).lastDate.text = "Scade il: " + stringTodate(dateString: (offertaRicevuta?.expirationeDate)!)
                 (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
@@ -489,8 +498,8 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
             }else if (offertaRicevuta!.offerState!) == "Pending" {
                 cell?.accessoryType = UITableViewCellAccessoryType.none
-            }else if (offertaRicevuta!.offerState!) == "Offerta inoltrata"{
-                cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
+            }else if (offertaRicevuta!.offerState!) == "Offerta consumata"{
+                cell?.accessoryType = UITableViewCellAccessoryType.none
                 (cell as? OrderReceivedTableViewCell)?.cellReaded = true
             }else {
                 cell?.accessoryType = UITableViewCellAccessoryType.checkmark

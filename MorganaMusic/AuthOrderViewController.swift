@@ -9,6 +9,7 @@
 import UIKit
 import FirebaseDatabase
 
+
 class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableViewDataSource {
 
     @IBOutlet var userImageView: UIImageView!
@@ -47,11 +48,10 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
         }
         
         setCustomImage()
-        self.controlExpirationDate()
-        self.readOrder()
+        self.readAndValidateOrder()
     }
     
-    private func readOrder() {
+    private func readAndValidateOrder() {
         
         FirebaseData.sharedIstance.readSingleOrder(userId: userDestinationID!, companyId: comapanyId!, orderId: orderId!, onCompletion: { (order) in
             guard !order.isEmpty else {
@@ -60,6 +60,7 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
             }
             self.orderReaded = order[0]
             self.readUserDetails()
+            self.validateOrder()
             self.myTable.reloadData()
             
         })
@@ -116,36 +117,56 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
         }
     }
     
-    private func controlExpirationDate(){
+    private func timeIntervalToDate(timeInterval: TimeInterval)->Date{
+        
+        let date = NSDate(timeIntervalSince1970: timeInterval/1000)
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.amSymbol = "AM"
+        dateFormatter.pmSymbol = "PM"
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
+        let dateString = dateFormatter.string(from: date as Date)
+        return dateFormatter.date(from: dateString)!
+    }
+    
+    private func validateOrder(){
         let ref = Database.database().reference()
         ref.child("sessions").setValue(ServerValue.timestamp())
         ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
-            let timeStamp = snap.value! as! TimeInterval
-            let date = NSDate(timeIntervalSince1970: timeStamp/1000)
+            let finalDate = self.timeIntervalToDate(timeInterval: snap.value! as! TimeInterval)
             
             let dateFormatter = DateFormatter()
-            dateFormatter.amSymbol = "AM"
-            dateFormatter.pmSymbol = "PM"
             dateFormatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
-            let dateString = dateFormatter.string(from: date as Date)
-            let finalDate = dateFormatter.date(from: dateString)
+            dateFormatter.locale = Locale.init(identifier: "it_IT")
             
-            let date1Formatter = DateFormatter()
-            date1Formatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
-            date1Formatter.locale = Locale.init(identifier: "it_IT")
-            
-            let dateObj = date1Formatter.date(from: self.expirationDate!)
-            if dateObj! < finalDate! {
+            let dateObj = dateFormatter.date(from: self.expirationDate!)
+            if dateObj! < finalDate {
                 self.orderState_label.text = "ORDINE SCADUTO"
                 dateFormatter.dateFormat = "dd/MM/yyyy"
                 
                 var alert = UIAlertController()
-                alert = UIAlertController(title: "ORDINE SCADUTO!!", message: "Ordine scaduto il " + dateFormatter.string(from: dateObj!), preferredStyle: .alert)
+                alert = UIAlertController(title: "Ordine scaduto!", message: "Ordine scaduto il " + dateFormatter.string(from: dateObj!), preferredStyle: .alert)
+                let defaultAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
+                alert.addAction(defaultAction)
                 self.present(alert, animated: true, completion: nil)
-            }else {
+            } else if self.orderReaded?.offerState == "Offerta accettata" && self.orderReaded?.paymentState == "Valid" {
                 self.myTable.isHidden = false
                 self.authButton.isHidden = false
                 self.orderState_label.text = "ORDINE VALIDO"
+            } else if self.orderReaded?.offerState != "Offerta accettata" {
+                self.orderState_label.text = "ORDINE NON VALIDO"
+                var alert = UIAlertController()
+                alert = UIAlertController(title: "Ordine non valido!", message: "Stato ordine non compatibile", preferredStyle: .alert)
+                let defaultAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
+                alert.addAction(defaultAction)
+                self.present(alert, animated: true, completion: nil)
+            } else if self.orderReaded?.paymentState != "Valid" {
+                self.orderState_label.text = "ORDINE NON VALIDO"
+                var alert = UIAlertController()
+                alert = UIAlertController(title: "Ordine non valido!", message: "Problemi con lo stato di pagamento", preferredStyle: .alert)
+                let defaultAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
+                alert.addAction(defaultAction)
+                self.present(alert, animated: true, completion: nil)
             }
             dateFormatter.dateFormat = "dd/MM/yyyy"
             self.expirationOrderDate_label.text = "Scade: " + dateFormatter.string(from: dateObj!)
@@ -208,9 +229,94 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
         
     }
     
+    private func prepareProductsOfferDetailsDictionary()->[String:String]{
+        var newProductsOfferDictionary: [String:String] = [:]
+        for product in (self.orderReaded?.prodotti)! {
+            if product.quantity != 0 {
+                newProductsOfferDictionary[product.productName!] = String((product.quantity)!) + "x" + String(format:"%.2f", (product.price)!)
+            }
+        }
+        return newProductsOfferDictionary
+    }
+    
+    private func numberOfProducts()->Int{
+        var totQuantity = 0
+        
+        for product in (self.orderReaded?.prodotti)!{
+            totQuantity += product.quantity!
+        }
+        return totQuantity
+    }
+    
+    private func updateNewProductsOfferDetails(){
+        
+        if productQuantity.reduce(0, +) != numberOfProducts() {
+            //update new quantity
+            var newProductsOfferDictionary: [String:String] = [:]
+            newProductsOfferDictionary = prepareProductsOfferDetailsDictionary()
+            FireBaseAPI.updateNode(node: "productsOffersDetails/\((self.orderReaded?.company?.companyId)!)/\((self.orderReaded?.idOfferta)!)", value: newProductsOfferDictionary)
+            
+            //orderState "in progress"
+            FireBaseAPI.updateNode(node: "ordersReceived", value: ["offerState":"in progress"])
+            FireBaseAPI.updateNode(node: "ordersSent", value: ["offerState":"in progress"])
+            
+        } else {
+            //update orderState "Offerta consumata"
+            FireBaseAPI.updateNode(node: "ordersReceived", value: ["offerState":"Offerta consumata"])
+            FireBaseAPI.updateNode(node: "ordersSent", value: ["offerState":"Offerta consumata"])
+        }
+    }
+    
+    private func sendNotificationToUserSender(){
+        //Send notification
+        let msg = "Il tuo amico \((self.orderReaded?.userDestination?.fullName)!) ha appena consumato l'ordine da te inviato "
+        NotitificationsCenter.sendConsuptionNotification(userDestinationIdApp: (self.orderReaded?.userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
+    }
+    
+    private func sendNotificationToUserReceiver(){
+        let msg = "Il tuo ordine è stato approvato "
+        NotitificationsCenter.sendConsuptionNotification(userDestinationIdApp: (self.orderReaded?.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
+    }
+    
+    private func sendNotifications(){
+        //se orderState non è in progress: invia notifiche (Sender receved))
+        if orderReaded?.offerState == "Offerta accettata"{
+            if orderReaded?.userDestination?.idApp != orderReaded?.userDestination?.idApp {
+                sendNotificationToUserSender()
+            }
+            sendNotificationToUserReceiver()
+        }else {
+            self.updateUserPoints()
+        }
+    }
+    
+    private func updateUserPoints(){
+        PointsManager.sharedInstance.readUserPointsStatsOnFirebase(onCompletion: { (error) in
+            guard error == nil else {
+                print(error!)
+                return
+            }
+            let ref = Database.database().reference()
+            ref.child("sessions").setValue(ServerValue.timestamp())
+            ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
+                let finalDate = self.timeIntervalToDate(timeInterval: snap.value! as! TimeInterval)
+                let points = PointsManager.sharedInstance.addPointsForConsumption(date: finalDate, numberOfProducts: self.numberOfProducts())
+                PointsManager.sharedInstance.updateNewValuesOnFirebase(onCompletion: {
+                    //send notification
+                    let msg = "Il tuo ordine è stato approvato, hai cumulato \(points) "
+                    NotitificationsCenter.sendConsuptionNotification(userDestinationIdApp: (self.orderReaded?.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
+                    
+                })
+            })
+        })
+    }
+    
 
     @IBAction func authButton_clicked(_ sender: UIButton) {
-    
+        self.updateNewProductsOfferDetails()
+        self.sendNotifications()
+        
+        //Aggiorna punteggio ed invia notifica
     }
     
 }
