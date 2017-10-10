@@ -11,6 +11,34 @@ import FirebaseDatabase
 import Firebase
 import UserNotifications
 
+extension UIApplication
+{
+    class func topViewController(_ base: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController?
+    {
+        if let nav = base as? UINavigationController
+        {
+            let top = topViewController(nav.visibleViewController)
+            return top
+        }
+        
+        if let tab = base as? UITabBarController
+        {
+            if let selected = tab.selectedViewController
+            {
+                let top = topViewController(selected)
+                return top
+            }
+        }
+        
+        if let presented = base?.presentedViewController
+        {
+            let top = topViewController(presented)
+            return top
+        }
+        return base
+    }
+}
+
 class FirebaseData {
     
     static let sharedIstance = FirebaseData()
@@ -67,7 +95,8 @@ class FirebaseData {
             "orderAutoId": order.orderAutoId,
             "pendingPaymentAutoId": self.paymentAutoId!,
             "userSender": (self.user?.idApp)!,
-            "orderReaded":"false"
+            "orderReaded":"false",
+            "consumingDate": ""
         ]
     }
     
@@ -194,17 +223,21 @@ class FirebaseData {
         offerDetails["userSender"] = (self.user?.idApp)!
         offerDetails["orderReaded"] = "false"
         offerDetails["orderExpirationNotificationIsScheduled"] = false
+        offerDetails["consumingDate"] = ""
+        
         
         return offerDetails
     }
     
     private func saveOrderOnFirebase(orderDetails: [String:Any],companyId: String,onCompletion: @escaping ()->()) {
+        
         FireBaseAPI.saveNodeOnFirebase(node: "ordersReceived/\(orderDetails["IdAppUserDestination"]! as! String)/\(companyId)/\(orderDetails["autoId"] as! String)", dictionaryToSave: orderDetails, onCompletion: { (error) in
             guard error == nil else {
                 print("read error on Firebase")
                 return
             }
-            onCompletion()
+            FireBaseAPI.updateNode(node: "ordersReceived/\(orderDetails["IdAppUserDestination"]! as! String)/\(companyId)", value: ["scanningQrCode":false])
+            
         })
     }
     
@@ -265,6 +298,7 @@ class FirebaseData {
             guard error == nil else {return}
             
             //solve pending payments
+            
             PaymentManager.sharedIstance.resolvePendingPayPalPayment(user: self.user!, payment: payment, onCompleted: { (verifiedPayment) in
                 guard verifiedPayment else {
                     print("pagamento non valido")
@@ -358,6 +392,7 @@ class FirebaseData {
                     order.ordersSentAutoId = orderDataDictionary?["ordersSentAutoId"] as! String
                     order.userSender?.idApp = orderDataDictionary?["userSender"] as? String
                     order.orderNotificationIsScheduled = orderDataDictionary?["orderNotificationIsScheduled"] as? Bool
+                    order.consumingDate = orderDataDictionary?["consumingDate"] as? String
                     
                     if  orderDataDictionary?["orderReaded"] as? String == "true"{
                         order.orderReaded = true
@@ -512,6 +547,9 @@ class FirebaseData {
             case "total":
                 order.totalReadedFromFirebase = (valore as? String)!
                 break
+            case "consumingDate":
+                order.consumingDate = valore as? String
+                break
             default:
                 break
             }
@@ -522,6 +560,8 @@ class FirebaseData {
        
     }
     
+    
+    
     func readOrderReceivedOnFireBase(user: User, onCompletion: @escaping ([Order])->()) {
         let ref = Database.database().reference()
         self.ordersReceived.removeAll()
@@ -530,6 +570,7 @@ class FirebaseData {
             // controllo che lo snap dei dati non sia vuoto
             guard snap.exists() else {return}
             guard snap.value != nil else {return}
+            
             self.ordersReceived.removeAll()
             
             // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
@@ -541,21 +582,31 @@ class FirebaseData {
                 var order: Order = Order(prodotti: [], userDestination: UserDestination(nil,nil,nil,nil,nil), userSender: UserDestination(nil,nil,nil,nil,nil))
                 
                 for (orderId, dati_pendingOffers) in dataOrder as! NSDictionary {
-                    order = Order(prodotti: [], userDestination: UserDestination(nil,nil,nil,nil,nil), userSender: UserDestination(nil,nil,nil,nil,nil))
-                    order.company?.companyId = companyId as? String
-                    order.orderAutoId = orderId as! String
-                    self.readOrder(order: order,controlExpirationDate: true, dataOrder: dati_pendingOffers as! NSDictionary)
+                    if orderId as? String != "scanningQrCode" {
+                        order = Order(prodotti: [], userDestination: UserDestination(nil,nil,nil,nil,nil), userSender: UserDestination(nil,nil,nil,nil,nil))
+                        order.company?.companyId = companyId as? String
+                        order.orderAutoId = orderId as! String
+                        self.readOrder(order: order,controlExpirationDate: true, dataOrder: dati_pendingOffers as! NSDictionary)
+                        
+                        if order.paymentState == "Valid" && order.offerState != "Offerta rifiutata" && order.offerState != "Offerta inoltrata" {
+                            self.ordersReceived.append(order)
+                        }
+                        //if consumption is before expirationDate, scheduled notification is killed
+                        if order.offerState == "Offerta consumata" {
+                            //attenzione killa ogni volta che carica le offeerte, deve farlo una volta
+                            let center = UNUserNotificationCenter.current()
+                            center.removePendingNotificationRequests(withIdentifiers: ["expirationDate-"+order.idOfferta!,"RememberExpiration-"+order.idOfferta!])
+                            print("scheduled notification killed")
+                        }
+                    } else if (dati_pendingOffers as? Bool)! {
+                        let activeViewController = UIApplication.topViewController()
+                        if activeViewController is QROrderGenerationViewController {
+                            (activeViewController as! QROrderGenerationViewController).unwind()
+                        }
+                        FireBaseAPI.updateNode(node: "ordersReceived/\((self.user?.idApp)!)/\(companyId)", value: ["scanningQrCode":false])
+                    }
                     
-                    if order.paymentState == "Valid" && order.offerState != "Offerta rifiutata" && order.offerState != "Offerta inoltrata" {
-                        self.ordersReceived.append(order)
-                    }
-                    //if consumption is before expirationDate, scheduled notification is killed
-                    if order.offerState == "Offerta consumata" {
-                        //attenzione killa ogni volta che carica le offeerte, deve farlo una volta
-                        let center = UNUserNotificationCenter.current()
-                        center.removePendingNotificationRequests(withIdentifiers: ["expirationDate-"+order.idOfferta!,"RememberExpiration-"+order.idOfferta!])
-                        print("scheduled notification killed")
-                    }
+                    
                 }
             }
             self.ordersReceived.sort(by: {self.timestampTodateObject(timestamp: $0.timeStamp) > self.timestampTodateObject(timestamp: $1.timeStamp)})
@@ -567,6 +618,7 @@ class FirebaseData {
                     
                 })
             })
+            
         })
     }
     
@@ -633,7 +685,6 @@ class FirebaseData {
     
     private func readProductsSentDetails(ordersToRead: [Order], onCompletion: @escaping ()->()) {
         
-        
         let dispatchGroup = DispatchGroup.init()
         let queue = DispatchQueue.init(label: "it.xcoding.queueReadProductsSentDetails", attributes: .concurrent, target: .main)
         
@@ -689,7 +740,7 @@ class FirebaseData {
             
             var badgeValueToUpdate = ""
             if recOrPurch == "received" {
-                badgeValueToUpdate = "numberOf PendingReceivedProducts"
+                badgeValueToUpdate = "numberOfPendingReceivedProducts"
             } else if recOrPurch == "purchased" {
                 badgeValueToUpdate = "numberOfPendingPurchasedProducts"
             }

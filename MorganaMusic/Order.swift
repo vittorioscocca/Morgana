@@ -25,6 +25,7 @@ class Order {
     var timeStamp : TimeInterval = 0
     var orderNotificationIsScheduled :Bool?
     var orderExpirationNotificationIsScheduled :Bool?
+    var consumingDate: String?
     
     var paymentState: String?
     var offerState: String?
@@ -72,6 +73,7 @@ class Order {
     private init(){
         self.prodotti = []
         self.expirationeDate = ""
+        self.consumingDate = ""
         self.userDestination = UserDestination(nil,nil,nil,nil,nil)
         self.paymentState = paymentStates.pending.rawValue
         self.offerState = offerStates.pending.rawValue

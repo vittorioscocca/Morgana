@@ -28,6 +28,10 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
     var imageCache = [String:UIImage]()
     var myIndexPath = [IndexPath]()
     var productQuantity = [Int]()
+    var alert = UIAlertController()
+    var orderScanned = false
+    var actualDate: Date?
+    var actualDateString: String?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,12 +45,16 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
         self.orderReaded = Order(prodotti: [], userDestination: UserDestination(nil,nil,nil,nil,nil), userSender: UserDestination(nil,nil,nil,nil,nil))
         
         guard userDestinationID != nil, orderId != nil else {
-            var alert = UIAlertController()
-            alert = UIAlertController(title: "Errore lettura Ordine", message: "assicurati che il codice sia valido", preferredStyle: .alert)
-            present(alert, animated: true, completion: nil)
+            
+            self.alert = UIAlertController(title: "Errore lettura Ordine", message: "assicurati che il codice sia valido", preferredStyle: .alert)
+            present(self.alert, animated: true, completion: nil)
             return
         }
-        
+        let ref = Database.database().reference()
+        ref.child("sessions").setValue(ServerValue.timestamp())
+        ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
+            self.actualDate = self.timeIntervalToDate(timeInterval: snap.value! as! TimeInterval)
+        })
         setCustomImage()
         self.readAndValidateOrder()
     }
@@ -57,6 +65,17 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
             guard !order.isEmpty else {
                 print("errore di lettura su Ordine")
                 return
+            }
+            
+            var newProduct = [Product]()
+            for product in order[0].prodotti! {
+                if product.productName?.range(of:"_climbed") != nil && product.quantity != 0 {
+                    product.productName = product.productName?.replacingOccurrences(of: "_climbed", with: "", options: .regularExpression)
+                    newProduct.append(product)
+                }
+            }
+            if newProduct.count != 0 {
+                order[0].prodotti = newProduct
             }
             self.orderReaded = order[0]
             self.readUserDetails()
@@ -126,51 +145,46 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
         dateFormatter.pmSymbol = "PM"
         dateFormatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
         let dateString = dateFormatter.string(from: date as Date)
+        self.actualDateString = dateString
         return dateFormatter.date(from: dateString)!
     }
     
     private func validateOrder(){
-        let ref = Database.database().reference()
-        ref.child("sessions").setValue(ServerValue.timestamp())
-        ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
-            let finalDate = self.timeIntervalToDate(timeInterval: snap.value! as! TimeInterval)
-            
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
-            dateFormatter.locale = Locale.init(identifier: "it_IT")
-            
-            let dateObj = dateFormatter.date(from: self.expirationDate!)
-            if dateObj! < finalDate {
-                self.orderState_label.text = "ORDINE SCADUTO"
-                dateFormatter.dateFormat = "dd/MM/yyyy"
-                
-                var alert = UIAlertController()
-                alert = UIAlertController(title: "Ordine scaduto!", message: "Ordine scaduto il " + dateFormatter.string(from: dateObj!), preferredStyle: .alert)
-                let defaultAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
-                alert.addAction(defaultAction)
-                self.present(alert, animated: true, completion: nil)
-            } else if self.orderReaded?.offerState == "Offerta accettata" && self.orderReaded?.paymentState == "Valid" {
-                self.myTable.isHidden = false
-                self.authButton.isHidden = false
-                self.orderState_label.text = "ORDINE VALIDO"
-            } else if self.orderReaded?.offerState != "Offerta accettata" {
-                self.orderState_label.text = "ORDINE NON VALIDO"
-                var alert = UIAlertController()
-                alert = UIAlertController(title: "Ordine non valido!", message: "Stato ordine non compatibile", preferredStyle: .alert)
-                let defaultAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
-                alert.addAction(defaultAction)
-                self.present(alert, animated: true, completion: nil)
-            } else if self.orderReaded?.paymentState != "Valid" {
-                self.orderState_label.text = "ORDINE NON VALIDO"
-                var alert = UIAlertController()
-                alert = UIAlertController(title: "Ordine non valido!", message: "Problemi con lo stato di pagamento", preferredStyle: .alert)
-                let defaultAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
-                alert.addAction(defaultAction)
-                self.present(alert, animated: true, completion: nil)
-            }
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
+        dateFormatter.locale = Locale.init(identifier: "it_IT")
+        
+        let dateObj = dateFormatter.date(from: self.expirationDate!)
+        if dateObj! < self.actualDate! {
+            self.orderState_label.text = "ORDINE SCADUTO"
             dateFormatter.dateFormat = "dd/MM/yyyy"
-            self.expirationOrderDate_label.text = "Scade: " + dateFormatter.string(from: dateObj!)
-        })
+            
+            self.alert = UIAlertController(title: "Ordine scaduto!", message: "Ordine scaduto il " + dateFormatter.string(from: dateObj!), preferredStyle: .alert)
+            let defaultAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
+            self.alert.addAction(defaultAction)
+            self.present(self.alert, animated: true, completion: nil)
+        } else if (self.orderReaded?.offerState == "Offerta accettata" || self.orderReaded?.offerState == "Offerta scalata") && self.orderReaded?.paymentState == "Valid" {
+            self.myTable.isHidden = false
+            self.authButton.isHidden = false
+            self.orderState_label.text = "ORDINE VALIDO"
+        } else if self.orderReaded?.offerState != "Offerta accettata" && self.orderReaded?.offerState != "Offerta scalata"  {
+            self.orderState_label.text = "ORDINE NON VALIDO"
+            self.alert = UIAlertController(title: "Ordine non valido!", message: "Stato ordine non compatibile", preferredStyle: .alert)
+            let defaultAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
+            self.alert.addAction(defaultAction)
+            self.present(self.alert, animated: true, completion: nil)
+        } else if self.orderReaded?.paymentState != "Valid" {
+            self.orderState_label.text = "ORDINE NON VALIDO"
+            
+            self.alert = UIAlertController(title: "Ordine non valido!", message: "Problemi con lo stato di pagamento", preferredStyle: .alert)
+            let defaultAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
+            self.alert.addAction(defaultAction)
+            self.present(self.alert, animated: true, completion: nil)
+        }
+        dateFormatter.dateFormat = "dd/MM/yyyy"
+        self.expirationOrderDate_label.text = "Scade: " + dateFormatter.string(from: dateObj!)
+        
     }
     
     
@@ -208,13 +222,20 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
         } else {
             cell = tableView.dequeueReusableCell(withIdentifier: "productCell", for: indexPath)
             let product = self.orderReaded?.prodotti![indexPath.row]
-            (cell as! AutOrderTableViewCell).productName_label.text = product?.productName
-            (cell as! AutOrderTableViewCell).productQuantity_label.text = String((product?.quantity)!)
-            self.myIndexPath.append(indexPath)
-            self.productQuantity.append((product?.quantity)!) 
-            (cell as! AutOrderTableViewCell).myStepper.tag = indexPath.row
-            (cell as! AutOrderTableViewCell).myStepper.addTarget(self, action: #selector(stepperAction(_:)), for: .touchUpInside)
             
+            if !self.orderScanned {
+                (cell as! AutOrderTableViewCell).productName_label.text = product?.productName
+                (cell as! AutOrderTableViewCell).productQuantity_label.text = String((product?.quantity)!)
+                self.myIndexPath.append(indexPath)
+                self.productQuantity.append((product?.quantity)!)
+                (cell as! AutOrderTableViewCell).myStepper.tag = indexPath.row
+                (cell as! AutOrderTableViewCell).myStepper.value = Double((product?.quantity)!)
+                (cell as! AutOrderTableViewCell).myStepper.maximumValue = Double((product?.quantity)!)
+                (cell as! AutOrderTableViewCell).myStepper.minimumValue = 0
+                (cell as! AutOrderTableViewCell).myStepper.addTarget(self, action: #selector(stepperAction(_:)), for: .touchUpInside)
+            }else {
+                (cell as! AutOrderTableViewCell).myStepper.isHidden = true
+            }
         }
         return cell!
     }
@@ -222,19 +243,22 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
     
     @objc func stepperAction( _ sender: UIStepper!) {
         let cell = self.myTable.cellForRow(at: myIndexPath[sender.tag])
-        sender.maximumValue = Double(self.productQuantity[sender.tag])
-        sender.minimumValue = 0
+        
         (cell as! AutOrderTableViewCell).productQuantity_label.text = String(Int(sender.value))
-        self.orderReaded?.prodotti![sender.tag].quantity = Int(sender.value)
+        self.orderReaded?.prodotti![sender.tag].quantity = Int((cell as! AutOrderTableViewCell).myStepper.maximumValue) - Int(sender.value)
         
     }
     
     private func prepareProductsOfferDetailsDictionary()->[String:String]{
         var newProductsOfferDictionary: [String:String] = [:]
+        var count = 0
         for product in (self.orderReaded?.prodotti)! {
-            if product.quantity != 0 {
-                newProductsOfferDictionary[product.productName!] = String((product.quantity)!) + "x" + String(format:"%.2f", (product.price)!)
+            if product.quantity == self.productQuantity[count] {
+                newProductsOfferDictionary[product.productName!+"_climbed"] = "0x" + String(format:"%.2f", (product.price)!)
+            }else {
+                newProductsOfferDictionary[product.productName!+"_climbed"] = String((product.quantity)!) + "x" + String(format:"%.2f", (product.price)!)
             }
+            count += 1
         }
         return newProductsOfferDictionary
     }
@@ -248,6 +272,8 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
         return totQuantity
     }
     
+    
+    
     private func updateNewProductsOfferDetails(){
         
         if productQuantity.reduce(0, +) != numberOfProducts() {
@@ -256,20 +282,36 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
             newProductsOfferDictionary = prepareProductsOfferDetailsDictionary()
             FireBaseAPI.updateNode(node: "productsOffersDetails/\((self.orderReaded?.company?.companyId)!)/\((self.orderReaded?.idOfferta)!)", value: newProductsOfferDictionary)
             
-            //orderState "in progress"
-            FireBaseAPI.updateNode(node: "ordersReceived", value: ["offerState":"in progress"])
-            FireBaseAPI.updateNode(node: "ordersSent", value: ["offerState":"in progress"])
+            //orderState Offerta scalata
+            FireBaseAPI.updateNode(node: "ordersReceived/\((self.orderReaded?.userDestination?.idApp)!)/\((self.orderReaded?.company?.companyId)!)/\((self.orderReaded?.orderAutoId)!)", value: ["offerState":"Offerta scalata", "total" : String(format:"%.2f", (self.orderReaded?.costoTotale)!),"consumingDate":self.actualDateString!])
+            FireBaseAPI.updateNode(node: "ordersSent/\((self.orderReaded?.userSender?.idApp)!)/\((self.orderReaded?.company?.companyId)!)/\((self.orderReaded?.idOfferta)!)", value: ["offerState":"Offerta scalata", "total" : String(format:"%.2f", (self.orderReaded?.costoTotale)!),"consumingDate":self.actualDateString!])
+            self.sendNotifications(full: false)
             
         } else {
             //update orderState "Offerta consumata"
-            FireBaseAPI.updateNode(node: "ordersReceived", value: ["offerState":"Offerta consumata"])
-            FireBaseAPI.updateNode(node: "ordersSent", value: ["offerState":"Offerta consumata"])
+            FireBaseAPI.updateNode(node: "ordersReceived/\((self.orderReaded?.userDestination?.idApp)!)/\((self.orderReaded?.company?.companyId)!)/\((self.orderReaded?.orderAutoId)!)", value: ["offerState":"Offerta consumata","consumingDate":self.actualDateString!])
+            FireBaseAPI.updateNode(node: "ordersSent/\((self.orderReaded?.userSender?.idApp)!)/\((self.orderReaded?.company?.companyId)!)/\((self.orderReaded?.idOfferta)!)", value: ["offerState":"Offerta consumata","consumingDate":self.actualDateString!])
+           
+            self.sendNotifications(full: true)
         }
+        FireBaseAPI.updateNode(node: "ordersReceived/\((self.orderReaded?.userDestination?.idApp)!)/\((self.orderReaded?.company?.companyId)!)", value: ["scanningQrCode":true])
+        
+        self.alert = UIAlertController(title: "Operazione completata!", message: "Ordine autorizzato correttamente", preferredStyle: .alert)
+        let confirm = UIAlertAction(title: "Ok", style: .default, handler: nil)
+        self.alert.addAction(confirm)
+        self.present(self.alert, animated: true, completion: nil)
     }
     
-    private func sendNotificationToUserSender(){
+    
+    private func sendNotificationToUserSender(full: Bool){
         //Send notification
-        let msg = "Il tuo amico \((self.orderReaded?.userDestination?.fullName)!) ha appena consumato l'ordine da te inviato "
+        var msg: String = ""
+        if full {
+            msg = "Il tuo amico \((self.orderReaded?.userDestination?.fullName)!) ha appena consumato l'ordine da te inviato "
+        }else {
+            msg = "Il tuo amico \((self.orderReaded?.userDestination?.fullName)!) ha appena consumato parte dell'ordine da te inviato "
+        }
+        
         NotitificationsCenter.sendConsuptionNotification(userDestinationIdApp: (self.orderReaded?.userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
     }
     
@@ -278,15 +320,15 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
         NotitificationsCenter.sendConsuptionNotification(userDestinationIdApp: (self.orderReaded?.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
     }
     
-    private func sendNotifications(){
-        //se orderState non è in progress: invia notifiche (Sender receved))
+    private func sendNotifications(full: Bool){
+        //se orderState non è Offerta scalata: invia notifiche (Sender receved))
         if orderReaded?.offerState == "Offerta accettata"{
             if orderReaded?.userDestination?.idApp != orderReaded?.userDestination?.idApp {
-                sendNotificationToUserSender()
+                sendNotificationToUserSender(full: full)
             }
-            sendNotificationToUserReceiver()
-        }else {
             self.updateUserPoints()
+        }else {
+            sendNotificationToUserReceiver()
         }
     }
     
@@ -296,27 +338,31 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
                 print(error!)
                 return
             }
-            let ref = Database.database().reference()
-            ref.child("sessions").setValue(ServerValue.timestamp())
-            ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
-                let finalDate = self.timeIntervalToDate(timeInterval: snap.value! as! TimeInterval)
-                let points = PointsManager.sharedInstance.addPointsForConsumption(date: finalDate, numberOfProducts: self.numberOfProducts())
-                PointsManager.sharedInstance.updateNewValuesOnFirebase(onCompletion: {
-                    //send notification
-                    let msg = "Il tuo ordine è stato approvato, hai cumulato \(points) "
-                    NotitificationsCenter.sendConsuptionNotification(userDestinationIdApp: (self.orderReaded?.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
-                    
-                })
+            let points = PointsManager.sharedInstance.addPointsForConsumption(date: self.actualDate!, numberOfProducts: self.numberOfProducts())
+            PointsManager.sharedInstance.updateNewValuesOnFirebase(actualUserId: (self.orderReaded?.userDestination?.idApp)!, onCompletion: {
+                //send notification
+                let msg = "Il tuo ordine è stato approvato, hai cumulato \(points) "
+                NotitificationsCenter.sendConsuptionNotification(userDestinationIdApp: (self.orderReaded?.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
+                
             })
         })
     }
     
 
     @IBAction func authButton_clicked(_ sender: UIButton) {
-        self.updateNewProductsOfferDetails()
-        self.sendNotifications()
+        self.alert = UIAlertController(title: "Attenzione!", message: "Stai per autorizzare quest'ordine. Continuare?", preferredStyle: .alert)
         
-        //Aggiorna punteggio ed invia notifica
+        let deleteAction = UIAlertAction(title: "Annulla", style: .default, handler: nil)
+        let confirmAction = UIAlertAction(title: "Ok", style: .default, handler: {(paramAction:UIAlertAction!) in
+            self.updateNewProductsOfferDetails()
+            self.authButton.isHidden = true
+            self.orderScanned = true
+            self.myTable.reloadData()
+         })
+        self.alert.addAction(deleteAction)
+        self.alert.addAction(confirmAction)
+        self.present(self.alert, animated: true, completion: nil)
+        
     }
     
 }

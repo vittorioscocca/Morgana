@@ -338,7 +338,7 @@
                                         <rect key="frame" x="0.0" y="28" width="375" height="80"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="cwk-0j-qrI" id="bmb-w8-eVa">
-                                            <rect key="frame" x="0.0" y="0.0" width="375" height="80"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="79.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <stackView opaque="NO" contentMode="scaleToFill" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="bko-9D-qaE">
@@ -429,7 +429,7 @@
                                         <rect key="frame" x="0.0" y="108" width="375" height="80"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="mig-TN-kDN" id="r2U-G6-bDq">
-                                            <rect key="frame" x="0.0" y="0.0" width="375" height="80"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="79.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <stackView opaque="NO" contentMode="scaleToFill" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="4I5-cN-w5t">
@@ -693,9 +693,11 @@
                         <outlet property="imgQRCode" destination="Vmq-yR-vav" id="hiD-D8-0nZ"/>
                         <outlet property="myTable" destination="Mpq-5f-3jF" id="2le-Ka-7fG"/>
                         <outlet property="userImage_image" destination="guJ-yI-WXV" id="CSE-H3-Dc9"/>
+                        <segue destination="qkz-ZX-GKV" kind="unwind" identifier="unwindToMyDrinks" unwindAction="unwindToMyDrinksWitoutValue:" id="MRh-7a-i5t"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="r6O-sd-Kc2" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <exit id="qkz-ZX-GKV" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="3041" y="1139"/>
         </scene>
@@ -1881,7 +1883,7 @@
                                     <constraint firstAttribute="height" constant="80" id="bD9-dn-FJR"/>
                                 </constraints>
                             </imageView>
-                            <tableView hidden="YES" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="55" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="H08-yX-ddK">
+                            <tableView hidden="YES" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="55" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="H08-yX-ddK">
                                 <rect key="frame" x="0.0" y="181" width="375" height="310"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <prototypes>
@@ -1949,7 +1951,6 @@
                                     <color key="titleColor" red="0.9951923077" green="0.9903846154" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </state>
                                 <connections>
-                                    <action selector="authButton:" destination="xec-if-1sD" eventType="touchUpInside" id="yOn-zC-Mce"/>
                                     <action selector="authButton_clicked:" destination="xec-if-1sD" eventType="touchUpInside" id="DBO-He-47W"/>
                                 </connections>
                             </button>
@@ -2005,6 +2006,6 @@
         <image name="userDefault" width="245" height="232"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="jti-Et-pRQ"/>
+        <segue reference="OXA-AZ-LfE"/>
     </inferredMetricsTieBreakers>
 </document>

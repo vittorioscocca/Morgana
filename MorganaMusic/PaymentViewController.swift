@@ -174,7 +174,7 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
                             return
                         }
                         let points = PointsManager.sharedInstance.addPointsForShopping(expense: Cart.sharedIstance.costoTotale)
-                        PointsManager.sharedInstance.updateNewValuesOnFirebase(onCompletion: {
+                        PointsManager.sharedInstance.updateNewValuesOnFirebase(actualUserId: (self.user?.idApp)!,onCompletion: {
                             
                             NotitificationsCenter.localNotification(title: "Congratulazioni \((self.user?.firstName)!)", body: "Hai appena cumulato \(points) Punti!")
                         })

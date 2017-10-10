@@ -192,7 +192,7 @@ class PointsManager {
         return balanceCurrentPoints
     }
     
-    func updateNewValuesOnFirebase(onCompletion: @escaping ()->()){
+    func updateNewValuesOnFirebase(actualUserId: String, onCompletion: @escaping ()->()){
         
         let newValuesDictionary: [String: Any] = [
             "personalDiscount": self.personalDiscount!,
@@ -209,7 +209,7 @@ class PointsManager {
             "totalPoints": self.totalPoints!
         ]
         
-        FireBaseAPI.updateNode(node: "usersPointsStats/"+userId, value: newValuesDictionary)
+        FireBaseAPI.updateNode(node: "usersPointsStats/"+actualUserId, value: newValuesDictionary)
         onCompletion()
     }
     

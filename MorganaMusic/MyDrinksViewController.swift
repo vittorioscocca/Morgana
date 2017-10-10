@@ -205,6 +205,20 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         self.drinksList_segmentControl.setTitle("Inviati", forSegmentAt: 0)
     }
     
+    private func deleteClimbedOrder(ordersReceived: [Order])->[Order]{
+        var newProduct = [Product]()
+        
+        for order in ordersReceived {
+            for product in order.prodotti!{
+                if product.productName?.range(of:"_climbed") == nil {
+                    newProduct.append(product)
+                }
+            }
+            order.prodotti = newProduct
+        }
+        return ordersReceived
+    }
+    
     func readOrdersSent(){
         self.nowReadingOrdersAndOffersOnFirebase = true
 
@@ -214,9 +228,26 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 return
             }
             self.nowReadingOrdersAndOffersOnFirebase = false
-            self.ordersSent = ordersSent
+            self.ordersSent = self.deleteClimbedOrder(ordersReceived: ordersSent)
             self.myTable.reloadData()
         })
+    }
+    
+    private func getClimbedOrders(ordersReceived: [Order])->[Order]{
+        var newProduct = [Product]()
+        
+        for order in ordersReceived {
+            for product in order.prodotti!{
+                if product.productName?.range(of:"_climbed") != nil && product.quantity != 0 {
+                    product.productName = product.productName?.replacingOccurrences(of: "_climbed", with: "", options: .regularExpression)
+                    newProduct.append(product)
+                }
+            }
+            if newProduct.count != 0 {
+                order.prodotti = newProduct
+            }
+        }
+        return ordersReceived
     }
     
     func readOrderReceived() {
@@ -228,7 +259,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 return
             }
             self.nowReadingOrdersAndOffersOnFirebase = false
-            self.ordersReceived = ordersReceived
+            self.ordersReceived = self.getClimbedOrders(ordersReceived: ordersReceived)
             self.myTable.reloadData()
         })
     }
@@ -365,6 +396,15 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                     (cell as! OrderSentTableViewCell).lastDate.text = "Offerta inoltrata"
                     (cell as! OrderSentTableViewCell).lastDate.textColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
                     break
+                case "Offerta scalata":
+                    (cell as! OrderSentTableViewCell).lastDate.text = "Offerta scalata"
+                    (cell as! OrderSentTableViewCell).lastDate.textColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
+                    break
+                case "Offerta consumata":
+                    (cell as! OrderSentTableViewCell).lastDate.isHidden = true
+                    (cell as! OrderSentTableViewCell).createDate.text = "Offerta consumata il " + stringTodate(dateString: (orderSent?.consumingDate)!)
+                    (cell as! OrderSentTableViewCell).createDate.textColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
+                    break
                 default:
                     (cell as! OrderSentTableViewCell).lastDate.text = "Scade il: " + stringTodate(dateString: (orderSent?.expirationeDate)!)
                     (cell as! OrderSentTableViewCell).lastDate.textColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
@@ -440,22 +480,17 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
             (cell as! OrderReceivedTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: (offertaRicevuta?.dataCreazioneOfferta)!)
             
             if offertaRicevuta?.offerState == "Scaduta" {
-                (cell as! OrderReceivedTableViewCell).lastDate.text = "Offerta scaduta"
+                (cell as! OrderReceivedTableViewCell).lastDate.text = "Ordine scaduta"
                 (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
             } else if offertaRicevuta?.offerState == "Offerta rifiutata"{
-                (cell as! OrderReceivedTableViewCell).lastDate.text = "Offerta rifiutata"
+                (cell as! OrderReceivedTableViewCell).lastDate.text = "Ordine rifiutata"
                 (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
             } else if offertaRicevuta?.offerState == "Offerta consumata"{
-                (cell as! OrderReceivedTableViewCell).lastDate.text = "Offerta consumata"
-                (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
-                
-                //when tap on notification user go to view notification target
-                let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                let rootVC = storyboard.instantiateViewController(withIdentifier: "HomeViewController") as! UITabBarController
-                rootVC.selectedIndex = 2 // Index of the tab bar item you want to present, as shown in question it seems is item 2
-                let appDelegate = UIApplication.shared.delegate as! AppDelegate
-                appDelegate.window!.rootViewController = rootVC
-                
+                (cell as! OrderReceivedTableViewCell).lastDate.text = "Offerta consumata il " + stringTodate(dateString: (offertaRicevuta?.consumingDate)!)
+                (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
+            } else if offertaRicevuta?.offerState == "Offerta scalata"{
+                (cell as! OrderReceivedTableViewCell).lastDate.text = "Offerta scalata"
+                (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
             } else {
                 (cell as! OrderReceivedTableViewCell).lastDate.text = "Scade il: " + stringTodate(dateString: (offertaRicevuta?.expirationeDate)!)
                 (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
@@ -501,7 +536,11 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
             }else if (offertaRicevuta!.offerState!) == "Offerta consumata"{
                 cell?.accessoryType = UITableViewCellAccessoryType.none
                 (cell as? OrderReceivedTableViewCell)?.cellReaded = true
-            }else {
+            }else if (offertaRicevuta!.offerState!) == "Offerta scalata"{
+                cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
+                (cell as? OrderReceivedTableViewCell)?.cellReaded = false
+                
+            }else{
                 cell?.accessoryType = UITableViewCellAccessoryType.checkmark
             }
             
@@ -729,7 +768,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         let thisCell = tableView.cellForRow(at: indexPath)
         if  thisCell is OrderReceivedTableViewCell  {
             let orderReceived = self.ordersReceived[indexPath.row]
-            if  orderReceived.offerState == "Offerta accettata" {
+            if  orderReceived.offerState == "Offerta accettata" ||  orderReceived.offerState == "Offerta scalata" {
                 if self.drinksList_segmentControl.titleForSegment(at: 1) != "Ricevuti" {
                     self.readOrderReceived()
                     print("ho aggiornato gli Ordini-Ricevuti da Firebase")
