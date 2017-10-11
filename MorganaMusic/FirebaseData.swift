@@ -318,7 +318,7 @@ class FirebaseData {
         //scheduling notification appearing in expirationDate
         if !order.orderNotificationIsScheduled! {
             DispatchQueue.main.async {
-                NotitificationsCenter.scheduledExpiratedOrderLocalNotification(title: "Ordine scaduto", body: "Il prodotto che hai offerto a \((order.userDestination?.fullName)!) è scaduto", identifier: order.idOfferta!, expirationDate: self.stringTodateObject(date: order.expirationeDate!))
+                NotificationsCenter.scheduledExpiratedOrderLocalNotification(title: "Ordine scaduto", body: "Il prodotto che hai offerto a \((order.userDestination?.fullName)!) è scaduto", identifier: order.idOfferta!, expirationDate: self.stringTodateObject(date: order.expirationeDate!))
                 print("Notifica scadenza schedulata correttamente")
                 order.orderNotificationIsScheduled = true
                 FireBaseAPI.updateNode(node: "ordersSent/\((self.user?.idApp)!)/\((order.company?.companyId)!)/\(order.idOfferta!)", value: ["orderNotificationIsScheduled":true])
@@ -440,7 +440,7 @@ class FirebaseData {
                                 ref.child("ordersReceived/\((order.userDestination?.idApp)!)/\((order.company?.companyId)!)/\(order.ordersSentAutoId)").updateChildValues(["offerState" : "Scaduta"])
                                 
                                 let msg = "Il prodotto che ti è stato offerto da \((self.user?.fullName)!) è scaduto"
-                                NotitificationsCenter.sendNotification(userDestinationIdApp: (order.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
+                                NotificationsCenter.sendNotification(userDestinationIdApp: (order.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
                                 self.updateNumberPendingProductsOnFireBase((order.userDestination?.idApp)!, recOrPurch: "received")
                             }
                         })
@@ -496,7 +496,7 @@ class FirebaseData {
                     ref.child("ordersSent/\((order.userSender?.idApp)!)/\((order.company?.companyId)!)/\(order.idOfferta!)").updateChildValues(["offerState" : "Scaduta"])
                     order.offerState = "Scaduta"
                     let msg = "Il prodotto che hai offerto a \((self.user?.fullName)!) è scaduto"
-                    NotitificationsCenter.sendNotification(userDestinationIdApp: (order.userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
+                    NotificationsCenter.sendNotification(userDestinationIdApp: (order.userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
                     self.updateNumberPendingProductsOnFireBase((order.userSender?.idApp)!, recOrPurch: "purchased")
                     let center = UNUserNotificationCenter.current()
                     center.removePendingNotificationRequests(withIdentifiers: ["expirationDate-"+order.idOfferta!, "RememberExpiration-"+order.idOfferta!])
@@ -852,7 +852,7 @@ class FirebaseData {
         
         let msg = "Il tuo amico " + userFullName  + " ha accettato il tuo ordine"
         
-        NotitificationsCenter.sendNotification(userDestinationIdApp:userSenderIdApp, msg: msg, controlBadgeFrom: "purchased")
+        NotificationsCenter.sendOrderAcionNotification(userDestinationIdApp:userSenderIdApp, msg: msg, controlBadgeFrom: "purchased")
         
         FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase(userSenderIdApp, recOrPurch: "purchased")
     }
@@ -862,7 +862,7 @@ class FirebaseData {
         FirebaseData.sharedIstance.updateStateOnFirebase(userIdApp: userIdApp, userSenderIdApp: userSenderIdApp,comapanyId:comapanyId, idOrder: idOrder, autoIdOrder: autoIdOrder, state: state)
         
         let msg = "Il tuo amico " + userFullName  + " ha rifiutato il tuo ordine"
-        NotitificationsCenter.sendNotification(userDestinationIdApp: userSenderIdApp, msg: msg, controlBadgeFrom: "purchased")
+        NotificationsCenter.sendOrderAcionNotification(userDestinationIdApp: userSenderIdApp, msg: msg, controlBadgeFrom: "purchased")
 
         FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase(userSenderIdApp, recOrPurch: "purchased")
     }

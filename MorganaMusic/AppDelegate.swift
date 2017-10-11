@@ -41,18 +41,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             let authOptions : UNAuthorizationOptions = [.alert, .badge, .sound]
             UNUserNotificationCenter.current().requestAuthorization(
                 options: authOptions,
-                completionHandler: {_,_ in })
+                completionHandler: {(granted, error) in
+                    if (granted) {
+                        DispatchQueue.main.async(execute: {
+                            UIApplication.shared.registerForRemoteNotifications()
+                            application.registerForRemoteNotifications()
+                        })
+                    } else{
+                        print("Notification permissions not granted")
+                    }
+            })
             
             setCategories()
             
             // For iOS 10 display notification (sent via APNS)
             UNUserNotificationCenter.current().delegate = self
+            
             // For iOS 10 data message (sent via FCM)
             Messaging.messaging().delegate = self
             
         }
-        
         application.registerForRemoteNotifications()
+        
+        
         guard (( uidFB == nil) && (uidFiB == nil)) else{
             print("[DEBUG] Salto il login iniziale")
             MorganaMusicActivate()
@@ -80,6 +91,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Print full message.
         print(userInfo)
         completionHandler(UIBackgroundFetchResult.newData)
+        
     }
     
     // [END receive_message]
@@ -228,12 +240,22 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         let userInfo = notification.request.content.userInfo
         
+        print("Will Present")
         // Print full message.
         print("%@", userInfo)
         print("Message ID: \(userInfo["gcm.message_id"]!)")
         
-        
+        //Local Notification
         if notification.request.identifier == "LocalAlert"{
+            completionHandler( [.alert,.sound,.badge])
+        }
+        //Local Notification
+        if notification.request.identifier == "alert"{
+            completionHandler( [.alert,.sound,.badge])
+        }
+        //Local Notification
+        if userInfo["gcm.message_id"] as! String == "expiratedOrder"{
+            print(notification.request.identifier)
             completionHandler( [.alert,.sound,.badge])
         }
         
@@ -242,22 +264,43 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             completionHandler( [.alert,.sound,.badge])
         }
         
-        if userInfo["gcm.message_id"] as! String == "OrderSent"{
+        
+        //Firebase Remote Push Notification
+        if userInfo["identifier"] as? String == "Consuption"{
+            completionHandler( [.alert,.sound,.badge])
+        }
+        
+        //Firebase Remote Push Notification
+        if userInfo["identifier"] as? String == "ExpiratedOrder"{
             print(notification.request.identifier)
             completionHandler( [.alert,.sound,.badge])
         }
         
-        if userInfo["gcm.message_id"] as! String == "expiratedOrder"{
+        //Firebase Remote Push Notification
+        if userInfo["identifier"] as? String == "OrderSent"{
             print(notification.request.identifier)
             completionHandler( [.alert,.sound,.badge])
         }
         
-        if userInfo["gcm.message_id"] as! String == "Consuption"{
+        //Firebase Remote Push Notification
+        if userInfo["identifier"] as? String == "OrderAction"{
             print(notification.request.identifier)
             completionHandler( [.alert,.sound,.badge])
         }
+        
+        
+        
+        
+        
+        
+        //This works for iphone 7 and above using haptic feedback
+        let feedbackGenerator = UINotificationFeedbackGenerator()
+        feedbackGenerator.notificationOccurred(.success)
+        
         
     }
+    
+    
     
     func setCategories(){
         
@@ -271,7 +314,7 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
   
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        
+        print("Did Receive")
         let userInfo = response.notification.request.content.userInfo
         // Print message ID.
         if let messageID = userInfo[gcmMessageIDKey] {
@@ -323,7 +366,7 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         
         
         if let id = userInfo["identifier"] as? String  {
-            if id == "OrderSent" {
+            if id == "OrderSent" || id == "Consuption" {
                 
                 //when tap on notification user go to view notification target
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)

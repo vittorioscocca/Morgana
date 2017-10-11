@@ -62,19 +62,19 @@ class PointsManager {
         }
     }
     
-    private var userId: String
+   
     private var fireBaseToken = UserDefaults.standard
     
     
     //Metodi
     private init(){
-        self.userId = (fireBaseToken.object(forKey: "FireBaseToken") as? String)!
+        
         self.days = [Int]()
         //self.user = CoreDataController.sharedIstance.findUserForIdApp(uid)
         
     }
     
-    func readUserPointsStatsOnFirebase (onCompletion: @escaping (String?)->()) {
+    func readUserPointsStatsOnFirebase (userId: String,onCompletion: @escaping (String?)->()) {
         FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "usersPointsStats/"+userId, onCompletion: { (error,dictionary) in
             guard error == nil else {
                 print(error!)
@@ -128,7 +128,7 @@ class PointsManager {
 
     }
     
-    func addPointsForShopping(expense: Double)->Int{
+    func addPointsForShopping(userId: String,expense: Double)->Int{
         
         if personalDiscount == 0 {
             personalDiscount = firstShoppingDiscount
@@ -146,7 +146,7 @@ class PointsManager {
         }
         self.totalShopping! += expense
         
-        if isAWeeklyShopping() {
+        if isAWeeklyShopping(userId: userId) {
             weeklyShopping! +=  expense
         }else {
             weeklyShopping = expense
@@ -163,12 +163,12 @@ class PointsManager {
     
     private func addPointsForStandardConsumption(_ numberOfProducts: Int) {
         totalStandardConsumptions! += 1
-        balanceCurrentPoints += numberOfProducts
+        balanceCurrentPoints += Int(Double(numberOfProducts)*standardConsumptions!/changeCreditToPoint!)
     }
     
     private func addPointsForDiversifiedConsumption(_ numberOfProducts: Int){
         totalDiversifiedConsumptions! =   1
-        balanceCurrentPoints = 2 * numberOfProducts
+        balanceCurrentPoints = Int(Double(numberOfProducts)*diversifiedConsumptions!/changeCreditToPoint!)
     }
     
     func addPointsForConsumption(date: Date, numberOfProducts: Int)->Int {
@@ -214,7 +214,7 @@ class PointsManager {
     }
     
     //control if the current shopping fifferencies from last shopping of 1 week
-    private func isAWeeklyShopping()->Bool {
+    private func isAWeeklyShopping(userId: String)->Bool {
         
         //Ultima data valida
         let date = NSDate(timeIntervalSince1970: self.lastDateShopping!/1000)
@@ -238,7 +238,7 @@ class PointsManager {
                     return
                 }
                 let dictionaryToUpload :[String:TimeInterval] = ["lastDateShopping":FIRTimestamp!, "personalDiscount":self.firstShoppingDiscount!,"weeklyShopping":0]
-                FireBaseAPI.updateNode(node: "usersPointsStats/"+self.userId, value: dictionaryToUpload)
+                FireBaseAPI.updateNode(node: "usersPointsStats/"+userId, value: dictionaryToUpload)
             })
             return false
         }

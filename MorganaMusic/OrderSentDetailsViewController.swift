@@ -74,8 +74,8 @@ class OrderSentDetailsViewController: UIViewController, UITableViewDelegate, UIT
             
             if let pictureUrl = offertaInviata?.userDestination?.pictureUrl {
                 if let img = imageCache[pictureUrl] {
-                    (cell as! OrderSentTableViewCell).friendImageView.image = img
-                }else {
+                    (cell as! CartUserTableViewCell).friendImageView.image = img
+                } else {
                     // The image isn't cached, download the img data
                     // We should perform this in a background thread
                     

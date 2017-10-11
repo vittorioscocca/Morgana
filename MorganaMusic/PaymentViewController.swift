@@ -168,15 +168,15 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
                 if Cart.sharedIstance.state == "Valid" {
                     print("Pagamento carrello valido")
                     
-                    PointsManager.sharedInstance.readUserPointsStatsOnFirebase(onCompletion: { (error) in
+                    PointsManager.sharedInstance.readUserPointsStatsOnFirebase(userId: (self.user?.idApp)!, onCompletion: { (error) in
                         guard error == nil else {
                             print(error!)
                             return
                         }
-                        let points = PointsManager.sharedInstance.addPointsForShopping(expense: Cart.sharedIstance.costoTotale)
+                        let points = PointsManager.sharedInstance.addPointsForShopping(userId:(self.user?.idApp)!,expense: Cart.sharedIstance.costoTotale)
                         PointsManager.sharedInstance.updateNewValuesOnFirebase(actualUserId: (self.user?.idApp)!,onCompletion: {
                             
-                            NotitificationsCenter.localNotification(title: "Congratulazioni \((self.user?.firstName)!)", body: "Hai appena cumulato \(points) Punti!")
+                            NotificationsCenter.localNotification(title: "Congratulazioni \((self.user?.firstName)!)", body: "Hai appena cumulato \(points) Punti!")
                         })
                         
                         print("Punti aggiornati")

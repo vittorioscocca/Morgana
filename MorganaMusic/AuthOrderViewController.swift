@@ -285,14 +285,14 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
             //orderState Offerta scalata
             FireBaseAPI.updateNode(node: "ordersReceived/\((self.orderReaded?.userDestination?.idApp)!)/\((self.orderReaded?.company?.companyId)!)/\((self.orderReaded?.orderAutoId)!)", value: ["offerState":"Offerta scalata", "total" : String(format:"%.2f", (self.orderReaded?.costoTotale)!),"consumingDate":self.actualDateString!])
             FireBaseAPI.updateNode(node: "ordersSent/\((self.orderReaded?.userSender?.idApp)!)/\((self.orderReaded?.company?.companyId)!)/\((self.orderReaded?.idOfferta)!)", value: ["offerState":"Offerta scalata", "total" : String(format:"%.2f", (self.orderReaded?.costoTotale)!),"consumingDate":self.actualDateString!])
-            self.sendNotifications(full: false)
+            self.sendNotifications()
             
         } else {
             //update orderState "Offerta consumata"
             FireBaseAPI.updateNode(node: "ordersReceived/\((self.orderReaded?.userDestination?.idApp)!)/\((self.orderReaded?.company?.companyId)!)/\((self.orderReaded?.orderAutoId)!)", value: ["offerState":"Offerta consumata","consumingDate":self.actualDateString!])
             FireBaseAPI.updateNode(node: "ordersSent/\((self.orderReaded?.userSender?.idApp)!)/\((self.orderReaded?.company?.companyId)!)/\((self.orderReaded?.idOfferta)!)", value: ["offerState":"Offerta consumata","consumingDate":self.actualDateString!])
            
-            self.sendNotifications(full: true)
+            self.sendNotifications()
         }
         FireBaseAPI.updateNode(node: "ordersReceived/\((self.orderReaded?.userDestination?.idApp)!)/\((self.orderReaded?.company?.companyId)!)", value: ["scanningQrCode":true])
         
@@ -303,37 +303,37 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
     }
     
     
-    private func sendNotificationToUserSender(full: Bool){
+    private func sendNotificationToUserSender(){
         //Send notification
         var msg: String = ""
-        if full {
-            msg = "Il tuo amico \((self.orderReaded?.userDestination?.fullName)!) ha appena consumato l'ordine da te inviato "
-        }else {
-            msg = "Il tuo amico \((self.orderReaded?.userDestination?.fullName)!) ha appena consumato parte dell'ordine da te inviato "
-        }
         
-        NotitificationsCenter.sendConsuptionNotification(userDestinationIdApp: (self.orderReaded?.userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
+        msg = "Il tuo amico \((self.orderReaded?.userDestination?.fullName)!) ha appena consumato l'ordine da te inviato "
+        NotificationsCenter.sendConsuptionNotification(userDestinationIdApp: (self.orderReaded?.userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
+        print("Notifica al sender inviata")
     }
     
     private func sendNotificationToUserReceiver(){
         let msg = "Il tuo ordine è stato approvato "
-        NotitificationsCenter.sendConsuptionNotification(userDestinationIdApp: (self.orderReaded?.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
+        NotificationsCenter.sendConsuptionNotification(userDestinationIdApp: (self.orderReaded?.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
+        print("notifica al receiver inviata")
     }
     
-    private func sendNotifications(full: Bool){
-        //se orderState non è Offerta scalata: invia notifiche (Sender receved))
+    private func sendNotifications(){
+        //if order is accepted and if is not a autopurchased case, send notification to sender and receiver and add point else only send notification to receiver
         if orderReaded?.offerState == "Offerta accettata"{
-            if orderReaded?.userDestination?.idApp != orderReaded?.userDestination?.idApp {
-                sendNotificationToUserSender(full: full)
+            if orderReaded?.userDestination?.idApp != orderReaded?.userSender?.idApp {
+                sendNotificationToUserSender()
+                sendNotificationToUserReceiver()
             }
             self.updateUserPoints()
         }else {
+            print("Sato offerta diversa da Accettata")
             sendNotificationToUserReceiver()
         }
     }
     
     private func updateUserPoints(){
-        PointsManager.sharedInstance.readUserPointsStatsOnFirebase(onCompletion: { (error) in
+        PointsManager.sharedInstance.readUserPointsStatsOnFirebase(userId: (self.orderReaded?.userDestination?.idApp)!,onCompletion: { (error) in
             guard error == nil else {
                 print(error!)
                 return
@@ -341,8 +341,8 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
             let points = PointsManager.sharedInstance.addPointsForConsumption(date: self.actualDate!, numberOfProducts: self.numberOfProducts())
             PointsManager.sharedInstance.updateNewValuesOnFirebase(actualUserId: (self.orderReaded?.userDestination?.idApp)!, onCompletion: {
                 //send notification
-                let msg = "Il tuo ordine è stato approvato, hai cumulato \(points) "
-                NotitificationsCenter.sendConsuptionNotification(userDestinationIdApp: (self.orderReaded?.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
+                let msg = "Il tuo ordine è stato approvato, hai cumulato \(points) punti"
+                NotificationsCenter.sendConsuptionNotification(userDestinationIdApp: (self.orderReaded?.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
                 
             })
         })

@@ -563,7 +563,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         //scheduling notification appearing in expirationDate
         if !order.orderNotificationIsScheduled! {
             DispatchQueue.main.async {
-                NotitificationsCenter.scheduledExpiratedOrderLocalNotification(title: "Ordine scaduto", body: "Il prodotto che ti è stato offerto  è scaduto", identifier:"expirationDate-"+order.idOfferta!, expirationDate: self.stringTodateObject(date: order.expirationeDate!))
+                NotificationsCenter.scheduledExpiratedOrderLocalNotification(title: "Ordine scaduto", body: "Il prodotto che ti è stato offerto  è scaduto", identifier:"expirationDate-"+order.idOfferta!, expirationDate: self.stringTodateObject(date: order.expirationeDate!))
                 print("Notifica scadenza schedulata correttamente")
                 order.orderNotificationIsScheduled = true
                 FireBaseAPI.updateNode(node: "ordersReceived/\((self.user?.idApp)!)/\((order.company?.companyId)!)/\(order.orderAutoId)", value: ["orderNotificationIsScheduled":true])
@@ -596,7 +596,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
             //components.day! < 2
             if  components.day! <= 2 && !order.orderExpirationNotificationIsScheduled!{
                 DispatchQueue.main.async {
-                    NotitificationsCenter.scheduledRememberExpirationLocalNotification(title: "Ordine in scadenza", body: "l'ordine di € \(order.totalReadedFromFirebase) è in scadenza, affrettati a consumare", identifier: "RememberExpiration-"+order.idOfferta!)
+                    NotificationsCenter.scheduledRememberExpirationLocalNotification(title: "Ordine in scadenza", body: "l'ordine di € \(order.totalReadedFromFirebase) è in scadenza, affrettati a consumare", identifier: "RememberExpiration-"+order.idOfferta!)
                     order.orderExpirationNotificationIsScheduled = true
                     FireBaseAPI.updateNode(node: "ordersReceived/\((self.user?.idApp)!)/\((order.company?.companyId)!)/\(order.orderAutoId)", value: ["orderExpirationNotificationIsScheduled":true])
                 }
@@ -664,7 +664,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                     tableView.setEditing(false, animated: true)
                     tableView.deselectRow(at: indexPath, animated: true)
                     let msg = "Il tuo amico " + (self.user?.fullName)!  + " ha inoltrato il tuo ordine"
-                    NotitificationsCenter.sendNotification(userIdApp: (self.ordersReceived[indexPath.row].userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
+                    NotificationsCenter.sendNotification(userIdApp: (self.ordersReceived[indexPath.row].userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
                     FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase((self.ordersReceived[indexPath.row].userSender?.idApp)!, recOrPurch: "purchased")
                     self.myTable.reloadData()
                     self.resetSegmentControl1()

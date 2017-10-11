@@ -300,7 +300,7 @@ class PaymentManager {
                 if  idAppUserDestination != user.idApp {
                     let msg = "Il tuo amico " + (user.fullName)! + " ti ha appena offerto qualcosa"
                     //push notification and App badge value for Receiver
-                    NotitificationsCenter.sendOrderNotification(userDestinationIdApp: idAppUserDestination!, msg: msg, controlBadgeFrom: "received", companyId: (self.payment?.company?.companyId)!, userFullName: userFullName!, userIdApp: userIdApp!, userSenderIdApp: userSenderIdApp!,idOrder: idOrder!, autoIdOrder: autoIdOrder!)
+                    NotificationsCenter.sendOrderNotification(userDestinationIdApp: idAppUserDestination!, msg: msg, controlBadgeFrom: "received", companyId: (self.payment?.company?.companyId)!, userFullName: userFullName!, userIdApp: userIdApp!, userSenderIdApp: userSenderIdApp!,idOrder: idOrder!, autoIdOrder: autoIdOrder!)
                 }
                 self.updateNumberPendingProducts(idAppUserDestination!, recOrPurch: "received")
                 
