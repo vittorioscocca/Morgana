@@ -486,6 +486,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 (cell as! OrderReceivedTableViewCell).lastDate.text = "Ordine rifiutata"
                 (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
             } else if offertaRicevuta?.offerState == "Offerta consumata"{
+                (cell as! OrderReceivedTableViewCell).createDate.isHidden = true
                 (cell as! OrderReceivedTableViewCell).lastDate.text = "Offerta consumata il " + stringTodate(dateString: (offertaRicevuta?.consumingDate)!)
                 (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
             } else if offertaRicevuta?.offerState == "Offerta scalata"{

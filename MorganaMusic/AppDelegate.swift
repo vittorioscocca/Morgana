@@ -252,6 +252,10 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             completionHandler( [.alert,.sound,.badge])
         }
         
+        if userInfo["gcm.message_id"] as! String == "Consuption"{
+            print(notification.request.identifier)
+            completionHandler( [.alert,.sound,.badge])
+        }
         
     }
     
