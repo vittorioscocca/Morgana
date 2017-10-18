@@ -35,7 +35,6 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
     var lastOrderReceivedReadedTimestamp = UserDefaults.standard
     var firebaseObserverKilled = UserDefaults.standard
     
-    var imageCache = [String:UIImage]()
     var ordersSent = [Order]()
     var ordersReceived = [Order]()
     //var pendingPayments = [Payment]()
@@ -205,18 +204,19 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         self.drinksList_segmentControl.setTitle("Inviati", forSegmentAt: 0)
     }
     
-    private func deleteClimbedOrder(ordersReceived: [Order])->[Order]{
+    private func deleteClimbedOrder(ordersSent: [Order])->[Order]{
         var newProduct = [Product]()
         
-        for order in ordersReceived {
+        for order in ordersSent {
             for product in order.prodotti!{
                 if product.productName?.range(of:"_climbed") == nil {
                     newProduct.append(product)
                 }
             }
             order.prodotti = newProduct
+            newProduct.removeAll()
         }
-        return ordersReceived
+        return ordersSent
     }
     
     func readOrdersSent(){
@@ -228,7 +228,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 return
             }
             self.nowReadingOrdersAndOffersOnFirebase = false
-            self.ordersSent = self.deleteClimbedOrder(ordersReceived: ordersSent)
+            self.ordersSent = self.deleteClimbedOrder(ordersSent: ordersSent)
             self.myTable.reloadData()
         })
     }
@@ -246,6 +246,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
             if newProduct.count != 0 {
                 order.prodotti = newProduct
             }
+            newProduct.removeAll()
         }
         return ordersReceived
     }
@@ -416,52 +417,18 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
             (cell as! OrderSentTableViewCell).productus.text = "Prodotti totali: " + String(orderSent!.prodottiTotali)
             (cell as! OrderSentTableViewCell).cost.text = "€ " + String(format:"%.2f",(orderSent?.costoTotale)!)
             
-            // Start by setting the cell's image to a static file
-            // Without this, we will end up without an image view!
-            // If this image is already cached, don't re-download
-            if let pictureUrl = orderSent?.userDestination?.pictureUrl {
-                if let img = imageCache[pictureUrl] {
-                    (cell as! OrderSentTableViewCell).friendImageView.image = img
-                }else {
-                    // The image isn't cached, download the img data
-                    // We should perform this in a background thread
-                    
-                    //let request: NSURLRequest = NSURLRequest(url: url! as URL)
-                    //let mainQueue = OperationQueue.main
-                    
-                    let request = NSMutableURLRequest(url: NSURL(string: (orderSent?.userDestination?.pictureUrl)!)! as URL)
-                    let session = URLSession.shared
-                    
-                    //NSURLConnection.sendAsynchronousRequest(request as URLRequest, queue: mainQueue, completionHandler: { (response, data, error) -> Void in
-                    let task = session.dataTask(with: request as URLRequest, completionHandler: {data, response, error -> Void in
-                        if error == nil {
-                            // Convert the downloaded data in to a UIImage object
-                            let image = UIImage(data: data!)
-                            // Store the image in to our cache
-                            self.imageCache[(orderSent?.userDestination?.pictureUrl)!] = image
-                            // Update the cell
-                            DispatchQueue.main.async(execute: {
-                                if let cellToUpdate = tableView.cellForRow(at: indexPath) {
-                                    (cellToUpdate as! OrderSentTableViewCell).friendImageView.image = image
-                                }
-                            })
-                        }
-                        else {
-                            print("Error: \(error!.localizedDescription)")
-                        }
-                    })
-                    task.resume()
+            CacheImage.getImage(url: orderSent?.userDestination?.pictureUrl, onCompletion: { (image) in
+                guard image != nil else {
+                    print("immagine utente non reperibile")
+                    return
                 }
-
-            }else {
-                print("Attenzione URL immagine Utente destinatario non presente")
-            }
-            if (orderSent!.paymentState!) == "Valid" {
-                cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
-            }else {
-                cell?.accessoryType = UITableViewCellAccessoryType.checkmark
-            }
-        }else if (self.drinksList_segmentControl.selectedSegmentIndex == 1 && !self.ordersReceived.isEmpty) {
+                DispatchQueue.main.async(execute: {
+                    if let cellToUpdate = tableView.cellForRow(at: indexPath) {
+                        (cellToUpdate as! OrderSentTableViewCell).friendImageView.image = image
+                    }
+                })
+            })
+        } else if (self.drinksList_segmentControl.selectedSegmentIndex == 1 && !self.ordersReceived.isEmpty) {
             var offertaRicevuta: Order?
             cell = tableView.dequeueReusableCell(withIdentifier: "myDrinksRiceivedCell", for: indexPath)
             
@@ -501,44 +468,28 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
             (cell as! OrderReceivedTableViewCell).ordersSentAutoId = offertaRicevuta?.idOfferta
             (cell as! OrderReceivedTableViewCell).orderReceivedAutoId = offertaRicevuta?.orderAutoId
             (cell as! OrderReceivedTableViewCell).friendFullName.text = offertaRicevuta?.userSender?.fullName
-            if let pictureUrl = offertaRicevuta?.userSender?.pictureUrl{
-                if let img = imageCache[pictureUrl] {
-                    (cell as! OrderReceivedTableViewCell).friendImageView.image = img
+            
+            CacheImage.getImage(url: offertaRicevuta?.userSender?.pictureUrl, onCompletion: { (image) in
+                guard image != nil else {
+                    print("immagine utente non reperibile")
+                    return
                 }
-                else {
-                    let request = NSMutableURLRequest(url: NSURL(string: (offertaRicevuta?.userSender?.pictureUrl)!)! as URL)
-                    let session = URLSession.shared
-                    let task = session.dataTask(with: request as URLRequest, completionHandler: {data, response, error -> Void in
-                        if error == nil {
-                            // Convert the downloaded data in to a UIImage object
-                            let image = UIImage(data: data!)
-                            // Store the image in to our cache
-                            self.imageCache[(offertaRicevuta?.userSender?.pictureUrl)!] = image
-                            // Update the cell
-                            DispatchQueue.main.async(execute: {
-                                if let cellToUpdate = tableView.cellForRow(at: indexPath) {
-                                    (cellToUpdate as! OrderReceivedTableViewCell).friendImageView.image = image
-                                }
-                            })
-                        }
-                        else {
-                            print("Error: \(error!.localizedDescription)")
-                        }
-                    })
-                    task.resume()
-                }
-            }else {
-                print("Attenzione URL immagine Mittente non presente")
-            }
+                DispatchQueue.main.async(execute: {
+                    if let cellToUpdate = tableView.cellForRow(at: indexPath) {
+                        (cellToUpdate as! OrderReceivedTableViewCell).friendImageView.image = image
+                    }
+                })
+            })
+            
             if (offertaRicevuta!.offerState!) == "Offerta accettata" { //"Pending"
-                cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
+                //cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
             }else if (offertaRicevuta!.offerState!) == "Pending" {
                 cell?.accessoryType = UITableViewCellAccessoryType.none
             }else if (offertaRicevuta!.offerState!) == "Offerta consumata"{
                 cell?.accessoryType = UITableViewCellAccessoryType.none
                 (cell as? OrderReceivedTableViewCell)?.cellReaded = true
             }else if (offertaRicevuta!.offerState!) == "Offerta scalata"{
-                cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
+                //cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
                 (cell as? OrderReceivedTableViewCell)?.cellReaded = false
                 
             }else{
@@ -672,11 +623,22 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 forwardOrderAction.backgroundColor = #colorLiteral(red: 0.6000000238, green: 0.6000000238, blue: 0.6000000238, alpha: 1)*/
                 
                 return [refuseOrderAction, acceptOrderAction]
-            case "Scaduta":
+            case "Scaduta" :
                 //Action delete order
                 let deleteOrderAction = UITableViewRowAction(style: .destructive, title: "Elimina") { (action, index) in
-                    FirebaseData.sharedIstance.deleteOrderReceveidOnFirebase(order: self.ordersReceived[indexPath.row])
+                    FirebaseData.sharedIstance.deleteOrderOnFirebase(node: "ordersReceived", userIdApp: (self.user?.idApp)!, comapanyId: (self.ordersReceived[indexPath.row].company?.companyId)!, autoIdOrder: self.ordersReceived[indexPath.row].orderAutoId, viewState: "deleted")
                     tableView.setEditing(false, animated: true)
+                    self.ordersReceived.remove(at: indexPath.row)
+                    tableView.deleteRows(at: [indexPath], with: .fade)
+                }
+                deleteOrderAction.backgroundColor = #colorLiteral(red: 0.9254902005, green: 0.2352941185, blue: 0.1019607857, alpha: 1)
+                return [deleteOrderAction]
+                
+            case  "Offerta consumata" :
+                let deleteOrderAction = UITableViewRowAction(style: .destructive, title: "Elimina") { (action, index) in
+                    FirebaseData.sharedIstance.deleteOrderOnFirebase(node: "ordersReceived", userIdApp: (self.user?.idApp)!, comapanyId: (self.ordersReceived[indexPath.row].company?.companyId)!, autoIdOrder: self.ordersReceived[indexPath.row].orderAutoId, viewState: "deleted")
+                    tableView.setEditing(false, animated: true)
+                    self.ordersReceived[indexPath.row].viewState =  "deleted"
                     self.ordersReceived.remove(at: indexPath.row)
                     tableView.deleteRows(at: [indexPath], with: .fade)
                 }
@@ -712,6 +674,17 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                 }
                 ransomOrder.backgroundColor = #colorLiteral(red: 0.501960814, green: 0.501960814, blue: 0.501960814, alpha: 1)
                 return [ransomOrder,forwardOrderAction, addToYourCredits]
+            case  "Offerta consumata" :
+                let deleteOrderAction = UITableViewRowAction(style: .destructive, title: "Elimina") { (action, index) in
+                    FirebaseData.sharedIstance.deleteOrderOnFirebase(node: "ordersSent", userIdApp: (self.user?.idApp)!, comapanyId: (self.ordersSent[indexPath.row].company?.companyId)!, autoIdOrder: self.ordersSent[indexPath.row].orderAutoId, viewState: "deleted")
+                    tableView.setEditing(false, animated: true)
+                    self.ordersSent[indexPath.row].viewState =  "deleted"
+                    self.ordersSent.remove(at: indexPath.row)
+                    tableView.deleteRows(at: [indexPath], with: .fade)
+                }
+                deleteOrderAction.backgroundColor = #colorLiteral(red: 0.9254902005, green: 0.2352941185, blue: 0.1019607857, alpha: 1)
+                return [deleteOrderAction]
+                
             default:
                 return nil
             }
@@ -914,7 +887,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
                     }
                     //Delete Order
                     if indexPath != nil {
-                        FirebaseData.sharedIstance.deleteOrderPurchasedOnFireBase(order: self.ordersSent[(indexPath?.row)!])
+                        FirebaseData.sharedIstance.deleteOrderOnFirebase(node: "ordersSent", userIdApp: (self.user?.idApp)!, comapanyId: (self.ordersSent[(indexPath?.row)!].company?.companyId)!, autoIdOrder: self.ordersSent[(indexPath?.row)!].orderAutoId, viewState: "deleted")
                         //self.myTable.deleteRows(at: [indexPath!], with: .fade)
                         self.ordersSent.remove(at: (indexPath?.row)!)
                     }

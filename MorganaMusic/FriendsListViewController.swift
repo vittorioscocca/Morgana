@@ -17,7 +17,6 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     var segueFrom: String?
     
     var resultSearchController: UISearchController?
-    var imageCache = [String:UIImage]()
     let fireBaseToken = UserDefaults.standard
     var userId: String?
     
@@ -138,41 +137,18 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
         
         // If this image is already cached, don't re-download
         
-        if let pictureUrl = friend?.pictureUrl{
-            if let img = imageCache[pictureUrl] {
-                (cell as! FirendsListTableViewCell).friendImageView.image = img
+        CacheImage.getImage(url: friend?.pictureUrl, onCompletion: { (image) in
+            guard image != nil else {
+                print("immagine utente non reperibile")
+                return
             }
-            else {
-                // The image isn't cached, download the img data
-                // We should perform this in a background thread
-                
-                //let request: NSURLRequest = NSURLRequest(url: url! as URL)
-                //let mainQueue = OperationQueue.main
-                let request = NSMutableURLRequest(url: NSURL(string: (friend?.pictureUrl)!)! as URL)
-                let session = URLSession.shared
-                
-                let task = session.dataTask(with: request as URLRequest, completionHandler: {data, response, error -> Void in
-                    if error == nil {
-                        // Convert the downloaded data in to a UIImage object
-                        let image = UIImage(data: data!)
-                        // Store the image in to our cache
-                        self.imageCache[(friend?.pictureUrl)!] = image
-                        // Update the cell
-                        DispatchQueue.main.async(execute: {
-                            if let cellToUpdate = tableView.cellForRow(at: indexPath) {
-                                (cellToUpdate as! FirendsListTableViewCell).friendImageView.image = image
-                            }
-                        })
-                    }
-                    else {
-                        print("Error: \(error!.localizedDescription)")
-                    }
-                })
-                task.resume()
-            }
-        }else {
-            print("Attenzione URL immagine User non presente")
-        }
+            DispatchQueue.main.async(execute: {
+                if let cellToUpdate = tableView.cellForRow(at: indexPath) {
+                    (cellToUpdate as! FirendsListTableViewCell).friendImageView.image = image
+                }
+            })
+        })
+        
         return cell
     }
     

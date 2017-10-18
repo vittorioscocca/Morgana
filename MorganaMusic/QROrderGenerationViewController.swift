@@ -25,7 +25,6 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
     var user: User?
     var qrcodeImage: CIImage!
     var sectionTitle = ["Dettaglio ordine", "Riepilogo"]
-    var imageCache = [String:UIImage]()
     var dataScadenza :String?
     
     
@@ -40,17 +39,8 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
             self.gender_label.text = "sesso: donna"
         }
         
-        let url = NSURL(string: (user?.pictureUrl)!)
-        let data = NSData(contentsOf: url! as URL)
-        userImage_image.image = UIImage(data: data! as Data)
-        
-        self.userImage_image.layer.borderWidth = 2.5
-        self.userImage_image.layer.borderColor = #colorLiteral(red: 0.7419371009, green: 0.1511851847, blue: 0.20955199, alpha: 1)
-        self.userImage_image.layer.masksToBounds = false
-        self.userImage_image.layer.cornerRadius = userImage_image.frame.height/2
-        self.userImage_image.clipsToBounds = true
-        
-
+        self.readImage()
+        self.setCustomImage()
         self.myTable.dataSource = self
         self.myTable.delegate = self
         guard !orderExpirated() else {
@@ -61,6 +51,7 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
        
         generateQrCode()
     }
+
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -73,6 +64,26 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+    }
+    
+    private func readImage(){
+        CacheImage.getImage(url: self.user?.pictureUrl, onCompletion: { (image) in
+            guard image != nil else {
+                print("Attenzione URL immagine Mittente non presente")
+                return
+            }
+            DispatchQueue.main.async(execute: {
+                self.userImage_image.image = image
+            })
+        })
+    }
+    
+    private func setCustomImage(){
+        self.userImage_image.layer.borderWidth = 2.5
+        self.userImage_image.layer.borderColor = #colorLiteral(red: 0.7419371009, green: 0.1511851847, blue: 0.20955199, alpha: 1)
+        self.userImage_image.layer.masksToBounds = false
+        self.userImage_image.layer.cornerRadius = userImage_image.frame.height/2
+        self.userImage_image.clipsToBounds = true
     }
     
     private func orderExpirated()->Bool{
@@ -161,10 +172,8 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
         if (sectionTitle[indexPath.section] == sectionTitle[0]) {
             let product = self.offertaRicevuta?.prodotti?[indexPath.row]
             
-             cell.textLabel?.text = "(\(product!.quantity!))  " + (product?.productName)! + " € " + String(format:"%.2f", product!.price!)
+            cell.textLabel?.text = "(\(product!.quantity!))  " + (product?.productName)! + " € " + String(format:"%.2f", product!.price!)
             cell.textLabel?.textColor = #colorLiteral(red: 0.7411764706, green: 0.1529411765, blue: 0.2078431373, alpha: 1)
-            
-            
             
             print(product!.productName!)
             print("costo ",product!.price!)

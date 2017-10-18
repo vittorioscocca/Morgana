@@ -60,12 +60,9 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
             print("user  trovato")
         }else {self.generateAlert()}
         
-        let url = NSURL(string: (user?.pictureUrl)!)
-        let data = NSData(contentsOf: url! as URL)
-        userImage_image.image = UIImage(data: data! as Data)
-        self.userName_text.text = user?.firstName
-        self.userSurname_text.text = user?.lastName
-        self.userEmail_text.text = user?.email
+        self.readImage()
+        self.setCustomImage()
+        
         generateQrCode()
         FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + (user?.idApp)!, onCompletion: { (error,dictionary) in
             guard error == nil else {
@@ -84,9 +81,28 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         })
     }
 
-    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
+    }
+    
+    private func readImage(){
+        CacheImage.getImage(url: self.user?.pictureUrl, onCompletion: { (image) in
+            guard image != nil else {
+                print("Attenzione URL immagine Mittente non presente")
+                return
+            }
+            DispatchQueue.main.async(execute: {
+                self.userImage_image.image = image
+            })
+        })
+    }
+    
+    private func setCustomImage(){
+        self.userImage_image.layer.borderWidth = 2.5
+        self.userImage_image.layer.borderColor = #colorLiteral(red: 0.7419371009, green: 0.1511851847, blue: 0.20955199, alpha: 1)
+        self.userImage_image.layer.masksToBounds = false
+        self.userImage_image.layer.cornerRadius = userImage_image.frame.height/2
+        self.userImage_image.clipsToBounds = true
     }
     
     private func generateQrCode(){

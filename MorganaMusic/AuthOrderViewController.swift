@@ -25,7 +25,6 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
     var sectionTitle = ["Locale","Prodotti"]
     var comapanyId: String?
     var orderReaded: Order?
-    var imageCache = [String:UIImage]()
     var myIndexPath = [IndexPath]()
     var productQuantity = [Int]()
     var alert = UIAlertController()
@@ -99,43 +98,23 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
             self.orderReaded?.userDestination?.fullName = dictionary!["fullName"] as? String
             self.orderReaded?.userDestination?.pictureUrl = dictionary!["pictureUrl"] as? String
             self.userFullName_label.text = dictionary!["fullName"] as? String
-            
+    
             self.readImage()
-            
+        })
+    }
+    
+    private func readImage(){
+        CacheImage.getImage(url: self.orderReaded?.userDestination?.pictureUrl, onCompletion: { (image) in
+            guard image != nil else {
+                print("Attenzione URL immagine Mittente non presente")
+                return
+            }
+            DispatchQueue.main.async(execute: {
+                self.userImageView.image = image
+            })
         })
     }
   
-    
-    private func readImage (){
-        if let pictureUrl = self.orderReaded?.userDestination?.pictureUrl{
-            if let img = imageCache[pictureUrl] {
-                self.userImageView.image = img
-            }
-            else {
-                let request = NSMutableURLRequest(url: NSURL(string: (self.orderReaded?.userDestination?.pictureUrl)!)! as URL)
-                let session = URLSession.shared
-                let task = session.dataTask(with: request as URLRequest, completionHandler: {data, response, error -> Void in
-                    if error == nil {
-                        // Convert the downloaded data in to a UIImage object
-                        let image = UIImage(data: data!)
-                        // Store the image in to our cache
-                        self.imageCache[(self.orderReaded?.userDestination?.pictureUrl)!] = image
-                        // Update the cell
-                        DispatchQueue.main.async(execute: {
-                            self.userImageView.image = image
-                        })
-                    }
-                    else {
-                        print("Error: \(error!.localizedDescription)")
-                    }
-                })
-                task.resume()
-            }
-        }else {
-            print("Attenzione URL immagine Mittente non presente")
-        }
-    }
-    
     private func timeIntervalToDate(timeInterval: TimeInterval)->Date{
         
         let date = NSDate(timeIntervalSince1970: timeInterval/1000)

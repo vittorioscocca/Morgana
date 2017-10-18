@@ -24,6 +24,8 @@
 		2A53AB671EB0AC120018B8E9 /* Product.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A53AB661EB0AC120018B8E9 /* Product.swift */; };
 		2A53AB691EB0AC950018B8E9 /* Order.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A53AB681EB0AC950018B8E9 /* Order.swift */; };
 		2A53AB6D1EB135D60018B8E9 /* InitialSliderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A53AB6C1EB135D60018B8E9 /* InitialSliderViewController.swift */; };
+		2A56BBFE1F9755FA00C72860 /* CartOrderDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A56BBFD1F9755FA00C72860 /* CartOrderDetailsViewController.swift */; };
+		2A56BC001F97584D00C72860 /* CacheImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A56BBFF1F97584D00C72860 /* CacheImage.swift */; };
 		2A6809AB1F79595200D813FF /* EventsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6809AA1F79595100D813FF /* EventsViewController.swift */; };
 		2A6809AD1F7962CD00D813FF /* TextFieldController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6809AC1F7962CC00D813FF /* TextFieldController.swift */; };
 		2A69711F1EB20E400036E3C5 /* UserDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A69711E1EB20E400036E3C5 /* UserDestination.swift */; };
@@ -116,6 +118,8 @@
 		2A53AB661EB0AC120018B8E9 /* Product.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Product.swift; sourceTree = "<group>"; };
 		2A53AB681EB0AC950018B8E9 /* Order.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Order.swift; sourceTree = "<group>"; };
 		2A53AB6C1EB135D60018B8E9 /* InitialSliderViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InitialSliderViewController.swift; sourceTree = "<group>"; };
+		2A56BBFD1F9755FA00C72860 /* CartOrderDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartOrderDetailsViewController.swift; sourceTree = "<group>"; };
+		2A56BBFF1F97584D00C72860 /* CacheImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheImage.swift; sourceTree = "<group>"; };
 		2A6809AA1F79595100D813FF /* EventsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsViewController.swift; sourceTree = "<group>"; };
 		2A6809AC1F7962CC00D813FF /* TextFieldController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldController.swift; sourceTree = "<group>"; };
 		2A69711E1EB20E400036E3C5 /* UserDestination.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserDestination.swift; sourceTree = "<group>"; };
@@ -342,6 +346,7 @@
 				2A1D14EB1F644DDC00C2F5E2 /* QrReaderViewControllerViewController.swift */,
 				2AA135F71F863FCD003B1507 /* AuthOrderViewController.swift */,
 				2AA135F91F868298003B1507 /* AutOrderTableViewCell.swift */,
+				2A56BBFD1F9755FA00C72860 /* CartOrderDetailsViewController.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -363,6 +368,7 @@
 				2ABD93BA1F18DF5C00F28632 /* NotificationsCenter.swift */,
 				2A6809AC1F7962CC00D813FF /* TextFieldController.swift */,
 				2A6CC8AB1F85BD310056129C /* MorganaMusicSettings.swift */,
+				2A56BBFF1F97584D00C72860 /* CacheImage.swift */,
 			);
 			name = SupportingFiles;
 			sourceTree = "<group>";
@@ -693,11 +699,13 @@
 				2AFA98851EC19BCA0007CA33 /* Cart.swift in Sources */,
 				2AA135F81F863FCD003B1507 /* AuthOrderViewController.swift in Sources */,
 				2A206B971F0B79990080235B /* FireBaseAPI.swift in Sources */,
+				2A56BBFE1F9755FA00C72860 /* CartOrderDetailsViewController.swift in Sources */,
 				2ABD93BB1F18DF5C00F28632 /* NotificationsCenter.swift in Sources */,
 				2AA4B96F1F755E9E00F4FD48 /* Company.swift in Sources */,
 				2A6E266D1E9BFCF600C1FC64 /* User+CoreDataProperties.swift in Sources */,
 				2A6971231EB9D9A20036E3C5 /* DrinksOrderViewController.swift in Sources */,
 				2A53AB6D1EB135D60018B8E9 /* InitialSliderViewController.swift in Sources */,
+				2A56BC001F97584D00C72860 /* CacheImage.swift in Sources */,
 				2A69711F1EB20E400036E3C5 /* UserDestination.swift in Sources */,
 				2A53AB5D1EAE893F0018B8E9 /* TestConnection.swift in Sources */,
 				2AA135FA1F868298003B1507 /* AutOrderTableViewCell.swift in Sources */,

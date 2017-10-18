@@ -44,8 +44,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 completionHandler: {(granted, error) in
                     if (granted) {
                         DispatchQueue.main.async(execute: {
-                            UIApplication.shared.registerForRemoteNotifications()
-                            application.registerForRemoteNotifications()
+                            //UIApplication.shared.registerForRemoteNotifications()
+                            //application.registerForRemoteNotifications()
                         })
                     } else{
                         print("Notification permissions not granted")
@@ -61,6 +61,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             Messaging.messaging().delegate = self
             
         }
+        
         application.registerForRemoteNotifications()
         
         
@@ -173,8 +174,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         self.saveContext()
         killFirebaseObserver()
-        
-        
     }
     
     func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
@@ -288,16 +287,9 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             completionHandler( [.alert,.sound,.badge])
         }
         
-        
-        
-        
-        
-        
         //This works for iphone 7 and above using haptic feedback
         let feedbackGenerator = UINotificationFeedbackGenerator()
         feedbackGenerator.notificationOccurred(.success)
-        
-        
     }
     
     

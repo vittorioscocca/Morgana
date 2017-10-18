@@ -96,7 +96,8 @@ class FirebaseData {
             "pendingPaymentAutoId": self.paymentAutoId!,
             "userSender": (self.user?.idApp)!,
             "orderReaded":"false",
-            "consumingDate": ""
+            "consumingDate": "",
+            "viewState": (order.viewState)!
         ]
     }
     
@@ -155,7 +156,6 @@ class FirebaseData {
                 currentWorkItem.perform()
             }
         }
-        
     }
     
     //SAVE PRODUCT ON FIREBASE
@@ -379,84 +379,88 @@ class FirebaseData {
                     let order: Order = Order(prodotti: [], userDestination: UserDestination(nil,nil,nil,nil,nil), userSender: UserDestination(nil,nil,nil,nil,nil))
                     order.company?.companyId = companyId as? String
                     order.idOfferta = id_offer as? String
+                    order.orderAutoId = (id_offer as? String)!
                     let orderDataDictionary = orderData as? NSDictionary
                     
-                    order.expirationeDate = orderDataDictionary?["expirationDate"] as? String
-                    order.paymentState = orderDataDictionary?["paymentState"] as? String
-                    order.offerState = orderDataDictionary?["offerState"] as? String
-                    order.userDestination?.idFB = orderDataDictionary?["facebookUserDestination"] as? String
-                    order.dataCreazioneOfferta = orderDataDictionary?["offerCreationDate"] as? String
-                    order.userDestination?.idApp = orderDataDictionary?["IdAppUserDestination"] as? String
-                    order.timeStamp = orderDataDictionary?["timestamp"] as! TimeInterval
-                    order.pendingPaymentAutoId = orderDataDictionary?["pendingPaymentAutoId"] as! String
-                    order.ordersSentAutoId = orderDataDictionary?["ordersSentAutoId"] as! String
-                    order.userSender?.idApp = orderDataDictionary?["userSender"] as? String
-                    order.orderNotificationIsScheduled = orderDataDictionary?["orderNotificationIsScheduled"] as? Bool
-                    order.consumingDate = orderDataDictionary?["consumingDate"] as? String
-                    
-                    if  orderDataDictionary?["orderReaded"] as? String == "true"{
-                        order.orderReaded = true
-                    } else {
-                        order.orderReaded = false
-                    }
-                    
-                    if order.userDestination?.idFB == self.user?.idFB {
-                        order.userDestination?.fullName = self.user?.fullName
-                        order.userDestination?.pictureUrl = self.user?.pictureUrl
+                    if orderDataDictionary?["viewState"] as? String != "deleted" {
+                        order.expirationeDate = orderDataDictionary?["expirationDate"] as? String
+                        order.paymentState = orderDataDictionary?["paymentState"] as? String
+                        order.offerState = orderDataDictionary?["offerState"] as? String
+                        order.userDestination?.idFB = orderDataDictionary?["facebookUserDestination"] as? String
+                        order.dataCreazioneOfferta = orderDataDictionary?["offerCreationDate"] as? String
+                        order.userDestination?.idApp = orderDataDictionary?["IdAppUserDestination"] as? String
+                        order.timeStamp = orderDataDictionary?["timestamp"] as! TimeInterval
+                        order.pendingPaymentAutoId = orderDataDictionary?["pendingPaymentAutoId"] as! String
+                        order.ordersSentAutoId = orderDataDictionary?["ordersSentAutoId"] as! String
+                        order.userSender?.idApp = orderDataDictionary?["userSender"] as? String
+                        order.orderNotificationIsScheduled = orderDataDictionary?["orderNotificationIsScheduled"] as? Bool
+                        order.consumingDate = orderDataDictionary?["consumingDate"] as? String
+                        order.viewState = orderDataDictionary?["viewState"] as? String
                         
-                    } else if !(friendsList?.isEmpty)! {
+                        if  orderDataDictionary?["orderReaded"] as? String == "true"{
+                            order.orderReaded = true
+                        } else {
+                            order.orderReaded = false
+                        }
+                        
+                        if order.userDestination?.idFB == self.user?.idFB {
+                            order.userDestination?.fullName = self.user?.fullName
+                            order.userDestination?.pictureUrl = self.user?.pictureUrl
+                            
+                        } else if !(friendsList?.isEmpty)! {
                             for friend in friendsList! {
                                 if friend.idFB == order.userDestination?.idFB {
-                                        order.userDestination?.fullName = friend.fullName
-                                        order.userDestination?.pictureUrl = friend.pictureUrl
-                                        break
+                                    order.userDestination?.fullName = friend.fullName
+                                    order.userDestination?.pictureUrl = friend.pictureUrl
+                                    break
                                 }
                             }
-                    }
-                    
-                    if order.offerState != "Scaduta" {
-                        self.scheduleExpiryNotification(order: order)
-                        ref.child("sessions").setValue(ServerValue.timestamp())
-                        ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
-                            let timeStamp = snap.value! as! TimeInterval
-                            let date = NSDate(timeIntervalSince1970: timeStamp/1000)
-                            
-                            let dateFormatter = DateFormatter()
-                            dateFormatter.amSymbol = "AM"
-                            dateFormatter.pmSymbol = "PM"
-                            dateFormatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
-                            let dateString = dateFormatter.string(from: date as Date)
-                            let finalDate = dateFormatter.date(from: dateString)
-                            self.lastOrderSentReadedTimestamp.set(finalDate!, forKey: "ordersSentReadedTimestamp")
-                            
-                            let date1Formatter = DateFormatter()
-                            date1Formatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
-                            date1Formatter.locale = Locale.init(identifier: "it_IT")
-                            
-                            let dateObj = date1Formatter.date(from: order.expirationeDate!)
-                            if dateObj! < finalDate! {
-                                order.offerState = "Scaduta"
-                                ref.child("ordersSent/\((self.user?.idApp)!)/\((order.company?.companyId)!)/\(order.idOfferta!)").updateChildValues(["offerState" : "Scaduta"])
-                                ref.child("ordersReceived/\((order.userDestination?.idApp)!)/\((order.company?.companyId)!)/\(order.ordersSentAutoId)").updateChildValues(["offerState" : "Scaduta"])
+                        }
+                        
+                        if order.offerState != "Scaduta" {
+                            self.scheduleExpiryNotification(order: order)
+                            ref.child("sessions").setValue(ServerValue.timestamp())
+                            ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
+                                let timeStamp = snap.value! as! TimeInterval
+                                let date = NSDate(timeIntervalSince1970: timeStamp/1000)
                                 
-                                let msg = "Il prodotto che ti è stato offerto da \((self.user?.fullName)!) è scaduto"
-                                NotificationsCenter.sendNotification(userDestinationIdApp: (order.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
-                                self.updateNumberPendingProductsOnFireBase((order.userDestination?.idApp)!, recOrPurch: "received")
-                            }
-                        })
-                    }
-                
-                    if order.paymentState != "Valid"  {
-                        self.ordersSent.append(order)
-                    }else if self.user?.idApp != order.userDestination?.idApp   {
-                        self.ordersSent.append(order)
-                    }
-                    //if consumption is before expirationDate, scheduled notification is killed
-                    //attenzione lo fa ogni volta che legge
-                    if order.offerState == "Offerta consumata" {
-                        let center = UNUserNotificationCenter.current()
-                        center.removePendingNotificationRequests(withIdentifiers: [order.idOfferta!])
-                        print("scheduled notification killed")
+                                let dateFormatter = DateFormatter()
+                                dateFormatter.amSymbol = "AM"
+                                dateFormatter.pmSymbol = "PM"
+                                dateFormatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
+                                let dateString = dateFormatter.string(from: date as Date)
+                                let finalDate = dateFormatter.date(from: dateString)
+                                self.lastOrderSentReadedTimestamp.set(finalDate!, forKey: "ordersSentReadedTimestamp")
+                                
+                                let date1Formatter = DateFormatter()
+                                date1Formatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
+                                date1Formatter.locale = Locale.init(identifier: "it_IT")
+                                
+                                let dateObj = date1Formatter.date(from: order.expirationeDate!)
+                                if dateObj! < finalDate! {
+                                    order.offerState = "Scaduta"
+                                    ref.child("ordersSent/\((self.user?.idApp)!)/\((order.company?.companyId)!)/\(order.idOfferta!)").updateChildValues(["offerState" : "Scaduta"])
+                                    ref.child("ordersReceived/\((order.userDestination?.idApp)!)/\((order.company?.companyId)!)/\(order.ordersSentAutoId)").updateChildValues(["offerState" : "Scaduta"])
+                                    
+                                    let msg = "Il prodotto che ti è stato offerto da \((self.user?.fullName)!) è scaduto"
+                                    NotificationsCenter.sendNotification(userDestinationIdApp: (order.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
+                                    self.updateNumberPendingProductsOnFireBase((order.userDestination?.idApp)!, recOrPurch: "received")
+                                }
+                            })
+                        }
+                        
+                        if order.paymentState != "Valid"  {
+                            self.ordersSent.append(order)
+                        }else if self.user?.idApp != order.userDestination?.idApp   {
+                            self.ordersSent.append(order)
+                        }
+                        //if consumption is before expirationDate, scheduled notification is killed
+                        //attenzione lo fa ogni volta che legge
+                        if order.offerState == "Offerta consumata" {
+                            let center = UNUserNotificationCenter.current()
+                            center.removePendingNotificationRequests(withIdentifiers: [order.idOfferta!])
+                            print("scheduled notification killed")
+                        }
                     }
                 }
             }
@@ -550,6 +554,9 @@ class FirebaseData {
             case "consumingDate":
                 order.consumingDate = valore as? String
                 break
+            case "viewState" :
+                order.viewState = valore as? String
+                break
             default:
                 break
             }
@@ -587,17 +594,19 @@ class FirebaseData {
                         order.company?.companyId = companyId as? String
                         order.orderAutoId = orderId as! String
                         self.readOrder(order: order,controlExpirationDate: true, dataOrder: dati_pendingOffers as! NSDictionary)
+                        if order.viewState != "deleted" {
+                            if order.paymentState == "Valid" && order.offerState != "Offerta rifiutata" && order.offerState != "Offerta inoltrata" {
+                                self.ordersReceived.append(order)
+                            }
+                            //if consumption is before expirationDate, scheduled notification is killed
+                            if order.offerState == "Offerta consumata" {
+                                //attenzione killa ogni volta che carica le offeerte, deve farlo una volta
+                                let center = UNUserNotificationCenter.current()
+                                center.removePendingNotificationRequests(withIdentifiers: ["expirationDate-"+order.idOfferta!,"RememberExpiration-"+order.idOfferta!])
+                                print("scheduled notification killed")
+                            }
+                        }
                         
-                        if order.paymentState == "Valid" && order.offerState != "Offerta rifiutata" && order.offerState != "Offerta inoltrata" {
-                            self.ordersReceived.append(order)
-                        }
-                        //if consumption is before expirationDate, scheduled notification is killed
-                        if order.offerState == "Offerta consumata" {
-                            //attenzione killa ogni volta che carica le offeerte, deve farlo una volta
-                            let center = UNUserNotificationCenter.current()
-                            center.removePendingNotificationRequests(withIdentifiers: ["expirationDate-"+order.idOfferta!,"RememberExpiration-"+order.idOfferta!])
-                            print("scheduled notification killed")
-                        }
                     } else if (dati_pendingOffers as? Bool)! {
                         let activeViewController = UIApplication.topViewController()
                         if activeViewController is QROrderGenerationViewController {
@@ -648,39 +657,32 @@ class FirebaseData {
     
     private func readUserSender(ordersToRead: [Order], onCompletion: @escaping ()->()){
         var node = String()
-        
         let dispatchGroup = DispatchGroup.init()
         let queue = DispatchQueue.init(label: "it.xcoding.queueReadUsers", attributes: .concurrent, target: .main)
         print("Orders Received contiene \(self.ordersReceived.count) ordini")
         for singleOrder in ordersToRead{
-            
             node = "users/" + (singleOrder.userSender?.idApp)!
-            
-            FireBaseAPI.readNodeOnFirebaseWithOutAutoIdHandler(node: node, beginHandler: {
-                dispatchGroup.enter()
-                queue.async(group: dispatchGroup){
+            dispatchGroup.enter()
+            queue.async(group: dispatchGroup){
+                FireBaseAPI.readNodeOnFirebaseWithOutAutoIdHandler(node: node, beginHandler: {
                     print("user letto")
-                }
-            }, completionHandler: {(error, userData) in
-                    
-                    guard error == nil else {return}
-                    guard userData != nil else {return}
-                
-                    singleOrder.userSender?.fullName = userData!["fullName"] as? String
-                    print("full name letto")
-                    singleOrder.userSender?.pictureUrl = userData!["pictureUrl"] as? String
-                    print("picturUrl letta")
-                
-                    print("letto uno user")
-                    dispatchGroup.leave()
-            })
+                }, completionHandler: {(error, userData) in
+                        guard error == nil else {return}
+                        guard userData != nil else {return}
+                        singleOrder.userSender?.fullName = userData!["fullName"] as? String
+                        print("full name letto")
+                        singleOrder.userSender?.pictureUrl = userData!["pictureUrl"] as? String
+                        print("picturUrl letta")
+                        print("letto uno user")
+                        dispatchGroup.leave()
+                })
+            }
         }
-        
+
         dispatchGroup.notify(queue: DispatchQueue.main) {
             print("group operation ended")
             onCompletion()
         }
-        
     }
     
     private func readProductsSentDetails(ordersToRead: [Order], onCompletion: @escaping ()->()) {
@@ -691,39 +693,38 @@ class FirebaseData {
         for singleOrder in ordersToRead{
             let node = "productsOffersDetails/\((singleOrder.company?.companyId)!)/\(singleOrder.idOfferta!)"
             
+            dispatchGroup.enter()
+            queue.async(group: dispatchGroup){
             //readNodeOnFireBase con Autoid
-            FireBaseAPI.readNodeOnFirebaseWithOutAutoIdHandler(node: node, beginHandler: {
-                dispatchGroup.enter()
-                queue.async(group: dispatchGroup){
+                FireBaseAPI.readNodeOnFirebaseWithOutAutoIdHandler(node: node, beginHandler: {
                     print("eseguo lettura Dettaglio Ordini")
-                }
-            }, completionHandler: { (error, productData) in
-                
-                guard error == nil else {return}
-                guard productData != nil else {return}
-                
-                var product: Product = Product(productName: nil, price: nil, quantity: nil)
-                singleOrder.prodotti?.removeAll()
-                for (chiave,valore) in productData! {
-                    if chiave != "autoId" {
-                        product.productName = chiave
-                        print("nome prodotto letto")
-                        let token = (valore as? String)?.components(separatedBy: "x")
-                        product.quantity = Int((token?[0])!)
-                        print("quantità letta")
-                        product.price = Double((token?[1])!)
-                        print("prezzo letto")
-                        if (product.price != nil) && (product.productName != nil) && (product.quantity != nil){
-                            singleOrder.prodotti?.append(product)
-                            print("numero prodotti \((singleOrder.prodotti?.count)!)")
-                            product = Product(productName: nil, price: nil, quantity: nil)
+                }, completionHandler: { (error, productData) in
+                    
+                    guard error == nil else {return}
+                    guard productData != nil else {return}
+                    
+                    var product: Product = Product(productName: nil, price: nil, quantity: nil)
+                    singleOrder.prodotti?.removeAll()
+                    for (chiave,valore) in productData! {
+                        if chiave != "autoId" {
+                            product.productName = chiave
+                            print("nome prodotto letto")
+                            let token = (valore as? String)?.components(separatedBy: "x")
+                            product.quantity = Int((token?[0])!)
+                            print("quantità letta")
+                            product.price = Double((token?[1])!)
+                            print("prezzo letto")
+                            if (product.price != nil) && (product.productName != nil) && (product.quantity != nil){
+                                singleOrder.prodotti?.append(product)
+                                print("numero prodotti \((singleOrder.prodotti?.count)!)")
+                                product = Product(productName: nil, price: nil, quantity: nil)
+                            }
+                            
                         }
-                        
                     }
-                }
-                dispatchGroup.leave()
-                
-            })
+                    dispatchGroup.leave()
+                })
+            }
         }
         
         dispatchGroup.notify(queue: DispatchQueue.main) {
@@ -791,21 +792,21 @@ class FirebaseData {
         FireBaseAPI.updateNode(node: "ordersSent/\(userSenderIdApp)/\(comapanyId)/\(idOrder)", value: ["offerState":state])
     }
     
-    func deleteOrderReceveidOnFirebase(order: Order){
-        let ref = Database.database().reference()
-        ref.child("ordersReceived/" + (order.userDestination?.idApp)! + "/" + order.orderAutoId).removeValue()
+    func deleteOrderOnFirebase(node: String,userIdApp: String, comapanyId: String, autoIdOrder: String, viewState: String){
+        
+        //ref.child("ordersReceived/" + (order.userDestination?.idApp)! + "/" + order.orderAutoId).removeValue()
+        FireBaseAPI.updateNode(node: "\(node)/\(userIdApp)/\(comapanyId)/\(autoIdOrder)", value: ["viewState":viewState])
     }
     
+    /*
     func deleteOrderPurchasedOnFireBase(order: Order){
         //remove ordersSent
         FireBaseAPI.removeNode(node: "ordersSent/\((self.user?.idApp)!)/\((order.company?.companyId)!)", autoId: order.orderAutoId)
-        
         //remove Payement
         FireBaseAPI.removeNode(node: "pendingPayments/\((self.user?.idApp)!)/\((order.company?.companyId)!)", autoId: order.orderAutoId)
-        
         //remove products Details
         FireBaseAPI.removeNode(node: "productsOffersDetails/\((order.company?.companyId)!)", autoId: order.orderAutoId)
-    }
+    }*/
     
     //migrates an order under another user
     func moveFirebaseRecord(userApp: User, user: UserDestination, order:Order, onCompletion: @escaping (String?)->()){

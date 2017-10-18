@@ -172,33 +172,32 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         
         if (sectionTitle[indexPath.section] == sectionTitle[0]) {
             cell = tableView.dequeueReusableCell(withIdentifier: "cellUser", for: indexPath)
+            var url: String?
+            
             if (Order.sharedIstance.userDestination?.idFB != nil) {
-                let userTemp = Order.sharedIstance.userDestination
-                let url = NSURL(string: (userTemp?.pictureUrl)!)
-                let data = NSData(contentsOf: url! as URL)
-                
-                (cell as! FirendsListTableViewCell).friendImageView.image = UIImage(data: data! as Data)
-                (cell as! FirendsListTableViewCell).friendName.text = userTemp?.fullName
+                url = Order.sharedIstance.userDestination?.pictureUrl
+                (cell as! FirendsListTableViewCell).friendName.text = Order.sharedIstance.userDestination?.fullName
             } else {
-                let url = NSURL(string: (user?.pictureUrl)!)
-                let data = NSData(contentsOf: url! as URL)
-                
-                (cell as! FirendsListTableViewCell).friendImageView.image = UIImage(data: data! as Data)
+                url = self.user?.pictureUrl
                 (cell as! FirendsListTableViewCell).friendName.text = user?.fullName
                 cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
             }
             
+            CacheImage.getImage(url: url, onCompletion: { (image) in
+                guard image != nil else {
+                    print("immagine utente non reperibile")
+                    return
+                }
+                DispatchQueue.main.async(execute: {
+                    if let cellToUpdate = tableView.cellForRow(at: indexPath) {
+                        (cellToUpdate as! FirendsListTableViewCell).friendImageView.image = image
+                    }
+                })
+            })
+            
         } else if (sectionTitle[indexPath.section] == sectionTitle[1]){
             cell = tableView.dequeueReusableCell(withIdentifier: "cellOffer", for: indexPath)
-            /*
-            if let company = companies?[indexPath.row] {
-                cell?.textLabel?.text = company.companyName
-            } else {
-                cell?.textLabel?.text = "Azienda non selezionata"
-            }*/
             cell?.textLabel?.text = "Morgana Music Club"
-            
-            
             cell?.textLabel?.font = UIFont.systemFont(ofSize: 16, weight: UIFont.Weight.light)
             
         } else {
@@ -546,8 +545,9 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         case "unwindToOfferfromListFriendWithoutValue":
             print("senza valori e reload table")
             break
-        case "unwindToOfferFromCartWithoutData":
-            print("senza dati")
+        case "unwindToOfferfromListFriend":
+            print("senza valori e reload table")
+            self.delete.isEnabled = true
             break
         default:
             self.myTable.reloadData()
