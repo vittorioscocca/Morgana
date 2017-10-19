@@ -19,6 +19,7 @@
 		2A206B971F0B79990080235B /* FireBaseAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A206B961F0B79990080235B /* FireBaseAPI.swift */; };
 		2A2A39B01F40EA8200D59476 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A2A39AF1F40EA8200D59476 /* MapViewController.swift */; };
 		2A2AD5751F5DB6A200716149 /* PointsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A2AD5741F5DB6A200716149 /* PointsManager.swift */; };
+		2A3492EB1F98948A00F2C6A7 /* SWRevealViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A3492EA1F98948A00F2C6A7 /* SWRevealViewController.m */; };
 		2A40AD151F1779A400864227 /* SegmentControlExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A40AD141F1779A400864227 /* SegmentControlExtension.swift */; };
 		2A53AB5D1EAE893F0018B8E9 /* TestConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A53AB5C1EAE893E0018B8E9 /* TestConnection.swift */; };
 		2A53AB671EB0AC120018B8E9 /* Product.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A53AB661EB0AC120018B8E9 /* Product.swift */; };
@@ -113,6 +114,8 @@
 		2A206B961F0B79990080235B /* FireBaseAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FireBaseAPI.swift; sourceTree = "<group>"; };
 		2A2A39AF1F40EA8200D59476 /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		2A2AD5741F5DB6A200716149 /* PointsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointsManager.swift; sourceTree = "<group>"; };
+		2A3492E91F98948900F2C6A7 /* SWRevealViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SWRevealViewController.h; sourceTree = "<group>"; };
+		2A3492EA1F98948A00F2C6A7 /* SWRevealViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SWRevealViewController.m; sourceTree = "<group>"; };
 		2A40AD141F1779A400864227 /* SegmentControlExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegmentControlExtension.swift; sourceTree = "<group>"; };
 		2A53AB5C1EAE893E0018B8E9 /* TestConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestConnection.swift; sourceTree = "<group>"; };
 		2A53AB661EB0AC120018B8E9 /* Product.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Product.swift; sourceTree = "<group>"; };
@@ -262,6 +265,15 @@
 			name = View;
 			sourceTree = "<group>";
 		};
+		2A3492E81F98944C00F2C6A7 /* Menù */ = {
+			isa = PBXGroup;
+			children = (
+				2A3492E91F98948900F2C6A7 /* SWRevealViewController.h */,
+				2A3492EA1F98948A00F2C6A7 /* SWRevealViewController.m */,
+			);
+			name = "Menù";
+			sourceTree = "<group>";
+		};
 		2AC5A67C1E94EA010081CAA0 /* FacebookFramework */ = {
 			isa = PBXGroup;
 			children = (
@@ -298,6 +310,7 @@
 		2AE35F881E93EF5800DF453F /* MorganaMusic */ = {
 			isa = PBXGroup;
 			children = (
+				2A3492E81F98944C00F2C6A7 /* Menù */,
 				2A9E9DA91EEF269000E8383B /* MorganaMusic.entitlements */,
 				2AE35FA01E93EF8200DF453F /* SupportingFiles */,
 				2AE35F9F1E93EF7500DF453F /* Controller */,
@@ -682,6 +695,7 @@
 				2AE35FAC1E93F99900DF453F /* UserViewController.swift in Sources */,
 				2AD5C80E1ECED68A001951C3 /* MyDrinksViewController.swift in Sources */,
 				2A6CC8AC1F85BD310056129C /* MorganaMusicSettings.swift in Sources */,
+				2A3492EB1F98948A00F2C6A7 /* SWRevealViewController.m in Sources */,
 				2A6E266F1E9BFCF600C1FC64 /* Friend+CoreDataProperties.swift in Sources */,
 				2A1863B01F5055EA00505F20 /* PaymentsManager.swift in Sources */,
 				2A53AB691EB0AC950018B8E9 /* Order.swift in Sources */,

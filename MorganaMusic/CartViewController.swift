@@ -71,11 +71,12 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
             let url = NSURL(string: (Cart.sharedIstance.carrello[indexPath.row].userDestination?.pictureUrl)!)
             let data = NSData(contentsOf: url! as URL)
             (cell as! CartUserTableViewCell).friendImageView.image = UIImage(data: data! as Data)
+            
+            
             (cell as! CartUserTableViewCell).nome_label.text = (Cart.sharedIstance.carrello[indexPath.row].userDestination?.fullName)!
             (cell as! CartUserTableViewCell).totProdotti_label.text = "Prodotti: " + String(Cart.sharedIstance.carrello[indexPath.row].prodottiTotali)
             (cell as! CartUserTableViewCell).costoOfferta_label.text = "€ " + String(format:"%.2f", Cart.sharedIstance.carrello[indexPath.row].costoTotale)
-            print((Cart.sharedIstance.carrello[indexPath.row].userDestination?.fullName)!,(Cart.sharedIstance.carrello[indexPath.row].userDestination?.idFB)!)
-            
+            cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
         } else {
             //products section
             cell = tableView.dequeueReusableCell(withIdentifier: "cartCell", for: indexPath)
@@ -105,6 +106,22 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
         default:
             break
         }
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        let thisCell = tableView.cellForRow(at: indexPath)
+        if (thisCell is CartUserTableViewCell){
+            self.performSegue(withIdentifier: "segueToCartOrderDetails", sender: indexPath)
+        }
+        tableView.deselectRow(at: indexPath, animated: false)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        guard let path = sender else {return}
+        
+        let orderSent = Cart.sharedIstance.carrello[(path as! IndexPath).row]
+        (segue.destination as! CartOrderDetailsViewController).orderSent = orderSent
     }
     
     @IBAction func unwindToOffer(_ sender: UIBarButtonItem) {
