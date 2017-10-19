@@ -13,7 +13,8 @@ extension AppDelegate{
     
     func MorganaMusicActivate(){
         let storybard = UIStoryboard(name: "Main", bundle: nil)
-        let vc = storybard.instantiateViewController(withIdentifier: "HomeViewController") //HomeViewController
+        //let vc = storybard.instantiateViewController(withIdentifier: "HomeViewController") //HomeViewController
+        let vc = storybard.instantiateViewController(withIdentifier: "SWRevealController") //HomeViewController
         self.window?.rootViewController = vc
     }
     

@@ -21,6 +21,8 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
     @IBOutlet weak var totale_label: UILabel!
     @IBOutlet weak var delete: UIBarButtonItem!
     @IBOutlet weak var carousel: UIBarButtonItem!
+    @IBOutlet var menuButton: UIBarButtonItem!
+    
     
     enum Alert: String {
         case lostConnection_title = "Attenzione connessione Internet assente"
@@ -74,6 +76,12 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
             self.generateAlert(title: Alert.lostConnection_title.rawValue, msg: Alert.lostConnection_msg.rawValue)
             return
         }
+        if revealViewController() != nil {
+            menuButton.target = revealViewController()
+            menuButton.action = #selector(SWRevealViewController.revealToggle(_:))
+            view.addGestureRecognizer(self.revealViewController().panGestureRecognizer())
+        }
+        
         self.isConnectedtoNetwork = true
         DispatchQueue.main.async {
             self.loadOfferte()

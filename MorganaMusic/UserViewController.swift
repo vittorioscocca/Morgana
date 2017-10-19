@@ -23,6 +23,7 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
     @IBOutlet var imgQRCode: UIImageView!
     @IBOutlet var userCredits_label: UILabel!
     @IBOutlet weak var qrOrder: UIBarButtonItem!
+    @IBOutlet var menuButton: UIBarButtonItem!
     
     
     
@@ -48,6 +49,11 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        if revealViewController() != nil {
+            menuButton.target = revealViewController()
+            menuButton.action = #selector(SWRevealViewController.revealToggle(_:))
+            view.addGestureRecognizer(self.revealViewController().panGestureRecognizer())
+        }
         self.userEmail_text.isEnabled = false
         if CheckConnection.isConnectedToNetwork() == true {
             

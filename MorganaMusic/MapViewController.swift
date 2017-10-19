@@ -12,6 +12,7 @@ import MapKit
 class MapViewController: UIViewController, CLLocationManagerDelegate {
 
     @IBOutlet weak var myMap: MKMapView!
+    @IBOutlet var menuButton: UIBarButtonItem!
     
     private var locationManager = CLLocationManager()
     private var userLocation: CLLocationCoordinate2D?
@@ -21,6 +22,11 @@ class MapViewController: UIViewController, CLLocationManagerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        if revealViewController() != nil {
+            menuButton.target = revealViewController()
+            menuButton.action = #selector(SWRevealViewController.revealToggle(_:))
+            view.addGestureRecognizer(self.revealViewController().panGestureRecognizer())
+        }
         self.initializeLocationManager()
         self.setUserAndMerchantPosition()
        

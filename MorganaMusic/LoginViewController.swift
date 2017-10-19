@@ -32,7 +32,8 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
         if  uidFiB != nil {
             // User is signed in.
             //after FB access control pass to HomeViewController
-            let userPage = storyboard?.instantiateViewController(withIdentifier: "HomeViewController")
+            //let userPage = storyboard?.instantiateViewController(withIdentifier: "HomeViewController")
+            let userPage = storyboard?.instantiateViewController(withIdentifier: "SWRevealController")
             let appDelegate = UIApplication.shared.delegate as! AppDelegate
             appDelegate.window!.rootViewController = userPage
             

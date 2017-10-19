@@ -20,6 +20,8 @@
 		2A2A39B01F40EA8200D59476 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A2A39AF1F40EA8200D59476 /* MapViewController.swift */; };
 		2A2AD5751F5DB6A200716149 /* PointsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A2AD5741F5DB6A200716149 /* PointsManager.swift */; };
 		2A3492EB1F98948A00F2C6A7 /* SWRevealViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A3492EA1F98948A00F2C6A7 /* SWRevealViewController.m */; };
+		2A3492EF1F98AB6D00F2C6A7 /* MenuTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3492EE1F98AB6D00F2C6A7 /* MenuTableViewController.swift */; };
+		2A3492F11F98B99800F2C6A7 /* UserProfileMenuRowTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3492F01F98B99800F2C6A7 /* UserProfileMenuRowTableViewCell.swift */; };
 		2A40AD151F1779A400864227 /* SegmentControlExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A40AD141F1779A400864227 /* SegmentControlExtension.swift */; };
 		2A53AB5D1EAE893F0018B8E9 /* TestConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A53AB5C1EAE893E0018B8E9 /* TestConnection.swift */; };
 		2A53AB671EB0AC120018B8E9 /* Product.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A53AB661EB0AC120018B8E9 /* Product.swift */; };
@@ -116,6 +118,8 @@
 		2A2AD5741F5DB6A200716149 /* PointsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointsManager.swift; sourceTree = "<group>"; };
 		2A3492E91F98948900F2C6A7 /* SWRevealViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SWRevealViewController.h; sourceTree = "<group>"; };
 		2A3492EA1F98948A00F2C6A7 /* SWRevealViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SWRevealViewController.m; sourceTree = "<group>"; };
+		2A3492EE1F98AB6D00F2C6A7 /* MenuTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuTableViewController.swift; sourceTree = "<group>"; };
+		2A3492F01F98B99800F2C6A7 /* UserProfileMenuRowTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileMenuRowTableViewCell.swift; sourceTree = "<group>"; };
 		2A40AD141F1779A400864227 /* SegmentControlExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegmentControlExtension.swift; sourceTree = "<group>"; };
 		2A53AB5C1EAE893E0018B8E9 /* TestConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestConnection.swift; sourceTree = "<group>"; };
 		2A53AB661EB0AC120018B8E9 /* Product.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Product.swift; sourceTree = "<group>"; };
@@ -270,6 +274,8 @@
 			children = (
 				2A3492E91F98948900F2C6A7 /* SWRevealViewController.h */,
 				2A3492EA1F98948A00F2C6A7 /* SWRevealViewController.m */,
+				2A3492EE1F98AB6D00F2C6A7 /* MenuTableViewController.swift */,
+				2A3492F01F98B99800F2C6A7 /* UserProfileMenuRowTableViewCell.swift */,
 			);
 			name = "Menù";
 			sourceTree = "<group>";
@@ -716,6 +722,8 @@
 				2A56BBFE1F9755FA00C72860 /* CartOrderDetailsViewController.swift in Sources */,
 				2ABD93BB1F18DF5C00F28632 /* NotificationsCenter.swift in Sources */,
 				2AA4B96F1F755E9E00F4FD48 /* Company.swift in Sources */,
+				2A3492EF1F98AB6D00F2C6A7 /* MenuTableViewController.swift in Sources */,
+				2A3492F11F98B99800F2C6A7 /* UserProfileMenuRowTableViewCell.swift in Sources */,
 				2A6E266D1E9BFCF600C1FC64 /* User+CoreDataProperties.swift in Sources */,
 				2A6971231EB9D9A20036E3C5 /* DrinksOrderViewController.swift in Sources */,
 				2A53AB6D1EB135D60018B8E9 /* InitialSliderViewController.swift in Sources */,
