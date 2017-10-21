@@ -22,6 +22,7 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
     @IBOutlet weak var myTable: UITableView!
     @IBOutlet weak var drinksList_segmentControl: UISegmentedControl!
     @IBOutlet var successView: UIView!
+    @IBOutlet var menuButton: UIBarButtonItem!
     
     var user: User?
     var friendsList: [Friend]?
@@ -64,6 +65,11 @@ class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableView
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
         navigationController?.navigationBar.shadowImage = UIImage()
         
+        if revealViewController() != nil {
+            menuButton.target = revealViewController()
+            menuButton.action = #selector(SWRevealViewController.revealToggle(_:))
+            view.addGestureRecognizer(self.revealViewController().panGestureRecognizer())
+        }
         self.nowReadingOrdersAndOffersOnFirebase = false
         
         self.setSegmentcontrol()

@@ -17,31 +17,24 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
 
     
     @IBOutlet weak var userImage_image: UIImageView!
-    @IBOutlet weak var userName_text: UITextField!
-    @IBOutlet weak var userSurname_text: UITextField!
-    @IBOutlet weak var userEmail_text: UITextField!
+    @IBOutlet weak var userFullName: UILabel!
+    @IBOutlet weak var userEmail_text: UILabel!
     @IBOutlet var imgQRCode: UIImageView!
     @IBOutlet var userCredits_label: UILabel!
     @IBOutlet weak var qrOrder: UIBarButtonItem!
     @IBOutlet var menuButton: UIBarButtonItem!
-    
-    
     
     var uid: String?
     var user: User?
     var fbTokenString: String?
     var fireBaseToken = UserDefaults.standard
     let fbToken = UserDefaults.standard
-    
     let idUserApp = UserDefaults.standard
     let defaults = UserDefaults.standard
-    
     var qrcodeImage: CIImage!
-    
     var activityIndicator: UIActivityIndicatorView = UIActivityIndicatorView()
     var strLabel = UILabel()
     let effectView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
-    
     var companyCode: String?
     
     //alert
@@ -49,22 +42,22 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
+        navigationController?.navigationBar.shadowImage = UIImage()
+        
         if revealViewController() != nil {
             menuButton.target = revealViewController()
             menuButton.action = #selector(SWRevealViewController.revealToggle(_:))
             view.addGestureRecognizer(self.revealViewController().panGestureRecognizer())
         }
-        self.userEmail_text.isEnabled = false
         if CheckConnection.isConnectedToNetwork() == true {
             
             self.uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
             self.user = CoreDataController.sharedIstance.findUserForIdApp(uid)
-            guard user != nil else{
-                print("user ancora non esiste")
-                return
-            }
-            print("user  trovato")
-        }else {self.generateAlert()}
+            guard user != nil else { return }
+            self.userFullName.text = self.user?.fullName
+            self.userEmail_text.text = self.user?.email
+        } else {self.generateAlert()}
         
         self.readImage()
         self.setCustomImage()
@@ -287,11 +280,11 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
     }
     
     @IBAction func fbFriend_clicked(_ sender: UIButton) {
+        
         guard CheckConnection.isConnectedToNetwork() == true else {
             self.generateAlert()
             return
         }
-        
         
         guard user?.friends?.count != 0 else {
             self.getFriends(mail: (self.user?.email)!)
@@ -300,14 +293,12 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
             return
         }
 
-        
         guard refreshUpdateFriendList() else {
             self.performSegue(withIdentifier: "segueToFriendsList", sender: nil)
             return
         }
-        
+    
         self.getFriends(mail: (self.user?.email)!)
-
     }
     
     func generateAlert(){
@@ -344,7 +335,7 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         
     }
     
-    @IBAction func logoutFBButton(_ sender: UIButton) {
+    private func logout(){
         guard CheckConnection.isConnectedToNetwork() == true else {
             self.generateAlert()
             return
@@ -359,7 +350,7 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         let firebaseAuth = Auth.auth()
         do {
             //kill firebase observer
-            self.killFirebaseObserver() 
+            self.killFirebaseObserver()
             try firebaseAuth.signOut()
             self.fireBaseToken.removeObject(forKey: "FireBaseToken")
             
@@ -368,12 +359,30 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
             print ("Error signing out: %@", signOutError)
         }
         
-        
-        
         //passo il controllo alla view di login, LoginViewController
         let loginPage = storyboard?.instantiateViewController(withIdentifier: "LoginViewController")
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         appDelegate.window!.rootViewController = loginPage
+    }
+    
+    private func activeActionSheet (){
+        self.controller = UIAlertController(title: "", message: "Confermi di volere uscire?", preferredStyle: .actionSheet)
+        
+        let action = UIAlertAction(title: "Esci", style: .destructive,handler: {(paramAction:UIAlertAction!) in
+            self.logout()
+        })
+        
+        let actionDestructive = UIAlertAction(title: "Annulla", style: .default,handler: {(paramAction:UIAlertAction!) in
+            return
+        })
+        
+        self.controller!.addAction(action)
+        self.controller!.addAction(actionDestructive)
+        self.present(controller!, animated: true, completion: nil)
+    }
+    
+    @IBAction func logoutFBButton(_ sender: UIButton) {
+        self.activeActionSheet()
     }
     
     @IBAction func unwindToProfile(_ sender: UIStoryboardSegue) {

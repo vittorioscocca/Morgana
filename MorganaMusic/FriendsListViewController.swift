@@ -166,6 +166,7 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     }
     
     private func loadList(){
+        self.friendsListPaginated = []
         (page,friendsForPage,lastPageFriends) = calculatePagination()
         if self.currentPage == page {
             self.numberOfFriends = lastPageFriends!
@@ -176,7 +177,7 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
         self.end += numberOfFriends
         self.start = end - numberOfFriends
         for i in start ..< end {
-            //order is != nil when forwar action i called. This code clean from friendsList that friends that has refused the order
+            //order is != nil when forward action is called. This code clean from friendsList  friends that has refused the order
             if self.order != nil {
                 if (friendsList?[i])?.idFB != order?.userDestination?.idFB {
                     self.friendsListPaginated?.append((friendsList?[i])!)
