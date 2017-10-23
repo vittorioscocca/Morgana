@@ -15,15 +15,11 @@ import UIKit
 extension UIViewController {
     
     //aggiungo la funzione per far scomparire la tastiera
-    
     func closeTextFieldAtTouch(txtFields: [UITextField]) {
-        
         for x in txtFields {
             x.resignFirstResponder()
         }
-        
     }
-    
 }
 
 
@@ -53,7 +49,7 @@ class TextFieldController: NSObject, UITextFieldDelegate {
     
     
 
-    
+    /*
     // funzione che controlla per ogni field a cui abbiamo associato il delegate se l'utente ha  inserito del testo
     func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
         guard !textField.text!.isEmpty else {
@@ -71,7 +67,7 @@ class TextFieldController: NSObject, UITextFieldDelegate {
         }
         return true
     }
-    
+    */
 
     
 }

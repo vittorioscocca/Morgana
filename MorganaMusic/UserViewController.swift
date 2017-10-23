@@ -21,7 +21,6 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
     @IBOutlet weak var userEmail_text: UILabel!
     @IBOutlet var imgQRCode: UIImageView!
     @IBOutlet var userCredits_label: UILabel!
-    @IBOutlet weak var qrOrder: UIBarButtonItem!
     @IBOutlet var menuButton: UIBarButtonItem!
     
     var uid: String?
@@ -73,7 +72,6 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
             }
             self.userCredits_label.text = "€ " + String(format:"%.2f", dictionary?["credits"] as! Double)
             if dictionary?["companyCode"] as! String != "0" {
-                self.qrOrder.isEnabled = true
                 self.companyCode = dictionary?["companyCode"] as? String
                 
             }
@@ -438,10 +436,4 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
             }
         }
     }
-    
-    @IBAction func segueToQROrderReader(_ sender: UIBarButtonItem) {
-        self.performSegue(withIdentifier: "segueToQROrderReader", sender: nil)
-    }
-    
-    
 }

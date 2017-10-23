@@ -23,16 +23,20 @@ class MenuTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.actualMenu = menuVoicesStandard
+        
         self.myTable.contentInset = UIEdgeInsetsMake(-20, 0, 0, 0) //UIEdgeInsets.zero
         if CheckConnection.isConnectedToNetwork() == true {
             self.uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
             self.user = CoreDataController.sharedIstance.findUserForIdApp(uid)
+            
             guard user != nil else{
                 print("user ancora non esiste")
                 return
             }
+            self.readMenu()
         }
-        self.readMenu()
+        
+        
     }
     
     private func readMenu(){
@@ -123,6 +127,7 @@ class MenuTableViewController: UITableViewController {
                 self.performSegue(withIdentifier: "segueToMap", sender: nil)
                 break
             case "Profilo azienda":
+                self.performSegue(withIdentifier: "segueToCompanyProfile", sender: nil)
                 break
             default:
                 break

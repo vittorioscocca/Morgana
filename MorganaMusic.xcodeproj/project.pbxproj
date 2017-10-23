@@ -10,12 +10,14 @@
 		106CE5A0B64ACE47467EB2DE /* Pods_MorganaMusicTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17C88BB35E78272643DA482B /* Pods_MorganaMusicTests.framework */; };
 		2A01EBB21F7C741400EB49C1 /* MorganaMusicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A01EBB11F7C741400EB49C1 /* MorganaMusicTests.swift */; };
 		2A01EBC01F7C743B00EB49C1 /* MorganaMusicUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A01EBBF1F7C743B00EB49C1 /* MorganaMusicUITests.swift */; };
+		2A051E731F9D5F1900DADF00 /* CompanyParametersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A051E721F9D5F1900DADF00 /* CompanyParametersViewController.swift */; };
 		2A0700F71EEB178100F701EC /* OrderReceivedTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0700F61EEB178100F701EC /* OrderReceivedTableViewCell.swift */; };
 		2A1863AE1F5055DB00505F20 /* FirebaseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1863AD1F5055DB00505F20 /* FirebaseData.swift */; };
 		2A1863B01F5055EA00505F20 /* PaymentsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1863AF1F5055EA00505F20 /* PaymentsManager.swift */; };
 		2A1A5EC41ECCAD4500A0144A /* PaymentTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1A5EC31ECCAD4500A0144A /* PaymentTableViewCell.swift */; };
 		2A1A5EC61ECCB55600A0144A /* PaymentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1A5EC51ECCB55600A0144A /* PaymentViewController.swift */; };
 		2A1D14EC1F644DDC00C2F5E2 /* QrReaderViewControllerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1D14EB1F644DDC00C2F5E2 /* QrReaderViewControllerViewController.swift */; };
+		2A1FEA161F9D02050064AF6C /* CompanyProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1FEA151F9D02050064AF6C /* CompanyProfileViewController.swift */; };
 		2A206B971F0B79990080235B /* FireBaseAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A206B961F0B79990080235B /* FireBaseAPI.swift */; };
 		2A2A39B01F40EA8200D59476 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A2A39AF1F40EA8200D59476 /* MapViewController.swift */; };
 		2A2AD5751F5DB6A200716149 /* PointsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A2AD5741F5DB6A200716149 /* PointsManager.swift */; };
@@ -68,6 +70,10 @@
 		2AD5C80E1ECED68A001951C3 /* MyDrinksViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD5C80D1ECED68A001951C3 /* MyDrinksViewController.swift */; };
 		2AD5C8121ECEDDBC001951C3 /* Payment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD5C8111ECEDDBC001951C3 /* Payment.swift */; };
 		2AD8C1431E9D486700017004 /* FriendActionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD8C1421E9D486700017004 /* FriendActionViewController.swift */; };
+		2ADD700D1F9E225100410DC9 /* CompanyParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADD700C1F9E225100410DC9 /* CompanyParameters.swift */; };
+		2ADD700F1F9E298300410DC9 /* CompanyParametersTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADD700E1F9E298300410DC9 /* CompanyParametersTableViewCell.swift */; };
+		2ADD70111F9E35C100410DC9 /* Parameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADD70101F9E35C100410DC9 /* Parameters.swift */; };
+		2ADD70131F9E3FC400410DC9 /* CompanyDaysParametersTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADD70121F9E3FC400410DC9 /* CompanyDaysParametersTableViewCell.swift */; };
 		2AE1D9151F16844A000EC896 /* ManageCredits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE1D9141F16844A000EC896 /* ManageCredits.swift */; };
 		2AE35F8A1E93EF5800DF453F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE35F891E93EF5800DF453F /* AppDelegate.swift */; };
 		2AE35F8F1E93EF5800DF453F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2AE35F8D1E93EF5800DF453F /* Main.storyboard */; };
@@ -107,12 +113,14 @@
 		2A01EBBD1F7C743B00EB49C1 /* MorganaMusicUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MorganaMusicUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A01EBBF1F7C743B00EB49C1 /* MorganaMusicUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorganaMusicUITests.swift; sourceTree = "<group>"; };
 		2A01EBC11F7C743B00EB49C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2A051E721F9D5F1900DADF00 /* CompanyParametersViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanyParametersViewController.swift; sourceTree = "<group>"; };
 		2A0700F61EEB178100F701EC /* OrderReceivedTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderReceivedTableViewCell.swift; sourceTree = "<group>"; };
 		2A1863AD1F5055DB00505F20 /* FirebaseData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FirebaseData.swift; sourceTree = "<group>"; };
 		2A1863AF1F5055EA00505F20 /* PaymentsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PaymentsManager.swift; sourceTree = "<group>"; };
 		2A1A5EC31ECCAD4500A0144A /* PaymentTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PaymentTableViewCell.swift; sourceTree = "<group>"; };
 		2A1A5EC51ECCB55600A0144A /* PaymentViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PaymentViewController.swift; sourceTree = "<group>"; };
 		2A1D14EB1F644DDC00C2F5E2 /* QrReaderViewControllerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QrReaderViewControllerViewController.swift; sourceTree = "<group>"; };
+		2A1FEA151F9D02050064AF6C /* CompanyProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanyProfileViewController.swift; sourceTree = "<group>"; };
 		2A206B961F0B79990080235B /* FireBaseAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FireBaseAPI.swift; sourceTree = "<group>"; };
 		2A2A39AF1F40EA8200D59476 /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		2A2AD5741F5DB6A200716149 /* PointsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointsManager.swift; sourceTree = "<group>"; };
@@ -168,6 +176,10 @@
 		2AD5C80D1ECED68A001951C3 /* MyDrinksViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyDrinksViewController.swift; sourceTree = "<group>"; };
 		2AD5C8111ECEDDBC001951C3 /* Payment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Payment.swift; sourceTree = "<group>"; };
 		2AD8C1421E9D486700017004 /* FriendActionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendActionViewController.swift; sourceTree = "<group>"; };
+		2ADD700C1F9E225100410DC9 /* CompanyParameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanyParameters.swift; sourceTree = "<group>"; };
+		2ADD700E1F9E298300410DC9 /* CompanyParametersTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanyParametersTableViewCell.swift; sourceTree = "<group>"; };
+		2ADD70101F9E35C100410DC9 /* Parameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parameters.swift; sourceTree = "<group>"; };
+		2ADD70121F9E3FC400410DC9 /* CompanyDaysParametersTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanyDaysParametersTableViewCell.swift; sourceTree = "<group>"; };
 		2AE1D9141F16844A000EC896 /* ManageCredits.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManageCredits.swift; sourceTree = "<group>"; };
 		2AE35F861E93EF5800DF453F /* MorganaMusic.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MorganaMusic.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2AE35F891E93EF5800DF453F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -256,6 +268,8 @@
 				2A1863AD1F5055DB00505F20 /* FirebaseData.swift */,
 				2A1863AF1F5055EA00505F20 /* PaymentsManager.swift */,
 				2A2AD5741F5DB6A200716149 /* PointsManager.swift */,
+				2ADD700C1F9E225100410DC9 /* CompanyParameters.swift */,
+				2ADD70101F9E35C100410DC9 /* Parameters.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -366,6 +380,10 @@
 				2AA135F71F863FCD003B1507 /* AuthOrderViewController.swift */,
 				2AA135F91F868298003B1507 /* AutOrderTableViewCell.swift */,
 				2A56BBFD1F9755FA00C72860 /* CartOrderDetailsViewController.swift */,
+				2A1FEA151F9D02050064AF6C /* CompanyProfileViewController.swift */,
+				2A051E721F9D5F1900DADF00 /* CompanyParametersViewController.swift */,
+				2ADD700E1F9E298300410DC9 /* CompanyParametersTableViewCell.swift */,
+				2ADD70121F9E3FC400410DC9 /* CompanyDaysParametersTableViewCell.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -689,22 +707,26 @@
 				2AD5C8121ECEDDBC001951C3 /* Payment.swift in Sources */,
 				2A2A39B01F40EA8200D59476 /* MapViewController.swift in Sources */,
 				2AFA98891EC1CE470007CA33 /* CartUserTableViewCell.swift in Sources */,
+				2ADD700D1F9E225100410DC9 /* CompanyParameters.swift in Sources */,
 				2AE35FA21E93F00F00DF453F /* LoginViewController.swift in Sources */,
 				2A1A5EC61ECCB55600A0144A /* PaymentViewController.swift in Sources */,
 				2A9B63BE1E96731B00862AC5 /* CoreData.swift in Sources */,
 				2A8576F71EC456E800D41949 /* CartViewController.swift in Sources */,
 				2ACF82671EF40CF000F64DAD /* QROrderGenerationViewController.swift in Sources */,
+				2ADD70111F9E35C100410DC9 /* Parameters.swift in Sources */,
 				2A2AD5751F5DB6A200716149 /* PointsManager.swift in Sources */,
 				2A6E266E1E9BFCF600C1FC64 /* Friend+CoreDataClass.swift in Sources */,
 				2A6B073D1ED6E8620054FFD3 /* OrderSentTableViewCell.swift in Sources */,
 				2AD8C1431E9D486700017004 /* FriendActionViewController.swift in Sources */,
 				2AE35FAC1E93F99900DF453F /* UserViewController.swift in Sources */,
 				2AD5C80E1ECED68A001951C3 /* MyDrinksViewController.swift in Sources */,
+				2A1FEA161F9D02050064AF6C /* CompanyProfileViewController.swift in Sources */,
 				2A6CC8AC1F85BD310056129C /* MorganaMusicSettings.swift in Sources */,
 				2A3492EB1F98948A00F2C6A7 /* SWRevealViewController.m in Sources */,
 				2A6E266F1E9BFCF600C1FC64 /* Friend+CoreDataProperties.swift in Sources */,
 				2A1863B01F5055EA00505F20 /* PaymentsManager.swift in Sources */,
 				2A53AB691EB0AC950018B8E9 /* Order.swift in Sources */,
+				2ADD700F1F9E298300410DC9 /* CompanyParametersTableViewCell.swift in Sources */,
 				2AE35F921E93EF5800DF453F /* MorganaMusic.xcdatamodeld in Sources */,
 				2A0700F71EEB178100F701EC /* OrderReceivedTableViewCell.swift in Sources */,
 				2A86BB6E1F47432100CE336B /* OrderSentDetailsViewController.swift in Sources */,
@@ -724,11 +746,13 @@
 				2AA4B96F1F755E9E00F4FD48 /* Company.swift in Sources */,
 				2A3492EF1F98AB6D00F2C6A7 /* MenuTableViewController.swift in Sources */,
 				2A3492F11F98B99800F2C6A7 /* UserProfileMenuRowTableViewCell.swift in Sources */,
+				2A051E731F9D5F1900DADF00 /* CompanyParametersViewController.swift in Sources */,
 				2A6E266D1E9BFCF600C1FC64 /* User+CoreDataProperties.swift in Sources */,
 				2A6971231EB9D9A20036E3C5 /* DrinksOrderViewController.swift in Sources */,
 				2A53AB6D1EB135D60018B8E9 /* InitialSliderViewController.swift in Sources */,
 				2A56BC001F97584D00C72860 /* CacheImage.swift in Sources */,
 				2A69711F1EB20E400036E3C5 /* UserDestination.swift in Sources */,
+				2ADD70131F9E3FC400410DC9 /* CompanyDaysParametersTableViewCell.swift in Sources */,
 				2A53AB5D1EAE893F0018B8E9 /* TestConnection.swift in Sources */,
 				2AA135FA1F868298003B1507 /* AutOrderTableViewCell.swift in Sources */,
 			);
