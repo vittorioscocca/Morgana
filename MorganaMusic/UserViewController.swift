@@ -19,7 +19,7 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
     @IBOutlet weak var userImage_image: UIImageView!
     @IBOutlet weak var userFullName: UILabel!
     @IBOutlet weak var userEmail_text: UILabel!
-    @IBOutlet var imgQRCode: UIImageView!
+    
     @IBOutlet var userCredits_label: UILabel!
     @IBOutlet var menuButton: UIBarButtonItem!
     
@@ -61,7 +61,6 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         self.readImage()
         self.setCustomImage()
         
-        generateQrCode()
         FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + (user?.idApp)!, onCompletion: { (error,dictionary) in
             guard error == nil else {
                 self.generateAlert()
@@ -102,36 +101,8 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         self.userImage_image.clipsToBounds = true
     }
     
-    private func generateQrCode(){
-        if qrcodeImage == nil {
-            
-           let data = self.uid?.data(using: String.Encoding.isoLatin2, allowLossyConversion: false)
-                        let filter = CIFilter(name: "CIQRCodeGenerator")
-            
-            filter?.setValue(data, forKey: "inputMessage")
-            filter!.setValue("Q", forKey: "inputCorrectionLevel")
-            qrcodeImage = filter!.outputImage
-            displayQRCodeImage()
-        }
-        else {
-            imgQRCode.image = nil
-            qrcodeImage = nil
-            
-        }
-    }
     
-    private func displayQRCodeImage() {
-        let scaleX = imgQRCode.frame.size.width / qrcodeImage.extent.size.width
-        let scaleY = imgQRCode.frame.size.height / qrcodeImage.extent.size.height
-        
-        let transformedImage = qrcodeImage.transformed(by: CGAffineTransform(scaleX: scaleX, y: scaleY))
-        
-        let context:CIContext = CIContext.init(options: nil)
-        let cgImage:CGImage = context.createCGImage(transformedImage, from: transformedImage.extent)!
-        let image:UIImage = UIImage.init(cgImage: cgImage)
-        
-        imgQRCode.image = image
-    }
+    
     
     func startActivityIndicator(_ title: String) {
         
@@ -173,11 +144,7 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
     
     func getFriends(mail: String){
         print("Update Friends List")
-        
-        
-        if user?.friends!.count != nil {
-            CoreDataController.sharedIstance.deleteFriends(self.uid!)
-        }
+        CoreDataController.sharedIstance.deleteFriends(self.uid!)
         
         let fbToken = UserDefaults.standard
         fbTokenString = fbToken.object(forKey: "FBToken") as? String
@@ -226,12 +193,22 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
                         let data = picture["data"] as? NSDictionary
                         let url = data?["url"] as? String
                         
-                        //salvo gli amici dello user nell'array di amici
-                        CoreDataController.sharedIstance.addFriendInUser(idAppUser: self.uid!, idFB: idFB,mail: mail, fullName: name, firstName: firstName, lastName: lastName, gender: nil, pictureUrl: url )
+                        FirebaseData.sharedIstance.readUserIdAppFromIdFB(node: "users", child: "idFB", idFB: idFB, onCompletion: { (error,idApp) in
+                            guard error == nil else {
+                                print(error!)
+                                return
+                            }
+                            guard idApp != nil else {return}
+                            FirebaseData.sharedIstance.readUserCityOfRecidenceFromIdFB(node: "users/\(idApp!)", onCompletion: { (error, cityOfRecidence) in
+                                CoreDataController.sharedIstance.addFriendInUser(idAppUser: self.uid!, idFB: idFB, mail: mail, fullName: name, firstName: firstName, lastName: lastName, gender: nil, pictureUrl: url, cityOfRecidence: cityOfRecidence)
+                            })
+                        })
+                        
                     }
                     print("inserimento amici completato. Inseriti \(contFriends) amici")
                     self.stopActivityIndicator()
                     self.performSegue(withIdentifier: "segueToFriendsList", sender: nil)
+                    self.user = CoreDataController.sharedIstance.findUserForIdApp(self.uid)
                 }
             })
         })
@@ -244,6 +221,12 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         switch identifier {
         case "segueToFriendsList":
             (segue.destination as! FriendsListViewController).segueFrom = "userView"
+            break
+        case "segueToUserQrCode":
+            (segue.destination as! UserQrCodeViewController).user = self.user
+            break
+        case "segueToCityAndBirthday":
+            (segue.destination as! UserCityAndBirthdayViewController).user = self.user
             break
         default:
             break
@@ -417,6 +400,17 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
             inviteDialog.show()
         }
     }
+    
+    @IBAction func segueToUserQrCode_clicked(_ sender: UIButton) {
+        self.performSegue(withIdentifier: "segueToUserQrCode", sender: nil)
+    
+    }
+    
+    @IBAction func segueToUserCityAndBirthday(_ sender: UIButton) {
+        self.performSegue(withIdentifier: "segueToCityAndBirthday", sender: nil)
+    }
+    
+    
     
     //supplementary Facebook invite funtions
     func appInviteDialog(_ appInviteDialog: FBSDKAppInviteDialog!, didFailWithError error: Error!) {

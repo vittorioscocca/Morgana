@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import FirebaseAuth
+import FBSDKLoginKit
 
 class MenuTableViewController: UITableViewController {
 
@@ -18,6 +20,7 @@ class MenuTableViewController: UITableViewController {
     var actualMenu =  [String]()
     var user: User?
     var fireBaseToken = UserDefaults.standard
+    var fbToken = UserDefaults.standard
     var uid: String?
     
     override func viewDidLoad() {
@@ -28,18 +31,82 @@ class MenuTableViewController: UITableViewController {
         if CheckConnection.isConnectedToNetwork() == true {
             self.uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
             self.user = CoreDataController.sharedIstance.findUserForIdApp(uid)
-            
-            guard user != nil else{
-                print("user ancora non esiste")
-                return
+            if  user == nil {
+                //self.loadUserFromFirebase()
+                self.logout()
+            } else {
+                self.readMenu()
             }
-            self.readMenu()
         }
-        
+    }
+    private func killFirebaseObserver (){
+        let firebaseObserverKilled = UserDefaults.standard
+        if !firebaseObserverKilled.bool(forKey: "firebaseObserverKilled") {
+            firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
+            let fireBaseToken = UserDefaults.standard
+            let uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
+            let user = CoreDataController.sharedIstance.findUserForIdApp(uid)
+            if user != nil {
+                FireBaseAPI.removeObserver(node: "users/" + (user?.idApp)!)
+                FireBaseAPI.removeObserver(node: "ordersSent/" + (user?.idApp)!)
+                FireBaseAPI.removeObserver(node: "ordersReceived/" + (user?.idApp)!)
+                firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
+                print("Firebase Observer Killed")
+            }
+            
+        } else {print("no observer killed")}
         
     }
     
+    private func logout(){
+        guard CheckConnection.isConnectedToNetwork() == true else {
+            return
+        }
+        print("siamo in menù")
+        //effettuo logout FB
+        let loginManager = FBSDKLoginManager()
+        loginManager.logOut()
+        //self.fbToken.set(nil, forKey: "FBToken")
+        self.fbToken.set(nil, forKey: "FBToken")
+        
+        //effettuologout da firebase
+        let firebaseAuth = Auth.auth()
+        do {
+            //kill firebase observer
+            self.killFirebaseObserver()
+            try firebaseAuth.signOut()
+            self.fireBaseToken.removeObject(forKey: "FireBaseToken")
+            
+            print("utente disconnesso di firebase")
+        } catch let signOutError as NSError {
+            print ("Error signing out: %@", signOutError)
+        }
+        
+        //passo il controllo alla view di login, LoginViewController
+        let loginPage = storyboard?.instantiateViewController(withIdentifier: "LoginViewController")
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        appDelegate.window!.rootViewController = loginPage
+    }
+    /*
+    private func loadUserFromFirebase (){
+        let fireBaseUser = Auth.auth().currentUser
+        self.fireBaseToken.set((fireBaseUser?.uid)!, forKey: "FireBaseToken")
+        self.uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
+        
+        FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/\(self.uid!)", onCompletion: { (error,dictionary) in
+            self.user = CoreDataController.sharedIstance.addNewUser(self.uid!, dictionary!["idFB"] as! String, dictionary?["email"] as? String, dictionary?["fullName"] as? String, dictionary?["name"] as? String, dictionary?["surname"] as? String, dictionary?["gender"] as? String, dictionary?["pictureUrl"] as? String)
+    
+            if dictionary?["companyCode"] as! String != "0" {
+                self.actualMenu = self.menuCompany
+                self.myTable.reloadData()
+            }
+        })
+    }*/
+    
     private func readMenu(){
+        guard self.user?.idApp != nil else {
+            return
+        }
         FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + (user?.idApp)!, onCompletion: { (error,dictionary) in
             guard error == nil else {return}
             guard dictionary != nil else {return}

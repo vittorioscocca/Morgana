@@ -50,6 +50,19 @@ class CoreDataController {
         return newUser
     }
     
+    
+    func saveCityAndBirthday(idApp: String, cityOfRecidence: String, birthday: String) {
+        
+        let currentUser = self.findUserForIdApp(idApp)
+        
+        guard  currentUser != nil else {
+            return
+        }
+        currentUser?.cityOfRecidence = cityOfRecidence
+        currentUser?.birthday = birthday
+        self.salvaContext()
+    }
+    
     private func salvaContext() {
         do {
             try self.context.save()
@@ -139,7 +152,7 @@ class CoreDataController {
         return nil
     }
     
-    func addFriendInUser(idAppUser: String, idFB: String, mail: String?, fullName: String?, firstName: String?, lastName: String?, gender: String?, pictureUrl: String?) {
+    func addFriendInUser(idAppUser: String, idFB: String, mail: String?, fullName: String?, firstName: String?, lastName: String?, gender: String?, pictureUrl: String?, cityOfRecidence: String?) {
         let entityFriend = NSEntityDescription.entity(forEntityName: "Friend", in: self.context)
         let newFriend = Friend(entity: entityFriend!, insertInto: self.context)
         let currentUser = findUserForEmail(mail!)
@@ -153,24 +166,13 @@ class CoreDataController {
         newFriend.lastName = lastName
         newFriend.gender = gender
         newFriend.pictureUrl = pictureUrl
-        
+        newFriend.cityOfRecidence = cityOfRecidence
         currentUser!.addToFriends(newFriend)
-        //currentMateria!.addVoto(value: nuovoVoto)
         
         print("Amico  \(fullName!) aggiunto allo user \(currentUser!.fullName!)")
         self.salvaContext()
     }
-    /*
-    func stampaVotiMateria(nome: String) {
-        let materiaVoti = cercaMateria(nome: nome)
-        
-        let voti = materiaVoti!.voti!.allObjects as! [Voto]
-        print("Recupero i voti della Materia: \(nome)")
-        for voto in voti {
-            print("[\(nome)] voto \(voto.tipo!) = \(voto.risultato)")
-        }
-    }
-    */
+    
     
     //Carica tutti gli amici di uno user
     func loadAllFriendsOfUser(idAppUser: String) ->[Friend]?{

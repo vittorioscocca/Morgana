@@ -17,7 +17,7 @@ import UserNotifications
 
 
 
-class MyDrinksViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
     @IBOutlet weak var myTable: UITableView!
     @IBOutlet weak var drinksList_segmentControl: UISegmentedControl!

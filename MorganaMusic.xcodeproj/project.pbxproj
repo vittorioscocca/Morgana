@@ -67,13 +67,16 @@
 		2AC63AF31E9DFFCE00A9F91E /* FirendsListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC63AF21E9DFFCE00A9F91E /* FirendsListTableViewCell.swift */; };
 		2ACE9D3D1EA6644800E93327 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2ACE9D3C1EA6644700E93327 /* GoogleService-Info.plist */; };
 		2ACF82671EF40CF000F64DAD /* QROrderGenerationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ACF82661EF40CF000F64DAD /* QROrderGenerationViewController.swift */; };
-		2AD5C80E1ECED68A001951C3 /* MyDrinksViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD5C80D1ECED68A001951C3 /* MyDrinksViewController.swift */; };
+		2AD430121F9F3869003B6E7A /* UserQrCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD430111F9F3869003B6E7A /* UserQrCodeViewController.swift */; };
+		2AD430141F9F5DED003B6E7A /* UserCityAndBirthdayViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD430131F9F5DED003B6E7A /* UserCityAndBirthdayViewController.swift */; };
+		2AD5C80E1ECED68A001951C3 /* MyOrderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD5C80D1ECED68A001951C3 /* MyOrderViewController.swift */; };
 		2AD5C8121ECEDDBC001951C3 /* Payment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD5C8111ECEDDBC001951C3 /* Payment.swift */; };
 		2AD8C1431E9D486700017004 /* FriendActionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD8C1421E9D486700017004 /* FriendActionViewController.swift */; };
 		2ADD700D1F9E225100410DC9 /* CompanyParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADD700C1F9E225100410DC9 /* CompanyParameters.swift */; };
 		2ADD700F1F9E298300410DC9 /* CompanyParametersTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADD700E1F9E298300410DC9 /* CompanyParametersTableViewCell.swift */; };
 		2ADD70111F9E35C100410DC9 /* Parameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADD70101F9E35C100410DC9 /* Parameters.swift */; };
 		2ADD70131F9E3FC400410DC9 /* CompanyDaysParametersTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADD70121F9E3FC400410DC9 /* CompanyDaysParametersTableViewCell.swift */; };
+		2AE046351F9E92EA00650A7D /* CompanyOrderToCustomerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE046341F9E92EA00650A7D /* CompanyOrderToCustomerViewController.swift */; };
 		2AE1D9151F16844A000EC896 /* ManageCredits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE1D9141F16844A000EC896 /* ManageCredits.swift */; };
 		2AE35F8A1E93EF5800DF453F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE35F891E93EF5800DF453F /* AppDelegate.swift */; };
 		2AE35F8F1E93EF5800DF453F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2AE35F8D1E93EF5800DF453F /* Main.storyboard */; };
@@ -173,13 +176,16 @@
 		2AC63AF21E9DFFCE00A9F91E /* FirendsListTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FirendsListTableViewCell.swift; sourceTree = "<group>"; };
 		2ACE9D3C1EA6644700E93327 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		2ACF82661EF40CF000F64DAD /* QROrderGenerationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QROrderGenerationViewController.swift; sourceTree = "<group>"; };
-		2AD5C80D1ECED68A001951C3 /* MyDrinksViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyDrinksViewController.swift; sourceTree = "<group>"; };
+		2AD430111F9F3869003B6E7A /* UserQrCodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserQrCodeViewController.swift; sourceTree = "<group>"; };
+		2AD430131F9F5DED003B6E7A /* UserCityAndBirthdayViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCityAndBirthdayViewController.swift; sourceTree = "<group>"; };
+		2AD5C80D1ECED68A001951C3 /* MyOrderViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyOrderViewController.swift; sourceTree = "<group>"; };
 		2AD5C8111ECEDDBC001951C3 /* Payment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Payment.swift; sourceTree = "<group>"; };
 		2AD8C1421E9D486700017004 /* FriendActionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendActionViewController.swift; sourceTree = "<group>"; };
 		2ADD700C1F9E225100410DC9 /* CompanyParameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanyParameters.swift; sourceTree = "<group>"; };
 		2ADD700E1F9E298300410DC9 /* CompanyParametersTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanyParametersTableViewCell.swift; sourceTree = "<group>"; };
 		2ADD70101F9E35C100410DC9 /* Parameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parameters.swift; sourceTree = "<group>"; };
 		2ADD70121F9E3FC400410DC9 /* CompanyDaysParametersTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanyDaysParametersTableViewCell.swift; sourceTree = "<group>"; };
+		2AE046341F9E92EA00650A7D /* CompanyOrderToCustomerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanyOrderToCustomerViewController.swift; sourceTree = "<group>"; };
 		2AE1D9141F16844A000EC896 /* ManageCredits.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManageCredits.swift; sourceTree = "<group>"; };
 		2AE35F861E93EF5800DF453F /* MorganaMusic.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MorganaMusic.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2AE35F891E93EF5800DF453F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -370,7 +376,7 @@
 				2AFA98881EC1CE470007CA33 /* CartUserTableViewCell.swift */,
 				2A1A5EC51ECCB55600A0144A /* PaymentViewController.swift */,
 				2A1A5EC31ECCAD4500A0144A /* PaymentTableViewCell.swift */,
-				2AD5C80D1ECED68A001951C3 /* MyDrinksViewController.swift */,
+				2AD5C80D1ECED68A001951C3 /* MyOrderViewController.swift */,
 				2A6B073C1ED6E8620054FFD3 /* OrderSentTableViewCell.swift */,
 				2A0700F61EEB178100F701EC /* OrderReceivedTableViewCell.swift */,
 				2ACF82661EF40CF000F64DAD /* QROrderGenerationViewController.swift */,
@@ -384,6 +390,9 @@
 				2A051E721F9D5F1900DADF00 /* CompanyParametersViewController.swift */,
 				2ADD700E1F9E298300410DC9 /* CompanyParametersTableViewCell.swift */,
 				2ADD70121F9E3FC400410DC9 /* CompanyDaysParametersTableViewCell.swift */,
+				2AE046341F9E92EA00650A7D /* CompanyOrderToCustomerViewController.swift */,
+				2AD430111F9F3869003B6E7A /* UserQrCodeViewController.swift */,
+				2AD430131F9F5DED003B6E7A /* UserCityAndBirthdayViewController.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -705,6 +714,7 @@
 				2A8CA5A51EFC230300B0DF55 /* UpdateBadgeInfo.swift in Sources */,
 				2A6971271EBA673A0036E3C5 /* addbadge.swift in Sources */,
 				2AD5C8121ECEDDBC001951C3 /* Payment.swift in Sources */,
+				2AD430141F9F5DED003B6E7A /* UserCityAndBirthdayViewController.swift in Sources */,
 				2A2A39B01F40EA8200D59476 /* MapViewController.swift in Sources */,
 				2AFA98891EC1CE470007CA33 /* CartUserTableViewCell.swift in Sources */,
 				2ADD700D1F9E225100410DC9 /* CompanyParameters.swift in Sources */,
@@ -719,7 +729,8 @@
 				2A6B073D1ED6E8620054FFD3 /* OrderSentTableViewCell.swift in Sources */,
 				2AD8C1431E9D486700017004 /* FriendActionViewController.swift in Sources */,
 				2AE35FAC1E93F99900DF453F /* UserViewController.swift in Sources */,
-				2AD5C80E1ECED68A001951C3 /* MyDrinksViewController.swift in Sources */,
+				2AD5C80E1ECED68A001951C3 /* MyOrderViewController.swift in Sources */,
+				2AE046351F9E92EA00650A7D /* CompanyOrderToCustomerViewController.swift in Sources */,
 				2A1FEA161F9D02050064AF6C /* CompanyProfileViewController.swift in Sources */,
 				2A6CC8AC1F85BD310056129C /* MorganaMusicSettings.swift in Sources */,
 				2A3492EB1F98948A00F2C6A7 /* SWRevealViewController.m in Sources */,
@@ -755,6 +766,7 @@
 				2ADD70131F9E3FC400410DC9 /* CompanyDaysParametersTableViewCell.swift in Sources */,
 				2A53AB5D1EAE893F0018B8E9 /* TestConnection.swift in Sources */,
 				2AA135FA1F868298003B1507 /* AutOrderTableViewCell.swift in Sources */,
+				2AD430121F9F3869003B6E7A /* UserQrCodeViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

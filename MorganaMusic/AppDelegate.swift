@@ -66,6 +66,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         
         guard (( uidFB == nil) && (uidFiB == nil)) else{
+            
             print("[DEBUG] Salto il login iniziale")
             MorganaMusicActivate()
             return true

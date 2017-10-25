@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import FBSDKLoginKit
 
 //User Facebook Friends List that use the app
 class FriendsListViewController: UIViewController,UITableViewDelegate, UITableViewDataSource, UISearchResultsUpdating {
@@ -37,19 +38,16 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     var currentPage = 0
     var numberOfFriends = 0
     var order: Order?
+    var defaults = UserDefaults.standard
+    var user: User?
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
         self.myTable.dataSource = self
         self.myTable.delegate = self
-        
         self.userId = fireBaseToken.object(forKey: "FireBaseToken")! as? String
-        self.friendsList = CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: self.userId!)
-        
-        self.loadList()
-        
+        self.getFriendsList()
         self.resultSearchController = ({
             // creo un oggetto di tipo UISearchController
             let controller = UISearchController(searchResultsController: nil)
@@ -63,10 +61,8 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
 
             return controller
         })()
-        
         self.myTable.addSubview(refreshControl1)
         self.numAmici.title = String(self.friendsListPaginated!.count)
-        
     }
     
     override func didReceiveMemoryWarning() {
@@ -77,6 +73,130 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
     }
+    
+    private func getFriendsList(){
+        guard CheckConnection.isConnectedToNetwork() == true else {
+            return
+        }
+        
+        //if friends list is 0, load user Facebook friends
+        guard self.user?.friends?.count != 0 else {
+            self.getFriends(mail: (self.user?.email)!)
+            print("chiamata1")
+            let date = Date()
+            self.defaults.set(date, forKey: "Data")
+            return
+        }
+        
+        //if request is > 18000 seconds refresh list friends  with getFriends func
+        guard self.refreshUpdateFriendList() else {
+            self.updateData()
+            return
+        }
+        self.getFriends(mail: (self.user?.email)!)
+        print("chiamata2")
+    }
+    
+    private func updateData(){
+        self.friendsList = CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: self.userId!)
+        self.user = CoreDataController.sharedIstance.findUserForIdApp(self.user?.idApp)
+        self.loadList()
+        self.myTable.reloadData()
+    }
+    
+    func getFriends(mail: String){
+        print("Update Friends List")
+        
+        
+        CoreDataController.sharedIstance.deleteFriends((self.user?.idApp)!)
+        
+        let fbToken = UserDefaults.standard
+        let fbTokenString = fbToken.object(forKey: "FBToken") as? String
+        
+        
+        let parameters_friend = ["fields" : "name, first_name, last_name, id, email, gender, picture.type(large)"]
+        
+        FBSDKGraphRequest(graphPath: "me/friends", parameters: parameters_friend, tokenString: fbTokenString, version: nil, httpMethod: "GET").start(completionHandler: {(connection,result, error) -> Void in
+            if ((error) != nil)
+            {
+                // Process error
+                print("Error: \(error!)")
+                return
+            }
+            //numbers of total friends
+            let newResult = result as! NSDictionary
+            let summary = newResult["summary"] as! NSDictionary
+            let counts = summary["total_count"] as! NSNumber
+            
+            print("Totale amici letti:  \(counts)")
+            var contFriends = 0
+            
+            //self.startActivityIndicator("Carico lista amici...")
+            let dati: NSArray = newResult.object(forKey: "data") as! NSArray
+            
+            guard dati.count != 0 else {
+                return
+            }
+            
+            for i in 0...(dati.count - 1) {
+                contFriends += 1
+                let valueDict: NSDictionary = dati[i] as! NSDictionary
+                let name = valueDict["name"] as? String
+                let idFB = valueDict["id"] as! String
+                let firstName = valueDict["first_name"] as! String
+                let lastName = valueDict["last_name"] as! String
+                
+                //let gender = valueDict["gender"] as! String
+                let picture = valueDict["picture"] as! NSDictionary
+                let data = picture["data"] as? NSDictionary
+                let url = data?["url"] as? String
+                
+                FirebaseData.sharedIstance.readUserIdAppFromIdFB(node: "users", child: "idFB", idFB: idFB, onCompletion: { (error,idApp) in
+                    guard error == nil else {
+                        print(error!)
+                        return
+                    }
+                    guard idApp != nil else {return}
+                    FirebaseData.sharedIstance.readUserCityOfRecidenceFromIdFB(node: "users/\(idApp!)", onCompletion: { (error, cityOfRecidence) in
+                        CoreDataController.sharedIstance.addFriendInUser(idAppUser: (self.user?.idApp)!, idFB: idFB, mail: mail, fullName: name, firstName: firstName, lastName: lastName, gender: nil, pictureUrl: url, cityOfRecidence: cityOfRecidence)
+                        if i == (dati.count - 1) {
+                            self.updateData()
+                        }
+                    })
+                })
+                
+            }
+            print("Aggiornamento elnco amici di Facebook completato!. Inseriti \(contFriends) amici")
+            
+        })
+    }
+    
+    func refreshUpdateFriendList() -> Bool{
+        //create first request Date
+        guard  defaults.object(forKey: "Data") != nil else {
+            let date = Date()
+            self.defaults.set(date, forKey: "Data")
+            print("data prima richiesta: ",defaults.object(forKey: "Data")!)
+            return true
+        }
+        
+        //current Date
+        let currentDate = Date()
+        
+        
+        // difference in seconds from TimeIntervalNow and one date
+        let diffTime = (defaults.object(forKey: "Data") as! Date).timeIntervalSinceNow * -1
+        print(diffTime)
+        
+        //if the request is > 1/2 gg (18000 sec) refresh FB Friends List
+        //for test: don't insert a value < 5
+        if diffTime > 18000 {
+            self.defaults.set(currentDate, forKey: "Data")
+            return true
+        }
+        return false
+    }
+    
     
     func contentsFilter(text: String) {
         print("sto filtrando i contenuti")
@@ -129,6 +249,11 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
         (cell as! FirendsListTableViewCell).friendImageView.image = UIImage(named: "userDefault")
         (cell as! FirendsListTableViewCell).idFB = friend?.idFB
         (cell as! FirendsListTableViewCell).friendImageUrl = friend?.pictureUrl
+        if friend?.cityOfRecidence != nil {
+            (cell as! FirendsListTableViewCell).cityOfRecidence.text = friend?.cityOfRecidence
+            (cell as! FirendsListTableViewCell).cityOfRecidence.isHidden = false
+        }
+        
         if self.segueFrom == "myDrinks" {
             (cell as! FirendsListTableViewCell).forwardButton.isHidden = false
             (cell as! FirendsListTableViewCell).forwardButton.tag = indexPath.row
@@ -148,8 +273,9 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
                 }
             })
         })
-        
+        print("Caricamento tablella ended")
         return cell
+        
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -249,7 +375,7 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
             }
             let friend = self.friendsListPaginated?[(isSenderEmpty as! UIButton).tag]
             let userDestination = UserDestination(friend?.fullName,friend?.idFB,friend?.pictureUrl,nil,nil)
-            (segue.destination as! MyDrinksViewController).forwardOrder?.userDestination = userDestination
+            (segue.destination as! MyOrderViewController).forwardOrder?.userDestination = userDestination
             
             //Order.sharedIstance.userDestination = userDestination
             break

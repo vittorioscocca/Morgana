@@ -48,7 +48,6 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
     var fireBaseToken = UserDefaults.standard
     let fbToken = UserDefaults.standard
     var productOfferedBadge = UserDefaults.standard
-    let defaults = UserDefaults.standard
     var firebaseObserverKilled = UserDefaults.standard
     
     var fbTokenString: String?
@@ -69,6 +68,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         super.viewDidLoad()
         //navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
         //navigationController?.navigationBar.shadowImage = UIImage()
+        
         guard CheckConnection.isConnectedToNetwork() == true else{
             self.isConnectedtoNetwork = false
             self.quantità_label.text = "   Quantità prodotti: " + "\(Order.sharedIstance.prodottiTotali)"
@@ -89,20 +89,11 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         self.uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
         
         self.user = CoreDataController.sharedIstance.findUserForIdApp(uid)
-        guard user != nil else{
-            print("User non esiste")
-            return
+        if user == nil {
+            self.logout()
+        } else {
+            self.viewSettings()
         }
-        UpdateBadgeInfo.sharedIstance.updateBadgeInformations(nsArray: self.tabBarController?.tabBar.items as NSArray!)
-        self.getFriendsList()
-        self.quantità_label.text = "   Quantità prodotti: 0"
-        self.totale_label.text = "   Totale: € 0,00"
-        self.myTable.dataSource = self
-        self.myTable.delegate = self
-        let token = Messaging.messaging().fcmToken
-        print("FCM token: \(token ?? "")")
-        self.readCompanies()
-        self.firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
         
         
         //reset Firebase DB. only for simulator tests
@@ -125,6 +116,66 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    private func viewSettings(){
+        UpdateBadgeInfo.sharedIstance.updateBadgeInformations(nsArray: self.tabBarController?.tabBar.items as NSArray!)
+        self.quantità_label.text = "   Quantità prodotti: 0"
+        self.totale_label.text = "   Totale: € 0,00"
+        self.myTable.dataSource = self
+        self.myTable.delegate = self
+        self.readCompanies()
+        self.firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
+    }
+    
+    
+    private func killFirebaseObserver (){
+        let firebaseObserverKilled = UserDefaults.standard
+        if !firebaseObserverKilled.bool(forKey: "firebaseObserverKilled") {
+            firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
+            let fireBaseToken = UserDefaults.standard
+            let uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
+            let user = CoreDataController.sharedIstance.findUserForIdApp(uid)
+            if user != nil {
+                FireBaseAPI.removeObserver(node: "users/" + (user?.idApp)!)
+                FireBaseAPI.removeObserver(node: "ordersSent/" + (user?.idApp)!)
+                FireBaseAPI.removeObserver(node: "ordersReceived/" + (user?.idApp)!)
+                firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
+                print("Firebase Observer Killed")
+            }
+            
+        } else {print("no observer killed")}
+        
+    }
+    
+    private func logout(){
+        guard CheckConnection.isConnectedToNetwork() == true else {
+            return
+        }
+        print("siamo in drinks")
+        //effettuo logout FB
+        let loginManager = FBSDKLoginManager()
+        loginManager.logOut()
+        //self.fbToken.set(nil, forKey: "FBToken")
+        self.fbToken.set(nil, forKey: "FBToken")
+        
+        //effettuologout da firebase
+        let firebaseAuth = Auth.auth()
+        do {
+            //kill firebase observer
+            self.killFirebaseObserver()
+            try firebaseAuth.signOut()
+            self.fireBaseToken.removeObject(forKey: "FireBaseToken")
+            
+            print("utente disconnesso di firebase")
+        } catch let signOutError as NSError {
+            print ("Error signing out: %@", signOutError)
+        }
+        
+        //passo il controllo alla view di login, LoginViewController
+        let loginPage = storyboard?.instantiateViewController(withIdentifier: "LoginViewController")
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        appDelegate.window!.rootViewController = loginPage
     }
     
     
@@ -236,26 +287,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         return cell!
     }
     
-    private func getFriendsList(){
-        guard CheckConnection.isConnectedToNetwork() == true else {
-            self.generateAlert(title: Alert.lostConnection_title.rawValue, msg: Alert.lostConnection_msg.rawValue)
-            return
-        }
-        
-        //if friends list is 0, load user Facebook friends
-        guard self.user?.friends?.count != 0 else {
-            self.getFriends(mail: (self.user?.email)!)
-            let date = Date()
-            self.defaults.set(date, forKey: "Data")
-            return
-        }
-        
-        //if request is > 18000 seconds refresh list friends  with getFriends func
-        guard self.refreshUpdateFriendList() else {
-            return
-        }
-        self.getFriends(mail: (self.user?.email)!)
-    }
+    
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
@@ -265,7 +297,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
                 print("utente non presente")
                 return
             }
-            self.getFriendsList()
+            //self.getFriendsList()
             self.performSegue(withIdentifier: "segueToAmiciFromOffer", sender: nil)
             
         }else {
@@ -418,60 +450,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         UIApplication.shared.endIgnoringInteractionEvents()
     }
     
-    func getFriends(mail: String){
-        print("Update Friends List")
-        
-        if user?.friends!.count != nil {
-            CoreDataController.sharedIstance.deleteFriends(self.uid!)
-        }
-        let fbToken = UserDefaults.standard
-        fbTokenString = fbToken.object(forKey: "FBToken") as? String
-        
-        
-        let parameters_friend = ["fields" : "name, first_name, last_name, id, email, gender, picture.type(large)"]
-        
-        FBSDKGraphRequest(graphPath: "me/friends", parameters: parameters_friend, tokenString: fbTokenString, version: nil, httpMethod: "GET").start(completionHandler: {(connection,result, error) -> Void in
-            if ((error) != nil)
-            {
-                // Process error
-                print("Error: \(error!)")
-                return
-            }
-            //numbers of total friends
-            let newResult = result as! NSDictionary
-            let summary = newResult["summary"] as! NSDictionary
-            let counts = summary["total_count"] as! NSNumber
-            
-            print("Totale amici letti:  \(counts)")
-            var contFriends = 0
-            
-            //self.startActivityIndicator("Carico lista amici...")
-            let dati: NSArray = newResult.object(forKey: "data") as! NSArray
-            
-            guard dati.count != 0 else {
-                return
-            }
-            
-            for i in 0...(dati.count - 1) {
-                contFriends += 1
-                let valueDict: NSDictionary = dati[i] as! NSDictionary
-                let name = valueDict["name"] as? String
-                let idFB = valueDict["id"] as! String
-                let firstName = valueDict["first_name"] as! String
-                let lastName = valueDict["last_name"] as! String
-                print(idFB)
-                
-                //let gender = valueDict["gender"] as! String
-                let picture = valueDict["picture"] as! NSDictionary
-                let data = picture["data"] as? NSDictionary
-                let url = data?["url"] as? String
-                
-                CoreDataController.sharedIstance.addFriendInUser(idAppUser: self.uid!, idFB: idFB, mail: mail, fullName: name, firstName: firstName, lastName: lastName, gender: nil, pictureUrl: url)
-            }
-            print("Aggiornamento elnco amici di Facebook completato!. Inseriti \(contFriends) amici")
-            //self.stopActivityIndicator()
-        })
-    }
+    
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         guard let identifier = segue.identifier else {
@@ -480,6 +459,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         switch identifier {
         case "segueToAmiciFromOffer":
             (segue.destination as! FriendsListViewController).segueFrom = "offerView"
+            (segue.destination as! FriendsListViewController).user = self.user
             break
         case "segueToOfferta":
             (segue.destination as! FriendActionViewController).productsList = self.elencoProdotti
@@ -507,31 +487,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         
     }
     
-    func refreshUpdateFriendList() -> Bool{
-        //create first request Date
-        guard  defaults.object(forKey: "Data") != nil else {
-            let date = Date()
-            self.defaults.set(date, forKey: "Data")
-            print("data prima richiesta: ",defaults.object(forKey: "Data")!)
-            return true
-        }
-        
-        //current Date
-        let currentDate = Date()
-        
-        
-        // difference in seconds from TimeIntervalNow and one date
-        let diffTime = (defaults.object(forKey: "Data") as! Date).timeIntervalSinceNow * -1
-        print(diffTime)
-        
-        //if the request is > 1/2 gg (18000 sec) refresh FB Friends List
-        //for test: don't insert a value < 5
-        if diffTime > 18000 {
-            self.defaults.set(currentDate, forKey: "Data")
-            return true
-        }
-        return false
-    }
+    
     
     @IBAction func unwindToOffer(_ sender: UIStoryboardSegue) {
         switch sender.identifier! {

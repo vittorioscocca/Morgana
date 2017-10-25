@@ -53,7 +53,7 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
     
     func fetchProfile(){
         print("fetch profile")
-        let parameters = ["fields" : "email, name, first_name, last_name, id, gender, picture.type(large)"]
+        let parameters = ["fields" : "email, name, first_name, last_name, age_range,id, gender, picture.type(large)"]
         
         FBSDKGraphRequest(graphPath: "me", parameters: parameters).start(completionHandler: { (connection, result, error) -> Void in
             
@@ -74,7 +74,7 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                 let picture = result?["picture"] as? NSDictionary
                 let data = picture?["data"] as? NSDictionary
                 let url = data?["url"] as? String
-    
+                
                 let user = self.fireBaseToken.object(forKey: "FireBaseToken") as? String
                 let newUser = CoreDataController.sharedIstance.addNewUser(user!, user_id_fb!, email, fullName, user_name, user_lastName, user_gender, url)
                 self.addUserInCloud(user: newUser, onCompletion: {
@@ -113,7 +113,9 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                 "accountState" : "Active",
                 "companyCode":"0",
                 "fireBaseIstanceIDToken" : Messaging.messaging().fcmToken!, //InstanceID.instanceID().token()!,
-                "credits": 5
+                "credits": 5,
+                "birthday": "",
+                "cityOfRecidence":""
                 ] as [String : Any]
             ref.child("users").child((userFireBase?.uid)!).setValue(dataUser)
             onCompletion()

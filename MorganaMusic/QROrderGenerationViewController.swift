@@ -32,7 +32,7 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
         super.viewDidLoad()
         self.fullName_label.text = user?.fullName
         
-        self.age_label.text = "anni 18"
+        self.calculateAge()
         if (user?.gender == "male") {
             self.gender_label.text = "sesso: uomo"
         }else {
@@ -66,6 +66,28 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
         super.viewWillDisappear(animated)
     }
     
+    private func calculateAge(){
+        guard self.user?.birthday != nil else {
+            self.age_label.text = "Età non disponibile"
+            return
+        }
+        let birthday = stringTodateObject(date:(self.user?.birthday)!)
+        let now = Date()
+        let calendar = Calendar.current
+        let ageComponents = calendar.dateComponents([.year], from: birthday!, to: now)
+        let age = ageComponents.year!
+        
+        self.age_label.text = String(age) + " anni"
+    }
+    private func stringTodateObject(date: String)->Date? {
+        let dateFormatter = DateFormatter()
+        dateFormatter.amSymbol = "AM"
+        dateFormatter.pmSymbol = "PM"
+        dateFormatter.dateFormat = "dd-MM-yyyy"
+        //let dateString = dateFormatter.string(from: date as Date)
+        
+        return dateFormatter.date(from: date)
+    }
     private func readImage(){
         CacheImage.getImage(url: self.user?.pictureUrl, onCompletion: { (image) in
             guard image != nil else {

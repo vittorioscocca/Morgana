@@ -132,11 +132,11 @@ class CompanyParametersViewController: UIViewController, UITableViewDelegate, UI
                 textField.clearButtonMode = .whileEditing
             }
             alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] (_) in
-                let textField = alert?.textFields![0] // Force unwrapping because we know it exists.
+                let textField = alert?.textFields![0]
                 self.companyParameters.parameters[indexPath.row].parameterValue = Double((textField?.text)!)
                 self.myTable.reloadData()
             }))
-            
+            alert.addAction(UIAlertAction(title: "Annulla", style: .destructive, handler: nil))
             self.present(alert, animated: true, completion: nil)
         }
         tableView.deselectRow(at: indexPath, animated: true)
@@ -160,8 +160,12 @@ class CompanyParametersViewController: UIViewController, UITableViewDelegate, UI
         }
         newValuesDictionary["days"] = daysOfWeek
         
-        
-        FireBaseAPI.updateNode(node: "merchantPointsParameters/mr001", value: newValuesDictionary)
+        FireBaseAPI.updateNode(node: "merchantPointsParameters/mr001", value: newValuesDictionary, onCompletion: {_ in
+            let alert = UIAlertController(title: "", message: "Dati salvati correttamente", preferredStyle: .alert)
+            
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+        })
         
     }
     

@@ -847,24 +847,27 @@ class FirebaseData {
         })
     }
     
+    func readUserCityOfRecidenceFromIdFB(node:String,  onCompletion: @escaping (String?,String?)->()){
+        FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: node, onCompletion: { (error,dictionary) in
+            guard error == nil else {
+                onCompletion(error,dictionary?["cityOfRecidence"] as? String)
+                return
+            }
+            onCompletion(error,dictionary?["cityOfRecidence"] as? String)
+        })
+    }
+    
     func acceptOrder(state: String, userFullName: String, userIdApp: String, comapanyId: String,userSenderIdApp: String,idOrder: String, autoIdOrder: String){
-        
         FirebaseData.sharedIstance.updateStateOnFirebase(userIdApp: userIdApp, userSenderIdApp: userSenderIdApp,comapanyId: comapanyId, idOrder: idOrder, autoIdOrder: autoIdOrder, state: state)
-        
         let msg = "Il tuo amico " + userFullName  + " ha accettato il tuo ordine"
-        
         NotificationsCenter.sendOrderAcionNotification(userDestinationIdApp:userSenderIdApp, msg: msg, controlBadgeFrom: "purchased")
-        
         FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase(userSenderIdApp, recOrPurch: "purchased")
     }
     
     func refuseOrder(state: String, userFullName: String, userIdApp: String, comapanyId: String, userSenderIdApp: String,idOrder: String, autoIdOrder: String) {
-       
         FirebaseData.sharedIstance.updateStateOnFirebase(userIdApp: userIdApp, userSenderIdApp: userSenderIdApp,comapanyId:comapanyId, idOrder: idOrder, autoIdOrder: autoIdOrder, state: state)
-        
         let msg = "Il tuo amico " + userFullName  + " ha rifiutato il tuo ordine"
         NotificationsCenter.sendOrderAcionNotification(userDestinationIdApp: userSenderIdApp, msg: msg, controlBadgeFrom: "purchased")
-
         FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase(userSenderIdApp, recOrPurch: "purchased")
     }
 

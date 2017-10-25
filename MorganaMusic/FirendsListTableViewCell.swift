@@ -13,6 +13,7 @@ class FirendsListTableViewCell: UITableViewCell {
     @IBOutlet weak var friendImageView: UIImageView!
     @IBOutlet weak var friendName: UILabel!
     @IBOutlet weak var forwardButton: UIButton!
+    @IBOutlet var cityOfRecidence: UILabel!
     
     
     

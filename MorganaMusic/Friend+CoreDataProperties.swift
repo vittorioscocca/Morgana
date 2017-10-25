@@ -23,5 +23,7 @@ extension Friend {
     @NSManaged public var lastName: String?
     @NSManaged public var pictureUrl: String?
     @NSManaged public var user: User?
+    @NSManaged public var cityOfRecidence: String?
+    @NSManaged public var birthday: String?
 
 }
