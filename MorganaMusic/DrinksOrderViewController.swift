@@ -81,20 +81,12 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
             menuButton.action = #selector(SWRevealViewController.revealToggle(_:))
             view.addGestureRecognizer(self.revealViewController().panGestureRecognizer())
         }
-        
         self.isConnectedtoNetwork = true
-        DispatchQueue.main.async {
-            self.loadOfferte()
-        }
         self.uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
-        
         self.user = CoreDataController.sharedIstance.findUserForIdApp(uid)
         if user == nil {
             self.logout()
-        } else {
-            self.viewSettings()
-        }
-        
+        } else {self.viewSettings()}
         
         //reset Firebase DB. only for simulator tests
         //FireBaseAPI.resetFirebaseDB()
@@ -128,7 +120,6 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         self.firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
     }
     
-    
     private func killFirebaseObserver (){
         let firebaseObserverKilled = UserDefaults.standard
         if !firebaseObserverKilled.bool(forKey: "firebaseObserverKilled") {
@@ -143,9 +134,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
                 firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
                 print("Firebase Observer Killed")
             }
-            
         } else {print("no observer killed")}
-        
     }
     
     private func logout(){
@@ -171,7 +160,6 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         } catch let signOutError as NSError {
             print ("Error signing out: %@", signOutError)
         }
-        
         //passo il controllo alla view di login, LoginViewController
         let loginPage = storyboard?.instantiateViewController(withIdentifier: "LoginViewController")
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -189,7 +177,6 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
             //self.myTable.reloadData()
             Cart.sharedIstance.company = self.companies?[0]
         }
-        
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
@@ -287,8 +274,6 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         return cell!
     }
     
-    
-    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         let thisCell = tableView.cellForRow(at: indexPath)
@@ -302,16 +287,10 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
             
         }else {
             if (thisCell?.textLabel?.text == "+    Aggiungi prodotto") {
-                if !self.offerteCaricate {
-                    thisCell?.selectionStyle = UITableViewCellSelectionStyle.none
-                    self.myTable.reloadData()
-                } else {
-                    self.performSegue(withIdentifier: "segueToOfferta", sender: nil)
-                }
+                self.performSegue(withIdentifier: "segueToOfferta", sender: nil)
             }
         }
         tableView.deselectRow(at: indexPath, animated: false)
-        
     }
     
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
@@ -344,43 +323,16 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         }
     }
     
-    private func loadOfferte(){
-        guard self.elencoProdotti.isEmpty else {
-            return
-        }
-        FireBaseAPI.readNodeOnFirebase(node: "merchant products", onCompletion: { (error, dictionary) in
-            guard error == nil else {
-                self.generateAlert(title: "Connessione assente", msg: "Controlla che i segnale internet sia presente ")
-                return
-            }
-            guard dictionary != nil else {
-                return
-            }
-            for (prodotto, costo) in dictionary! {
-                if prodotto != "autoId" {
-                    let prodottoConCosto = prodotto
-                    self.elencoProdotti.append(prodottoConCosto)
-                    self.dictionaryOfferte[prodotto] = costo as? Double
-                }
-            }
-            self.offerteCaricate = true
-            print("offerte caricate")
-        })
-    }
-    
     private func generateAlert(title: String, msg: String){
         controller = UIAlertController(title: title,
                                        message: msg,
                                        preferredStyle: .alert)
-        
         let action = UIAlertAction(title: "Chiudi", style: UIAlertActionStyle.default, handler:
         {(paramAction:UIAlertAction!) in
             print("Il messaggio di chiusura è stato premuto")
         })
         controller!.addAction(action)
         self.present(controller!, animated: true, completion: nil)
-        
-        
     }
     
     private func generateAlert2(title: String, msg: String){
@@ -401,7 +353,6 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         controller!.addAction(actionAnnulla)
         controller!.addAction(actionProsegui)
         self.present(controller!, animated: true, completion: nil)
-        
     }
     
     private func deleteOrdine(){
@@ -438,19 +389,15 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         effectView.addSubview(strLabel)
         self.view.addSubview(effectView)
         UIApplication.shared.beginIgnoringInteractionEvents()
-        
     }
     
     func stopActivityIndicator() {
-        
         strLabel.removeFromSuperview()
         activityIndicator.removeFromSuperview()
         effectView.removeFromSuperview()
         activityIndicator.stopAnimating()
         UIApplication.shared.endIgnoringInteractionEvents()
     }
-    
-    
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         guard let identifier = segue.identifier else {
@@ -462,8 +409,6 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
             (segue.destination as! FriendsListViewController).user = self.user
             break
         case "segueToOfferta":
-            (segue.destination as! FriendActionViewController).productsList = self.elencoProdotti
-            (segue.destination as! FriendActionViewController).offersDctionary = self.dictionaryOfferte
             (segue.destination as! FriendActionViewController).userId = self.uid
             
             if (Order.sharedIstance.userDestination?.idFB != nil) {
@@ -487,8 +432,6 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         
     }
     
-    
-    
     @IBAction func unwindToOffer(_ sender: UIStoryboardSegue) {
         switch sender.identifier! {
         case "unwindToOffer":
@@ -501,7 +444,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
             if Cart.sharedIstance.carrello.count == 0 {
                 self.carousel.isEnabled = false
                 self.carousel.removeBadge()
-            }else {
+            } else {
                 self.carousel.addBadge(number: Cart.sharedIstance.carrello.count)
             }
 
@@ -579,7 +522,6 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
         if !insertOk {
             Cart.sharedIstance.carrello.append(order)
         }
-        
         self.carousel.isEnabled = true
         self.carousel.addBadge(number: Cart.sharedIstance.carrello.count)
         self.deleteOrdine()
@@ -589,6 +531,7 @@ class DrinksOrderViewController: UIViewController, UITableViewDelegate, UITableV
     @IBAction func carousel_clicked(_ sender: UIBarButtonItem) {
         self.performSegue(withIdentifier: "segueToCarousel", sender: nil)
     }
+    
     @IBAction func deleteSelections(_ sender: UIBarButtonItem) {
         self.generateAlert2(title: Alert.deleteSelection_title.rawValue, msg: Alert.deleteSelection_msg.rawValue)
     }

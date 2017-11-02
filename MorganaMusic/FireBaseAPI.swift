@@ -302,9 +302,13 @@ class FireBaseAPI {
         })
     }
     
-    //remove Node
+    //remove Node with autoId
     class func removeNode(node: String, autoId: String){
         ref.child(node + "/" + autoId).removeValue()
+    }
+    
+    class func removeNode(node: String){
+        ref.child(node).removeValue()
     }
     
     //remove FireBase DB

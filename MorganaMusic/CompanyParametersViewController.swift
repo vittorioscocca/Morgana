@@ -46,6 +46,7 @@ class CompanyParametersViewController: UIViewController, UITableViewDelegate, UI
             self.companyParameters.parameters.append(Parameters(parameterName:"standardPresenceCoin" ,parameterValue: (dictionary?["standardPresenceCoin"] as? Double)!))
             self.companyParameters.parameters.append(Parameters(parameterName:"diversifiedPresenceCoin" ,parameterValue: (dictionary?["diversifiedPresenceCoin"] as? Double)!))
             self.companyParameters.parameters.append(Parameters(parameterName:"weeklyThreshold" ,parameterValue: (dictionary?["weeklyThreshold"] as? Double)!))
+            self.companyParameters.parameters.append(Parameters(parameterName:"birthdayCredits" ,parameterValue: (dictionary?["birthdayCredits"] as? Double)!))
             
              for(_,valore) in (dictionary?["days"] as? NSDictionary)! {
                 self.companyParameters.days.append(valore as? String)

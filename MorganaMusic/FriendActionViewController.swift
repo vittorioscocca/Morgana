@@ -65,22 +65,31 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
         // Connect data:
         self.pickerView.delegate = self
         self.pickerView.dataSource = self
-        guard !self.productsList.isEmpty else {
-            return
-        }
-        let product = self.productsList[0]
-        self.selection.product = product
-        self.product1_label.text = product
-        self.selection.price = self.offersDctionary[product]
-        let priceString = String(format:"%.2f", self.selection.price!)
-        self.price1_label.text = priceString + " €"
-        
-        
+        self.loadOfferte()
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    private func loadOfferte(){
+        FireBaseAPI.readNodeOnFirebase(node: "merchant products", onCompletion: { (error, dictionary) in
+            guard error == nil else {
+                return
+            }
+            guard dictionary != nil else {
+                return
+            }
+            for (prodotto, costo) in dictionary! {
+                if prodotto != "autoId" {
+                    let prodottoConCosto = prodotto
+                    self.productsList.append(prodottoConCosto)
+                    self.offersDctionary[prodotto] = costo as? Double
+                }
+            }
+            self.pickerView.reloadAllComponents()
+        })
     }
     
     
@@ -109,6 +118,7 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
         self.selection.price = self.offersDctionary[product]
         let priceString = String(format:"%.2f", self.selection.price!)
         self.price1_label.text = priceString + " €"
+        
     }
     
     @IBAction func newRequest(_ sender: UIButton) {
@@ -117,7 +127,6 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
             let priceString = String(format:"%.2f", self.selection.price!)
             self.price1_label.text = priceString + " €"
             //self.memorizza(self.scelta.product!)
-            
         }
     }
     

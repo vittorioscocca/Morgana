@@ -299,6 +299,37 @@ class NotificationsCenter{
         }
     }
     
+    class func scheduledBirthdayOrder(title: String, userIdApp: String, credits: Double, body: String, identifier: String, scheduledNotification: Date){
+        
+        let center = UNUserNotificationCenter.current()
+        let content = UNMutableNotificationContent()
+        
+        content.title = title
+        content.body = body
+        content.categoryIdentifier = "birthdayNotification"
+        content.userInfo = ["gcm.message_id":"birthdayNotification", "creditsSended": credits, "userIdApp": userIdApp]
+        content.sound = UNNotificationSound.default()
+        /*
+        var dateComponents = DateComponents()
+        let calendar = Calendar.current
+        dateComponents.day = calendar.component(.day, from: scheduledNotification)
+        
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
+       
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+         */
+        
+        let trigger = UNTimeIntervalNotificationTrigger.init(timeInterval: 3.0, repeats: false)
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+        center.add(request) { (error : Error?) in
+            if let theError = error {
+                print(theError.localizedDescription)
+            }
+        }
+        
+        // continuare da qui: dedcommentare il giorno schedulato, in face di accept salvare la nuova data 
+    }
+    
     class func scheduledRememberExpirationLocalNotification(title: String, body: String, identifier: String){
         
         let center = UNUserNotificationCenter.current()

@@ -259,7 +259,14 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             completionHandler( [.alert,.sound,.badge])
         }
         
-        if userInfo["gcm.message_id"] as! String == "RemeberExpiration"{
+        //Local Notification
+        if userInfo["gcm.message_id"] as! String == "expiratedOrder"{
+            print(notification.request.identifier)
+            completionHandler( [.alert,.sound,.badge])
+        }
+        
+        //Local Notification
+        if userInfo["gcm.message_id"] as! String == "birthdayNotification"{
             print(notification.request.identifier)
             completionHandler( [.alert,.sound,.badge])
         }
@@ -300,9 +307,12 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         let deleteExpirationAction = UNNotificationAction(identifier: "delete.action",title: "Non ricordarlmelo più",options: [])
         let acceptOrderAction = UNNotificationAction(identifier: "acceptOrder.action",title: "Accetta",options: [])
         let refuseOrderAction = UNNotificationAction(identifier: "refuseOrder.action",title: "Rifiuta",options: [])
+        let acceptCredits = UNNotificationAction(identifier: "acceptCredits.action",title: "Accetta i crediti",options: [])
+        
         let remeberExpirationCategory = UNNotificationCategory(identifier: "RemeberExpiration",actions: [deleteExpirationAction],intentIdentifiers: [],options: [])
         let OrderSentCategory = UNNotificationCategory(identifier: "OrderSent",actions: [acceptOrderAction,refuseOrderAction],intentIdentifiers: [],options: [])
-        UNUserNotificationCenter.current().setNotificationCategories([remeberExpirationCategory,OrderSentCategory])
+        let birthdayNotificationCategory = UNNotificationCategory(identifier: "birthdayNotification",actions: [acceptCredits],intentIdentifiers: [],options: [])
+        UNUserNotificationCenter.current().setNotificationCategories([remeberExpirationCategory,OrderSentCategory,birthdayNotificationCategory])
     }
   
     
@@ -353,6 +363,13 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             FirebaseData.sharedIstance.refuseOrder(state: "Offerta rifiutata", userFullName: userFullName!, userIdApp: userIdApp!, comapanyId: companyId!, userSenderIdApp: userSenderIdApp!, idOrder: idOrder!, autoIdOrder: autoIdOrder!)
             print("Ordine Rifiutato")
             break
+        case "acceptCredits.action":
+            let credits = userInfo["creditsSended"] as? Double
+            let userIdApp = userInfo["userIdApp"] as? String
+            
+            ManageCredits.updateCredits(newCredit: String(credits!), userId: userIdApp! , onCompletion: {_ in
+                print("Crediti aggiornati")
+            })
         default:
             break
         }

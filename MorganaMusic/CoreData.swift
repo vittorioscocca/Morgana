@@ -51,7 +51,7 @@ class CoreDataController {
     }
     
     
-    func saveCityAndBirthday(idApp: String, cityOfRecidence: String, birthday: String) {
+    func saveCityAndBirthday(idApp: String, cityOfRecidence: String?, birthday: String?) {
         
         let currentUser = self.findUserForIdApp(idApp)
         

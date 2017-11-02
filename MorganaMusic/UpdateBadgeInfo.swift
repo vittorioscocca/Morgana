@@ -68,8 +68,10 @@ class UpdateBadgeInfo {
             if (self.productOfferedBadge.object(forKey: "productOfferedBadge") as? Int != 0) || self.productOfferedBadge.object(forKey: "paymentOfferedBadge") as? Int != 0 {
                 // Now set the badge of the third tab
                 let val = self.productOfferedBadge.object(forKey: "productOfferedBadge") as! Int
-                let paymentVal = self.productOfferedBadge.object(forKey: "paymentOfferedBadge") as! Int
-                tabItem.badgeValue = String(describing: (val + paymentVal))
+                if let paymentVal = self.productOfferedBadge.object(forKey: "paymentOfferedBadge") as? Int {
+                     tabItem.badgeValue = String(describing: (val + paymentVal))
+                }
+               
                 
             } else if (self.productOfferedBadge.object(forKey: "productOfferedBadge") as? Int == 0) && self.productOfferedBadge.object(forKey: "paymentOfferedBadge") as? Int == 0{
                 tabItem.badgeValue = nil
