@@ -366,10 +366,14 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         case "acceptCredits.action":
             let credits = userInfo["creditsSended"] as? Double
             let userIdApp = userInfo["userIdApp"] as? String
+            let scheduledNotification = userInfo["scheduledNotification"] as? Date
+            let notificationIdentifier = userInfo["notificationIdentifier"] as? String
             
             ManageCredits.updateCredits(newCredit: String(credits!), userId: userIdApp! , onCompletion: {_ in
                 print("Crediti aggiornati")
             })
+            
+            FirebaseData.sharedIstance.changeSchedulationBirthday(scheduledBirthdayNotification: scheduledNotification!, idApp: userIdApp!, notificationIdentifier: notificationIdentifier!)
         default:
             break
         }

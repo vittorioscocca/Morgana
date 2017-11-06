@@ -299,6 +299,15 @@ class NotificationsCenter{
         }
     }
     
+    private class func formattedDate(date: Date)->Date{
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd-MM-yyyy"
+        dateFormatter.timeZone = TimeZone(abbreviation: "GMT+0:00")
+        dateFormatter.locale = Locale(identifier: "it_IT")
+        let stringDate = dateFormatter.string(from: date as Date)
+        return dateFormatter.date(from: stringDate)!
+    }
+    
     class func scheduledBirthdayOrder(title: String, userIdApp: String, credits: Double, body: String, identifier: String, scheduledNotification: Date){
         
         let center = UNUserNotificationCenter.current()
@@ -307,27 +316,30 @@ class NotificationsCenter{
         content.title = title
         content.body = body
         content.categoryIdentifier = "birthdayNotification"
-        content.userInfo = ["gcm.message_id":"birthdayNotification", "creditsSended": credits, "userIdApp": userIdApp]
+        content.userInfo = ["gcm.message_id":"birthdayNotification", "creditsSended": credits, "userIdApp": userIdApp, "scheduledNotification": scheduledNotification,"notificationIdentifier":identifier ]
         content.sound = UNNotificationSound.default()
-        /*
+        
+        // let trigger = UNTimeIntervalNotificationTrigger.init(timeInterval: 3.0, repeats: false)
+        // let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+        
         var dateComponents = DateComponents()
         let calendar = Calendar.current
         dateComponents.day = calendar.component(.day, from: scheduledNotification)
+        dateComponents.month = calendar.component(.month, from: scheduledNotification)
+        dateComponents.year = calendar.component(.year, from: scheduledNotification)
+        let diferencesHour = 20
+        let now = self.formattedDate(date:Date())
+        dateComponents.hour = calendar.component(.hour, from: now) + 1 + diferencesHour
+        print(dateComponents)
         
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
-       
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
-         */
         
-        let trigger = UNTimeIntervalNotificationTrigger.init(timeInterval: 3.0, repeats: false)
-        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
         center.add(request) { (error : Error?) in
             if let theError = error {
                 print(theError.localizedDescription)
             }
         }
-        
-        // continuare da qui: dedcommentare il giorno schedulato, in face di accept salvare la nuova data 
     }
     
     class func scheduledRememberExpirationLocalNotification(title: String, body: String, identifier: String){

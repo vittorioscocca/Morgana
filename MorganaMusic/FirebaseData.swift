@@ -13,27 +13,25 @@ import UserNotifications
 
 extension UIApplication
 {
-    class func topViewController(_ base: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController?
+    class func topViewController(_ base: UIViewController?) -> UIViewController?
     {
         if let nav = base as? UINavigationController
         {
-            let top = topViewController(nav.visibleViewController)
-            return top
+            return topViewController(nav.visibleViewController)
+            
         }
         
         if let tab = base as? UITabBarController
         {
             if let selected = tab.selectedViewController
             {
-                let top = topViewController(selected)
-                return top
+               return topViewController(selected)
             }
         }
         
         if let presented = base?.presentedViewController
         {
-            let top = topViewController(presented)
-            return top
+            return topViewController(presented)
         }
         return base
     }
@@ -607,15 +605,16 @@ class FirebaseData {
                             }
                         }
                         
-                    } else if (dati_pendingOffers as? Bool)! {
-                        let activeViewController = UIApplication.topViewController()
+                    } else if (dati_pendingOffers as? Bool)! == true {
+                        
+                        let activeViewController = UIApplication.topViewController(UIApplication.shared.keyWindow?.rootViewController?.childViewControllers[1])
+                            //print("Titolo view controller: ", UIApplication.shared.keyWindow?.rootViewController?.childViewControllers[0].title)
+                        //print("Titolo view controller::", UIApplication.shared.keyWindow?.rootViewController?.childViewControllers[1].title)
                         if activeViewController is QROrderGenerationViewController {
                             (activeViewController as! QROrderGenerationViewController).unwind()
                         }
                         FireBaseAPI.updateNode(node: "ordersReceived/\((self.user?.idApp)!)/\(companyId)", value: ["scanningQrCode":false])
                     }
-                    
-                    
                 }
             }
             self.ordersReceived.sort(by: {self.timestampTodateObject(timestamp: $0.timeStamp) > self.timestampTodateObject(timestamp: $1.timeStamp)})
@@ -848,6 +847,7 @@ class FirebaseData {
     }
     
     func readUserCityOfRecidenceFromIdFB(node:String,  onCompletion: @escaping (String?,String?)->()){
+        
         FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: node, onCompletion: { (error,dictionary) in
             guard error == nil else {
                 onCompletion(error,dictionary?["cityOfRecidence"] as? String)
@@ -869,6 +869,25 @@ class FirebaseData {
         let msg = "Il tuo amico " + userFullName  + " ha rifiutato il tuo ordine"
         NotificationsCenter.sendOrderAcionNotification(userDestinationIdApp: userSenderIdApp, msg: msg, controlBadgeFrom: "purchased")
         FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase(userSenderIdApp, recOrPurch: "purchased")
+    }
+    
+    func changeSchedulationBirthday(scheduledBirthdayNotification: Date, idApp:String,notificationIdentifier:String ){
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd-MM-yyyy"
+        dateFormatter.timeZone = TimeZone(abbreviation: "GMT+0:00")
+        dateFormatter.locale = Locale(identifier: "it_IT")
+        
+        var gregorian = Calendar(identifier: .gregorian)
+        gregorian.timeZone = TimeZone(abbreviation: "GMT+0:00")!
+        var components = gregorian.dateComponents([.year, .month, .day], from: scheduledBirthdayNotification)
+        
+        components.year = components.year! + 1
+        
+        let nextScheduledBirthdayNotification = dateFormatter.string(from: gregorian.date(from: components)!)
+        
+        FireBaseAPI.saveNodeOnFirebase(node: "merchantOrder/mr001/\(idApp)/birthday/\(notificationIdentifier)", dictionaryToSave: ["birthdayScheduledNotification":nextScheduledBirthdayNotification,"schedulationType":"acceptSettings"], onCompletion:{_ in
+            print("Offerta crediti accettata e prossima Data di notifica  aggiornata al \(nextScheduledBirthdayNotification)")
+        })
     }
 
 }

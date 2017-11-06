@@ -38,7 +38,7 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
     var paymentMethod: [String:String] = [
         "PayPal": "paypalButtom",
         "ApplePay" : "applePayButtom",
-        "Crediti" : "i tuoi crediti"
+        "Crediti" : "credits"
     ]
     
     //App idUtente su FireBase
@@ -183,16 +183,11 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
                         Cart.sharedIstance.initializeCart()
                         self.performSegue(withIdentifier: "unwindToOfferFromPayment", sender: nil)
                     })
-                    
-                    
-                    
                 } else {
                    print("Pagamento carrello non valido, riprova")
                     self.generateAlert(title: "Attenzione", message: "Il pagamento non è stato validato, riprova su 'I miei Drinks' sezione 'Ricevuti'")
                 }
-                
             })
-            
         })
     }
     
@@ -262,10 +257,27 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
             break
         case "ApplePay":
             break
+        case "Crediti":
+            self.performSegue(withIdentifier: "segueToCreditsPayment", sender: nil)
+            break
         default:
             break
         }
         tableView.deselectRow(at: indexPath, animated: false)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        guard let identifier = segue.identifier else {
+            return
+        }
+        switch identifier {
+        case "segueToCreditsPayment":
+            (segue.destination as! CreditsPaymentViewController).shopTotal = Cart.sharedIstance.costoTotale
+            (segue.destination as! CreditsPaymentViewController).user = self.user
+            break
+        default:
+            break
+        }
     }
     
     
@@ -306,7 +318,9 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
             })
     }
     
-    
+    @IBAction func unwindToPaymentMethod(_ sender: UIStoryboardSegue) {
+        
+    }
     
     @IBAction func unwindToCarousel(_ sender: UIBarButtonItem) {
         self.performSegue(withIdentifier: "unwindToCarousel", sender: nil)

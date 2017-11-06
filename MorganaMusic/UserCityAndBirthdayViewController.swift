@@ -56,7 +56,7 @@ class UserCityAndBirthdayViewController: UIViewController, UITextFieldDelegate,U
             if dictionary != nil {
                 let notificationIdentifier = dictionary?.keys
                 let dataDictionary = dictionary![(notificationIdentifier!.first)!] as? NSDictionary
-                self.scheduledBirthdayNotification.text = "Il Morgana ti offrirà qualcosa il \((dataDictionary!["birthdayScheduledNotification"] as? String)!)"
+                self.scheduledBirthdayNotification.text = "Il Morgana ti offrirà il \((dataDictionary!["birthdayScheduledNotification"] as? String)!)"
             }
         })
     }
@@ -148,11 +148,11 @@ class UserCityAndBirthdayViewController: UIViewController, UITextFieldDelegate,U
                     
                     FireBaseAPI.removeNode(node: "merchantOrder/mr001/\((self.user?.idApp)!)/birthday")
                     let newNotificationIdentifier = FireBaseAPI.setId(node: "merchantOrder/mr001/\((self.user?.idApp)!)/birthday")
-                    self.birthdayCompanyOrder(birthdayDate: self.birthday_label.text!, comparationDate: dataDictionary!["birthdayScheduledNotification"] as? String, notificationIdentifier: newNotificationIdentifier)
+                    self.birthdayCompanyOrder(birthdayDate: self.birthday_label.text!, comparationDate: dataDictionary!["birthdayScheduledNotification"] as? String,schedulationType: dataDictionary!["schedulationType"] as? String, notificationIdentifier: newNotificationIdentifier)
                 } else {
                     FireBaseAPI.removeNode(node: "merchantOrder/mr001/\((self.user?.idApp)!)/birthday")
                     let newNotificationIdentifier = FireBaseAPI.setId(node: "merchantOrder/mr001/\((self.user?.idApp)!)/birthday")
-                    self.birthdayCompanyOrder(birthdayDate: self.birthday_label.text!,comparationDate: nil,  notificationIdentifier: newNotificationIdentifier)
+                    self.birthdayCompanyOrder(birthdayDate: self.birthday_label.text!,comparationDate: nil,schedulationType: nil,  notificationIdentifier: newNotificationIdentifier)
                 }
             })
             CoreDataController.sharedIstance.saveCityAndBirthday(idApp: (self.user?.idApp)!, cityOfRecidence: nil, birthday: self.birthday_label.text!)
@@ -182,13 +182,13 @@ class UserCityAndBirthdayViewController: UIViewController, UITextFieldDelegate,U
         return dateFormatter.date(from: date)
     }
     
-    private func birthdayCompanyOrder(birthdayDate: String, comparationDate: String?, notificationIdentifier: String){
+    private func birthdayCompanyOrder(birthdayDate: String, comparationDate: String?, schedulationType: String?, notificationIdentifier: String){
        
         FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "merchantPointsParameters/mr001", onCompletion: { (error, dictionary) in
-            let notificationDate = self.calculateNotificationDate(date: birthdayDate, comparationDate: comparationDate)
-            FireBaseAPI.saveNodeOnFirebase(node: "merchantOrder/mr001/\((self.user?.idApp)!)/birthday/\(notificationIdentifier)", dictionaryToSave: ["birthdayScheduledNotification":notificationDate], onCompletion:{_ in
+            let notificationDate = self.calculateNotificationDate(date: birthdayDate, comparationDate: comparationDate, schedulationType: schedulationType)
+            FireBaseAPI.saveNodeOnFirebase(node: "merchantOrder/mr001/\((self.user?.idApp)!)/birthday/\(notificationIdentifier)", dictionaryToSave: ["birthdayScheduledNotification":notificationDate,"schedulationType":"schedulationSettings"], onCompletion:{_ in
                 self.scheduledBirthdayNotification.text = "Ti offriremo qualcosa il: \(notificationDate)"
-                NotificationsCenter.scheduledBirthdayOrder(title: "Buon compleanno", userIdApp: (self.user?.idApp)! ,credits : (dictionary?["birthdayCredits"] as? Double)!, body: "Eccoti \((dictionary?["birthdayCredits"] as? Double)!) crediti per acquistare quello che vuoi al Morgana! Salute!", identifier: notificationIdentifier, scheduledNotification: self.stringTodateObject(date: birthdayDate)!)
+                NotificationsCenter.scheduledBirthdayOrder(title: "Buon compleanno", userIdApp: (self.user?.idApp)! ,credits : (dictionary?["birthdayCredits"] as? Double)!, body: "Eccoti \((dictionary?["birthdayCredits"] as? Double)!) crediti per acquistare quello che vuoi al Morgana! Salute!", identifier: notificationIdentifier, scheduledNotification: self.stringTodateObject(date: notificationDate)!)
                 //accept: schedule new notification and save new date
                 print("Eccoti \((dictionary?["birthdayCredits"] as? Double)!) euro per acquistare quello che vuoi al Morgana! Salute!")
             })
@@ -204,7 +204,7 @@ class UserCityAndBirthdayViewController: UIViewController, UITextFieldDelegate,U
         return dateFormatter.date(from: stringDate)!
     }
     
-    private func calculateNotificationDate(date: String, comparationDate: String?)->String{
+    private func calculateNotificationDate(date: String, comparationDate: String?,schedulationType: String?)->String{
         //if data è di quest'anno crea notifica quest'anno a meno che next year sia true: notifica anno prossimo
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd-MM-yyyy"
@@ -218,8 +218,12 @@ class UserCityAndBirthdayViewController: UIViewController, UITextFieldDelegate,U
         let now = self.formattedDate(date:Date())
         var currentDate: Date
         
-        if comparationDate != nil {
-            currentDate = self.stringTodateObject(date: comparationDate!)!
+        if comparationDate != nil && schedulationType != nil {
+            if schedulationType != "schedulationSettings" {
+                currentDate = self.stringTodateObject(date: comparationDate!)!
+            } else {
+                currentDate = now
+            }
         } else {
             currentDate = now
         }

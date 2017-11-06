@@ -89,6 +89,7 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
                 }
             }
             self.pickerView.reloadAllComponents()
+            self.updateLabels(row: 0)
         })
     }
     
@@ -109,8 +110,7 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
         return self.productsList[row]
     }
     
-    // Catpure the picker view selection
-    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+    func updateLabels(row: Int){
         let product = self.productsList[row]
         //self.storeSelection(self.productsList[row])
         self.product1_label.text = product
@@ -118,9 +118,15 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
         self.selection.price = self.offersDctionary[product]
         let priceString = String(format:"%.2f", self.selection.price!)
         self.price1_label.text = priceString + " €"
-        
     }
     
+    // Catpure the picker view selection
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        updateLabels(row: row)
+    }
+    
+    
+    /*
     @IBAction func newRequest(_ sender: UIButton) {
         if self.selection.product != "" {
             self.product1_label.text = self.selection.product
@@ -128,7 +134,7 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
             self.price1_label.text = priceString + " €"
             //self.memorizza(self.scelta.product!)
         }
-    }
+    }*/
     
     @IBAction func stepperValueChange(_ sender: UIStepper) {
         self.quantità.text = String(Int(sender.value))

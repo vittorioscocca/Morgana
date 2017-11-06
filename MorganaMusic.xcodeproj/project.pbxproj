@@ -55,6 +55,8 @@
 		2A8576F71EC456E800D41949 /* CartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8576F61EC456E800D41949 /* CartViewController.swift */; };
 		2A86BB6E1F47432100CE336B /* OrderSentDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A86BB6D1F47432100CE336B /* OrderSentDetailsViewController.swift */; };
 		2A8CA5A51EFC230300B0DF55 /* UpdateBadgeInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8CA5A41EFC230300B0DF55 /* UpdateBadgeInfo.swift */; };
+		2A9A7ADC1FAFC5C60085AA1F /* CreditsPaymentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9A7ADB1FAFC5C60085AA1F /* CreditsPaymentViewController.swift */; };
+		2A9A7ADE1FAFE2910085AA1F /* LocalAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A9A7ADD1FAFE2910085AA1F /* LocalAuthentication.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		2A9B63BE1E96731B00862AC5 /* CoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9B63BD1E96731B00862AC5 /* CoreData.swift */; };
 		2AA135F81F863FCD003B1507 /* AuthOrderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA135F71F863FCD003B1507 /* AuthOrderViewController.swift */; };
 		2AA135FA1F868298003B1507 /* AutOrderTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA135F91F868298003B1507 /* AutOrderTableViewCell.swift */; };
@@ -163,6 +165,8 @@
 		2A8576F61EC456E800D41949 /* CartViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CartViewController.swift; sourceTree = "<group>"; };
 		2A86BB6D1F47432100CE336B /* OrderSentDetailsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderSentDetailsViewController.swift; sourceTree = "<group>"; };
 		2A8CA5A41EFC230300B0DF55 /* UpdateBadgeInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateBadgeInfo.swift; sourceTree = "<group>"; };
+		2A9A7ADB1FAFC5C60085AA1F /* CreditsPaymentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditsPaymentViewController.swift; sourceTree = "<group>"; };
+		2A9A7ADD1FAFE2910085AA1F /* LocalAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LocalAuthentication.framework; path = System/Library/Frameworks/LocalAuthentication.framework; sourceTree = SDKROOT; };
 		2A9B63BD1E96731B00862AC5 /* CoreData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreData.swift; sourceTree = "<group>"; };
 		2A9E9DA91EEF269000E8383B /* MorganaMusic.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MorganaMusic.entitlements; sourceTree = "<group>"; };
 		2AA135F71F863FCD003B1507 /* AuthOrderViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthOrderViewController.swift; sourceTree = "<group>"; };
@@ -224,6 +228,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A9A7ADE1FAFE2910085AA1F /* LocalAuthentication.framework in Frameworks */,
 				2A74253D1EC52A840071EA25 /* Accelerate.framework in Frameworks */,
 				2A74253E1EC52A840071EA25 /* AudioToolbox.framework in Frameworks */,
 				2A74253F1EC52A840071EA25 /* AVFoundation.framework in Frameworks */,
@@ -393,6 +398,7 @@
 				2AE046341F9E92EA00650A7D /* CompanyOrderToCustomerViewController.swift */,
 				2AD430111F9F3869003B6E7A /* UserQrCodeViewController.swift */,
 				2AD430131F9F5DED003B6E7A /* UserCityAndBirthdayViewController.swift */,
+				2A9A7ADB1FAFC5C60085AA1F /* CreditsPaymentViewController.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -422,6 +428,7 @@
 		65312183B46FE65E26A89277 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				2A9A7ADD1FAFE2910085AA1F /* LocalAuthentication.framework */,
 				2A7425341EC52A840071EA25 /* Accelerate.framework */,
 				2A7425351EC52A840071EA25 /* AudioToolbox.framework */,
 				2A7425361EC52A840071EA25 /* AVFoundation.framework */,
@@ -606,7 +613,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		46D67B7B89FBE38B61E9F35C /* [CP] Copy Pods Resources */ = {
@@ -636,7 +643,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		49DC1D64E5F39BA39F03BB0F /* [CP] Embed Pods Frameworks */ = {
@@ -753,6 +760,7 @@
 				2AA135F81F863FCD003B1507 /* AuthOrderViewController.swift in Sources */,
 				2A206B971F0B79990080235B /* FireBaseAPI.swift in Sources */,
 				2A56BBFE1F9755FA00C72860 /* CartOrderDetailsViewController.swift in Sources */,
+				2A9A7ADC1FAFC5C60085AA1F /* CreditsPaymentViewController.swift in Sources */,
 				2ABD93BB1F18DF5C00F28632 /* NotificationsCenter.swift in Sources */,
 				2AA4B96F1F755E9E00F4FD48 /* Company.swift in Sources */,
 				2A3492EF1F98AB6D00F2C6A7 /* MenuTableViewController.swift in Sources */,
