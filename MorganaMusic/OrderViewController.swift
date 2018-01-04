@@ -100,9 +100,6 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         self.isConnectedtoNetwork = true
         self.myTable.reloadData()
         UIApplication.shared.statusBarStyle = UIStatusBarStyle.lightContent
-        //Update badge info
-        //UpdateBadgeInfo.sharedIstance.updateBadgeInformations(nsArray: self.tabBarController?.tabBar.items as NSArray!)
-        
     }
     
     override func didReceiveMemoryWarning() {

@@ -158,7 +158,7 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
             DispatchQueue.main.async {
                 self.startActivityIndicator("Pagamento in validazione...")
             }
-            FirebaseData.sharedIstance.saveCartOnFirebase(user: self.user!, badgeValue: self.productOfferedBadge.object(forKey: "paymentOfferedBadge") as! Int, onCompletion: {
+            FirebaseData.sharedIstance.saveCartOnFirebase(user: self.user!, badgeValue: self.productOfferedBadge.object(forKey: "paymentOfferedBadge") as? Int, onCompletion: {
                 print("ordine salvato su firebase")
                 DispatchQueue.main.async {
                     // ritorno sul main thread ed aggiorno la view

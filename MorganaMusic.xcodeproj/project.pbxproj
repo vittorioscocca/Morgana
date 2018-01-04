@@ -35,7 +35,7 @@
 		2A6809AD1F7962CD00D813FF /* TextFieldController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6809AC1F7962CC00D813FF /* TextFieldController.swift */; };
 		2A69711F1EB20E400036E3C5 /* UserDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A69711E1EB20E400036E3C5 /* UserDestination.swift */; };
 		2A6971211EB9CA7F0036E3C5 /* FriendsListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6971201EB9CA7F0036E3C5 /* FriendsListViewController.swift */; };
-		2A6971231EB9D9A20036E3C5 /* DrinksOrderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6971221EB9D9A20036E3C5 /* DrinksOrderViewController.swift */; };
+		2A6971231EB9D9A20036E3C5 /* OrderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6971221EB9D9A20036E3C5 /* OrderViewController.swift */; };
 		2A6971271EBA673A0036E3C5 /* addbadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6971261EBA673A0036E3C5 /* addbadge.swift */; };
 		2A6B073D1ED6E8620054FFD3 /* OrderSentTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6B073C1ED6E8620054FFD3 /* OrderSentTableViewCell.swift */; };
 		2A6CC8AC1F85BD310056129C /* MorganaMusicSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6CC8AB1F85BD310056129C /* MorganaMusicSettings.swift */; };
@@ -144,7 +144,7 @@
 		2A6809AC1F7962CC00D813FF /* TextFieldController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldController.swift; sourceTree = "<group>"; };
 		2A69711E1EB20E400036E3C5 /* UserDestination.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserDestination.swift; sourceTree = "<group>"; };
 		2A6971201EB9CA7F0036E3C5 /* FriendsListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendsListViewController.swift; sourceTree = "<group>"; };
-		2A6971221EB9D9A20036E3C5 /* DrinksOrderViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrinksOrderViewController.swift; sourceTree = "<group>"; };
+		2A6971221EB9D9A20036E3C5 /* OrderViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderViewController.swift; sourceTree = "<group>"; };
 		2A6971261EBA673A0036E3C5 /* addbadge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = addbadge.swift; sourceTree = "<group>"; };
 		2A6B073C1ED6E8620054FFD3 /* OrderSentTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderSentTableViewCell.swift; sourceTree = "<group>"; };
 		2A6CC8AB1F85BD310056129C /* MorganaMusicSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorganaMusicSettings.swift; sourceTree = "<group>"; };
@@ -376,7 +376,7 @@
 				2AD8C1421E9D486700017004 /* FriendActionViewController.swift */,
 				2A6971201EB9CA7F0036E3C5 /* FriendsListViewController.swift */,
 				2AC63AF21E9DFFCE00A9F91E /* FirendsListTableViewCell.swift */,
-				2A6971221EB9D9A20036E3C5 /* DrinksOrderViewController.swift */,
+				2A6971221EB9D9A20036E3C5 /* OrderViewController.swift */,
 				2A8576F61EC456E800D41949 /* CartViewController.swift */,
 				2AFA98881EC1CE470007CA33 /* CartUserTableViewCell.swift */,
 				2A1A5EC51ECCB55600A0144A /* PaymentViewController.swift */,
@@ -767,7 +767,7 @@
 				2A3492F11F98B99800F2C6A7 /* UserProfileMenuRowTableViewCell.swift in Sources */,
 				2A051E731F9D5F1900DADF00 /* CompanyParametersViewController.swift in Sources */,
 				2A6E266D1E9BFCF600C1FC64 /* User+CoreDataProperties.swift in Sources */,
-				2A6971231EB9D9A20036E3C5 /* DrinksOrderViewController.swift in Sources */,
+				2A6971231EB9D9A20036E3C5 /* OrderViewController.swift in Sources */,
 				2A53AB6D1EB135D60018B8E9 /* InitialSliderViewController.swift in Sources */,
 				2A56BC001F97584D00C72860 /* CacheImage.swift in Sources */,
 				2A69711F1EB20E400036E3C5 /* UserDestination.swift in Sources */,

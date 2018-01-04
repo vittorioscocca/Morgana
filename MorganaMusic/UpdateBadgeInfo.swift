@@ -54,7 +54,8 @@ class UpdateBadgeInfo {
                 case "numberOfPendingReceivedProducts":
                     self.productOfferedBadge.set(valore as! Int, forKey: "productOfferedBadge")
                     break
-                case "ì":
+                    
+                case "numberOfPendingPurchasedProducts":
                     self.productOfferedBadge.set(valore as! Int, forKey: "paymentOfferedBadge")
                     break
                 default:

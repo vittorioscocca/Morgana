@@ -64,9 +64,13 @@ class FirebaseData {
         self.companies = [Company]()
     }
     
-    private func updatePendingProducts(order: Order,badgeValue: Int ) {
+    private func updatePendingProducts(order: Order,badgeValue: Int?) {
         if order.userDestination?.idApp != (self.user?.idApp)! {
-            FireBaseAPI.updateNode(node: "users/"+(self.user?.idApp)!, value: ["numberOfPendingPurchasedProducts" : badgeValue + 1])
+            var badgeValuePass = 0
+            if badgeValue != nil {
+                badgeValuePass = badgeValue!
+            }
+            FireBaseAPI.updateNode(node: "users/"+(self.user?.idApp)!, value: ["numberOfPendingPurchasedProducts" : badgeValuePass + 1])
         }
     }
     
@@ -99,7 +103,7 @@ class FirebaseData {
         ]
     }
     
-    private func saveOrdersSentOnFireBase (badgeValue: Int, order: Order, onCompletion: @escaping ()->()){
+    private func saveOrdersSentOnFireBase (badgeValue: Int?, order: Order, onCompletion: @escaping ()->()){
         
         order.orderAutoId = FireBaseAPI.setId(node: "ordersSent/\((self.user?.idApp)!)/\((order.company?.companyId)!)")
         order.ordersSentAutoId = FireBaseAPI.setId(node: "ordersReceived/\((order.userDestination?.idApp)!)/\((order.company?.companyId)!)")
@@ -119,7 +123,7 @@ class FirebaseData {
         })
     }
 
-    func saveCartOnFirebase(user: User, badgeValue: Int,  onCompletion: @escaping ()->()){
+    func saveCartOnFirebase(user: User, badgeValue: Int?,  onCompletion: @escaping ()->()){
         self.user = user
         var workItems = [DispatchWorkItem]()
         
@@ -470,7 +474,7 @@ class FirebaseData {
         })
     }
     
-    private func manageExirationOrder(order: Order){
+    private func manageExpirationOrder(order: Order){
         let ref = Database.database().reference()
         if order.offerState != "Scaduta" {
             ref.child("sessions").setValue(ServerValue.timestamp())
@@ -560,7 +564,7 @@ class FirebaseData {
             }
         }
         if controlExpirationDate {
-            self.manageExirationOrder(order: order)
+            self.manageExpirationOrder(order: order)
         }
        
     }
@@ -608,8 +612,6 @@ class FirebaseData {
                     } else if (dati_pendingOffers as? Bool)! == true {
                         
                         let activeViewController = UIApplication.topViewController(UIApplication.shared.keyWindow?.rootViewController?.childViewControllers[1])
-                            //print("Titolo view controller: ", UIApplication.shared.keyWindow?.rootViewController?.childViewControllers[0].title)
-                        //print("Titolo view controller::", UIApplication.shared.keyWindow?.rootViewController?.childViewControllers[1].title)
                         if activeViewController is QROrderGenerationViewController {
                             (activeViewController as! QROrderGenerationViewController).unwind()
                         }
@@ -658,24 +660,27 @@ class FirebaseData {
         var node = String()
         let dispatchGroup = DispatchGroup.init()
         let queue = DispatchQueue.init(label: "it.xcoding.queueReadUsers", attributes: .concurrent, target: .main)
+        
         print("Orders Received contiene \(self.ordersReceived.count) ordini")
         for singleOrder in ordersToRead{
             node = "users/" + (singleOrder.userSender?.idApp)!
-            dispatchGroup.enter()
-            queue.async(group: dispatchGroup){
+            print("user sender letto", (singleOrder.userSender?.idApp)! )
+            
+            //dispatchGroup.enter()
+            //queue.async(group: dispatchGroup){
                 FireBaseAPI.readNodeOnFirebaseWithOutAutoIdHandler(node: node, beginHandler: {
-                    print("user letto")
+                    dispatchGroup.enter()
+                    queue.async(group: dispatchGroup){
+                        print("user letto", node)
+                    }
                 }, completionHandler: {(error, userData) in
                         guard error == nil else {return}
                         guard userData != nil else {return}
                         singleOrder.userSender?.fullName = userData!["fullName"] as? String
-                        print("full name letto")
                         singleOrder.userSender?.pictureUrl = userData!["pictureUrl"] as? String
-                        print("picturUrl letta")
-                        print("letto uno user")
                         dispatchGroup.leave()
                 })
-            }
+            //}
         }
 
         dispatchGroup.notify(queue: DispatchQueue.main) {
@@ -692,11 +697,13 @@ class FirebaseData {
         for singleOrder in ordersToRead{
             let node = "productsOffersDetails/\((singleOrder.company?.companyId)!)/\(singleOrder.idOfferta!)"
             
-            dispatchGroup.enter()
-            queue.async(group: dispatchGroup){
+            
             //readNodeOnFireBase con Autoid
                 FireBaseAPI.readNodeOnFirebaseWithOutAutoIdHandler(node: node, beginHandler: {
-                    print("eseguo lettura Dettaglio Ordini")
+                    dispatchGroup.enter()
+                    queue.async(group: dispatchGroup){
+                        print("eseguo lettura Dettaglio Ordini")
+                    }
                 }, completionHandler: { (error, productData) in
                     
                     guard error == nil else {return}
@@ -723,7 +730,6 @@ class FirebaseData {
                     }
                     dispatchGroup.leave()
                 })
-            }
         }
         
         dispatchGroup.notify(queue: DispatchQueue.main) {
