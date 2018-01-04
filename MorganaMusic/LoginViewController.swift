@@ -95,7 +95,17 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
             guard !snap.exists() else {
                 print("exist: user already exist on Firebase")
                 //Firebase Token can changed, so if there is such problem with a login/logout we have the new Token
-                ref.child("users/"+(userFireBase?.uid)!).updateChildValues(["fireBaseIstanceIDToken" : Messaging.messaging().fcmToken!])
+                let dataUser = [
+                    "name" : user.firstName!,
+                    "surname" : user.lastName!,
+                    "fullName" : user.fullName!,
+                    "idFB" : user.idFB!,
+                    "email" : user.email!,
+                    "gender" : user.gender!,
+                    "pictureUrl" : user.pictureUrl!,
+                    "fireBaseIstanceIDToken" : Messaging.messaging().fcmToken!, //InstanceID.instanceID().token()!,
+                    ] as [String : Any]
+                ref.child("users/"+(userFireBase?.uid)!).updateChildValues(dataUser)
                 onCompletion()
                 return
             }

@@ -66,16 +66,71 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         
         guard (( uidFB == nil) && (uidFiB == nil)) else{
-            
+
             print("[DEBUG] Salto il login iniziale")
             MorganaMusicActivate()
+            updateFacebookAndFirebaseInfo()
             return true
         }
         //FBSDKLoginButton.classForCoder()
-        
         FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
         
         return true
+    }
+    
+    func updateFacebookAndFirebaseInfo(){
+        let parameters = ["fields" : "email, name, first_name, last_name, age_range,id, gender, picture.type(large)"]
+        
+        let fbToken = UserDefaults.standard
+        let fbTokenString = fbToken.object(forKey: "FBToken") as? String
+        
+        
+        FBSDKGraphRequest(graphPath: "me", parameters: parameters, tokenString: fbTokenString, version: nil, httpMethod: "GET").start(completionHandler: {(connection,result, error) -> Void in
+            if ((error) != nil){
+                // Process error
+                print("Error: \(error!)")
+            } else{
+                let result = result as? NSDictionary
+                let email = result?["email"] as? String
+                let fullName = result?["name"] as? String
+                let user_name = result?["first_name"] as? String
+                let user_lastName = result?["last_name"] as? String
+                let user_gender = result?["gender"] as? String
+                let user_id_fb = result?["id"]  as? String
+                let picture = result?["picture"] as? NSDictionary
+                let data = picture?["data"] as? NSDictionary
+                let url = data?["url"] as? String
+                let fireBaseToken = UserDefaults.standard
+                let user = fireBaseToken.object(forKey: "FireBaseToken") as? String
+                let newUser = CoreDataController.sharedIstance.addNewUser(user!, user_id_fb!, email, fullName, user_name, user_lastName, user_gender, url)
+                self.updateUserInCloud(user: newUser)
+            }
+        })
+    }
+    
+    //update user info on Firebase
+    private func updateUserInCloud(user: User){
+        let userFireBase = Auth.auth().currentUser
+        let ref = Database.database().reference()
+    
+        ref.child("users/"+(userFireBase?.uid)!).observeSingleEvent(of: .value, with: { (snap) in
+            //if user exist on firbase exit, else save user data on firebase(only one time)
+            if snap.exists() {
+                //create user data on Firebase
+                let dataUser = [
+                    "name" : user.firstName!,
+                    "surname" : user.lastName!,
+                    "fullName" : user.fullName!,
+                    "idFB" : user.idFB!,
+                    "email" : user.email!,
+                    "gender" : user.gender!,
+                    "pictureUrl" : user.pictureUrl!,
+                    "fireBaseIstanceIDToken" : Messaging.messaging().fcmToken!, //InstanceID.instanceID().token()!,
+                    ] as [String : Any]
+                //Firebase Token can changed, so if there is such problem with a login/logout we have the new Token
+                ref.child("users/"+(userFireBase?.uid)!).updateChildValues(dataUser)
+            }
+        })
     }
 
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],

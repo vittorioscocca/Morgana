@@ -37,6 +37,10 @@ extension UIApplication
     }
 }
 
+extension NSNotification.Name {
+    public static let FireBaseDataUserReadedNotification = NSNotification.Name("FireBaseDataUserReadedNotification")
+}
+
 class FirebaseData {
     
     static let sharedIstance = FirebaseData()
@@ -56,12 +60,15 @@ class FirebaseData {
     
     var idOrder: [String]?
     
+    let notificationCenter: NotificationCenter
+    
     private init(){
         self.ordersSent = [Order]()
         self.ordersReceived = [Order]()
         
         self.idOrder = [String]()
         self.companies = [Company]()
+        self.notificationCenter = NotificationCenter.default
     }
     
     private func updatePendingProducts(order: Order,badgeValue: Int?) {
@@ -469,6 +476,7 @@ class FirebaseData {
             self.ordersSent.sort(by: {self.timestampTodateObject(timestamp: $0.timeStamp) > self.timestampTodateObject(timestamp: $1.timeStamp)})
             
             self.readProductsSentDetails(ordersToRead: self.ordersSent,onCompletion: {
+                self.notificationCenter.post(name: .FireBaseDataUserReadedNotification, object: nil)
                 onCompletion(self.ordersSent)
             })
         })
@@ -569,11 +577,8 @@ class FirebaseData {
        
     }
     
-    
-    
     func readOrderReceivedOnFireBase(user: User, onCompletion: @escaping ([Order])->()) {
         let ref = Database.database().reference()
-        self.ordersReceived.removeAll()
         self.user = user
         ref.child("ordersReceived/" + (self.user?.idApp)!).observe(.value, with: { (snap) in
             // controllo che lo snap dei dati non sia vuoto
@@ -621,14 +626,12 @@ class FirebaseData {
             }
             self.ordersReceived.sort(by: {self.timestampTodateObject(timestamp: $0.timeStamp) > self.timestampTodateObject(timestamp: $1.timeStamp)})
 
-            
             self.readUserSender(ordersToRead: self.ordersReceived, onCompletion: {
                 self.readProductsSentDetails(ordersToRead: self.ordersReceived, onCompletion: {
+                    self.notificationCenter.post(name: .FireBaseDataUserReadedNotification, object: nil)
                     onCompletion(self.ordersReceived)
-                    
                 })
             })
-            
         })
     }
     

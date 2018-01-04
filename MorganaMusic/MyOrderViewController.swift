@@ -78,6 +78,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         self.user = CoreDataController.sharedIstance.findUserForIdApp(self.uid)
         self.updateSegmentControl()
         
+        NotificationCenter.default.addObserver(self, selector: #selector(reloadData), name: .FireBaseDataUserReadedNotification, object: nil)
        
         self.friendsList = CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: self.uid!)
         
@@ -132,6 +133,10 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         FireBaseAPI.removeObserver(node: "ordersSent/" + (self.user?.idApp)!)
         FireBaseAPI.removeObserver(node: "orderReceived/" + (self.user?.idApp)!)
         self.firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")*/
+    }
+    
+    @objc private func reloadData() {
+        self.myTable.reloadData()
     }
     
     private func setSegmentcontrol() {
@@ -235,7 +240,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
             self.nowReadingOrdersAndOffersOnFirebase = false
             self.ordersSent = self.deleteClimbedOrder(ordersSent: ordersSent)
-            self.myTable.reloadData()
+            //self.myTable.reloadData()
         })
     }
     
@@ -267,7 +272,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
             self.nowReadingOrdersAndOffersOnFirebase = false
             self.ordersReceived = self.getClimbedOrders(ordersReceived: ordersReceived)
-            self.myTable.reloadData()
+            //self.myTable.reloadData()
         })
     }
 
@@ -489,16 +494,16 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             
             if (offertaRicevuta!.offerState!) == "Offerta accettata" { //"Pending"
                 //cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
-            }else if (offertaRicevuta!.offerState!) == "Pending" {
+            } else if (offertaRicevuta!.offerState!) == "Pending" {
                 cell?.accessoryType = UITableViewCellAccessoryType.none
-            }else if (offertaRicevuta!.offerState!) == "Offerta consumata"{
+            } else if (offertaRicevuta!.offerState!) == "Offerta consumata"{
                 cell?.accessoryType = UITableViewCellAccessoryType.none
                 (cell as? OrderReceivedTableViewCell)?.cellReaded = true
-            }else if (offertaRicevuta!.offerState!) == "Offerta scalata"{
+            } else if (offertaRicevuta!.offerState!) == "Offerta scalata"{
                 //cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
                 (cell as? OrderReceivedTableViewCell)?.cellReaded = false
                 
-            }else{
+            } else{
                 cell?.accessoryType = UITableViewCellAccessoryType.checkmark
             }
             
