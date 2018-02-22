@@ -27,6 +27,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //Paypal sandbox credentials
         PayPalMobile.initializeWithClientIds(forEnvironments: [PayPalEnvironmentProduction: "ARowfMHmd5EwE2lUU2Gc3DkAwyQEFUi1H2qzmwhIiplZ9T2r0eqAAzh_qoE8O57fH6yEz6P9Kl6uRHU2",PayPalEnvironmentSandbox: "AfN_l2vZFwYniDa6bpCW3NmqrD4wX0VV7vH3VdDUb0Fjxsw2__X9gC0fee2VNKus-mRuvN4oHCjPJyBl"])
 
+        //Singleton initialization
+        _ = NetworkStatus.default
+        _ = FacebookFriendsListManager.instance
         //var token for Firebase and Facebook
         let fbToken = UserDefaults.standard
         let fireBaseToken = UserDefaults.standard
@@ -360,7 +363,7 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
     func setCategories(){
         
         let deleteExpirationAction = UNNotificationAction(identifier: "delete.action",title: "Non ricordarlmelo più",options: [])
-        let acceptOrderAction = UNNotificationAction(identifier: "acceptOrder.action",title: "Accetta",options: [])
+        let acceptOrderAction = UNNotificationAction(identifier: "acceptOrder.action",title: "Accetta",options: [.foreground])
         let refuseOrderAction = UNNotificationAction(identifier: "refuseOrder.action",title: "Rifiuta",options: [])
         let acceptCredits = UNNotificationAction(identifier: "acceptCredits.action",title: "Accetta i crediti",options: [])
         

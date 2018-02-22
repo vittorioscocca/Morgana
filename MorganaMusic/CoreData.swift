@@ -25,6 +25,14 @@ class CoreDataController {
         
         let user = self.findUserForIdApp(idApp)
         guard  user == nil else {
+            user?.idApp = idApp
+            user?.idFB = idFB
+            user?.email = email
+            user?.fullName = fullName
+            user?.firstName = firstName
+            user?.lastName = lastName
+            user?.gender = gender
+            user?.pictureUrl = pictureUrl
             return user!
         }
         let entityUser = NSEntityDescription.entity(forEntityName: "User", in: self.context)

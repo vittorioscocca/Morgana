@@ -98,7 +98,11 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
             self.viewDidLoad()
         }
         self.isConnectedtoNetwork = true
-        self.myTable.reloadData()
+        
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(updateTable),
+                                               name: .CacheImageLoadImage,
+                                               object: nil)
         UIApplication.shared.statusBarStyle = UIStatusBarStyle.lightContent
     }
     
@@ -115,6 +119,14 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         self.myTable.delegate = self
         self.readCompanies()
         self.firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
+    }
+    @objc func updateTable(){
+        print("table reloaded")
+        myTable.reloadData()
+    }
+    
+    deinit{
+        NotificationCenter.default.removeObserver(self)
     }
     
     private func killFirebaseObserver (){
@@ -148,7 +160,6 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         //effettuologout da firebase
         let firebaseAuth = Auth.auth()
         do {
-            //kill firebase observer
             self.killFirebaseObserver()
             try firebaseAuth.signOut()
             self.fireBaseToken.removeObject(forKey: "FireBaseToken")
@@ -410,23 +421,18 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
             
             if (Order.sharedIstance.userDestination?.idFB != nil) {
                 let userTemp = Order.sharedIstance.userDestination
-                let url = NSURL(string: (userTemp?.pictureUrl)!)
-                let data = NSData(contentsOf: url! as URL)
                 
-                (segue.destination as! FriendActionViewController).imageFriend = UIImage(data: data! as Data)
+                (segue.destination as! FriendActionViewController).friendURLImage = userTemp?.pictureUrl
                 (segue.destination as! FriendActionViewController).fullNameFriend = userTemp?.fullName!
             } else {
-                let url = NSURL(string: (user?.pictureUrl)!)
-                let data = NSData(contentsOf: url! as URL)
                 
-                (segue.destination as! FriendActionViewController).imageFriend = UIImage(data: data! as Data)
-                (segue.destination as! FriendActionViewController).fullNameFriend = self.user?.fullName
+                (segue.destination as? FriendActionViewController)?.friendURLImage = user?.pictureUrl
+                (segue.destination as? FriendActionViewController)?.fullNameFriend = self.user?.fullName
             }
             break
         default:
             break
         }
-        
     }
     
     @IBAction func unwindToOffer(_ sender: UIStoryboardSegue) {
@@ -447,11 +453,12 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
             break
         case "unwindToOfferfromListFriendWithoutValue":
-            print("senza valori e reload table")
+            print("senza valori senza reload table")
             break
         case "unwindToOfferfromListFriend":
-            print("senza valori e reload table")
+            print("con nuovi valori valori e reload table")
             self.delete.isEnabled = true
+            self.myTable.reloadData()
             break
         default:
             self.myTable.reloadData()

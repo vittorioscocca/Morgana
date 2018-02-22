@@ -14,6 +14,8 @@
 		2A0700F71EEB178100F701EC /* OrderReceivedTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0700F61EEB178100F701EC /* OrderReceivedTableViewCell.swift */; };
 		2A1863AE1F5055DB00505F20 /* FirebaseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1863AD1F5055DB00505F20 /* FirebaseData.swift */; };
 		2A1863B01F5055EA00505F20 /* PaymentsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1863AF1F5055EA00505F20 /* PaymentsManager.swift */; };
+		2A19684F203F3EC40036BDB9 /* FacebookFriendsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A19684E203F3EC40036BDB9 /* FacebookFriendsList.swift */; };
+		2A196851203F42A30036BDB9 /* NetworkStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A196850203F42A30036BDB9 /* NetworkStatus.swift */; };
 		2A1A5EC41ECCAD4500A0144A /* PaymentTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1A5EC31ECCAD4500A0144A /* PaymentTableViewCell.swift */; };
 		2A1A5EC61ECCB55600A0144A /* PaymentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1A5EC51ECCB55600A0144A /* PaymentViewController.swift */; };
 		2A1D14EC1F644DDC00C2F5E2 /* QrReaderViewControllerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1D14EB1F644DDC00C2F5E2 /* QrReaderViewControllerViewController.swift */; };
@@ -122,6 +124,8 @@
 		2A0700F61EEB178100F701EC /* OrderReceivedTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderReceivedTableViewCell.swift; sourceTree = "<group>"; };
 		2A1863AD1F5055DB00505F20 /* FirebaseData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FirebaseData.swift; sourceTree = "<group>"; };
 		2A1863AF1F5055EA00505F20 /* PaymentsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PaymentsManager.swift; sourceTree = "<group>"; };
+		2A19684E203F3EC40036BDB9 /* FacebookFriendsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FacebookFriendsList.swift; sourceTree = "<group>"; };
+		2A196850203F42A30036BDB9 /* NetworkStatus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkStatus.swift; sourceTree = "<group>"; };
 		2A1A5EC31ECCAD4500A0144A /* PaymentTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PaymentTableViewCell.swift; sourceTree = "<group>"; };
 		2A1A5EC51ECCB55600A0144A /* PaymentViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PaymentViewController.swift; sourceTree = "<group>"; };
 		2A1D14EB1F644DDC00C2F5E2 /* QrReaderViewControllerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QrReaderViewControllerViewController.swift; sourceTree = "<group>"; };
@@ -374,6 +378,7 @@
 				2AE35FA11E93F00F00DF453F /* LoginViewController.swift */,
 				2AE35FAB1E93F99900DF453F /* UserViewController.swift */,
 				2AD8C1421E9D486700017004 /* FriendActionViewController.swift */,
+				2A19684E203F3EC40036BDB9 /* FacebookFriendsList.swift */,
 				2A6971201EB9CA7F0036E3C5 /* FriendsListViewController.swift */,
 				2AC63AF21E9DFFCE00A9F91E /* FirendsListTableViewCell.swift */,
 				2A6971221EB9D9A20036E3C5 /* OrderViewController.swift */,
@@ -412,6 +417,7 @@
 				2AE35F981E93EF5800DF453F /* Info.plist */,
 				2ACE9D3C1EA6644700E93327 /* GoogleService-Info.plist */,
 				2A53AB5C1EAE893E0018B8E9 /* TestConnection.swift */,
+				2A196850203F42A30036BDB9 /* NetworkStatus.swift */,
 				2A6971261EBA673A0036E3C5 /* addbadge.swift */,
 				2A8CA5A41EFC230300B0DF55 /* UpdateBadgeInfo.swift */,
 				2A206B961F0B79990080235B /* FireBaseAPI.swift */,
@@ -737,6 +743,7 @@
 				2AD8C1431E9D486700017004 /* FriendActionViewController.swift in Sources */,
 				2AE35FAC1E93F99900DF453F /* UserViewController.swift in Sources */,
 				2AD5C80E1ECED68A001951C3 /* MyOrderViewController.swift in Sources */,
+				2A19684F203F3EC40036BDB9 /* FacebookFriendsList.swift in Sources */,
 				2AE046351F9E92EA00650A7D /* CompanyOrderToCustomerViewController.swift in Sources */,
 				2A1FEA161F9D02050064AF6C /* CompanyProfileViewController.swift in Sources */,
 				2A6CC8AC1F85BD310056129C /* MorganaMusicSettings.swift in Sources */,
@@ -768,6 +775,7 @@
 				2A051E731F9D5F1900DADF00 /* CompanyParametersViewController.swift in Sources */,
 				2A6E266D1E9BFCF600C1FC64 /* User+CoreDataProperties.swift in Sources */,
 				2A6971231EB9D9A20036E3C5 /* OrderViewController.swift in Sources */,
+				2A196851203F42A30036BDB9 /* NetworkStatus.swift in Sources */,
 				2A53AB6D1EB135D60018B8E9 /* InitialSliderViewController.swift in Sources */,
 				2A56BC001F97584D00C72860 /* CacheImage.swift in Sources */,
 				2A69711F1EB20E400036E3C5 /* UserDestination.swift in Sources */,

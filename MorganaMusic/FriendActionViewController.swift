@@ -39,10 +39,9 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
     var productsList = [String]()
     var offersDctionary = [String : Double]()
     
-    
-    var imageFriend: UIImage!
     var fullNameFriend: String?
     var idFBFriend: String?
+    var friendURLImage: String?
     
     
     //alert per comunicazioni
@@ -52,7 +51,6 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
     override func viewDidLoad() {
         
         super.viewDidLoad()
-        self.imageFriend_Picture.image = self.imageFriend
         self.fullNameFrienf_label.text = fullNameFriend
         
         //modifying image
@@ -62,12 +60,22 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
         self.imageFriend_Picture.layer.borderWidth = 2.5
         self.imageFriend_Picture.layer.borderColor = #colorLiteral(red: 0.7419371009, green: 0.1511851847, blue: 0.20955199, alpha: 1)
         
+        CacheImage.getImage(url: friendURLImage, onCompletion: { (image) in
+            guard image != nil else {
+                print("immagine utente non reperibile")
+                return
+            }
+            self.imageFriend_Picture.image = image
+        })
+        
+        
+        
         // Connect data:
         self.pickerView.delegate = self
         self.pickerView.dataSource = self
         self.loadOfferte()
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.

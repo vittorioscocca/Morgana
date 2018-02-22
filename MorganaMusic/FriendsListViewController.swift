@@ -16,21 +16,10 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     @IBOutlet weak var numAmici: UIBarButtonItem!
    
     var segueFrom: String?
-    
     var resultSearchController: UISearchController?
     let fireBaseToken = UserDefaults.standard
     var userId: String?
-    
-    //pagination settings
-    enum PageSetting: Int {
-        case cento = 1
-        case mille = 100
-        case duemila = 200
-        case cinquemila = 300
-    }
-    
-    var friendsList: [Friend]?
-    var friendsListPaginated: [Friend]? = []
+    var friendsList: [Friend]? = []
     var listaFiltrata = [Friend]()
     var start = 0
     var end = 0
@@ -40,14 +29,12 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     var order: Order?
     var defaults = UserDefaults.standard
     var user: User?
-    
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         self.myTable.dataSource = self
         self.myTable.delegate = self
         self.userId = fireBaseToken.object(forKey: "FireBaseToken")! as? String
-        self.getFriendsList()
         self.resultSearchController = ({
             // creo un oggetto di tipo UISearchController
             let controller = UISearchController(searchResultsController: nil)
@@ -62,7 +49,13 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
             return controller
         })()
         self.myTable.addSubview(refreshControl1)
-        self.numAmici.title = String(self.friendsListPaginated!.count)
+        self.friendsList = FacebookFriendsListManager.instance.readContactList().facebookFriendsList
+        self.numAmici.title = String(self.friendsList!.count)
+        
+        NotificationCenter.default.addObserver(self,
+                                       selector: #selector(FacebookFriendsListStateDidChange),
+                                       name: .FacebookFriendsListStateDidChange,
+                                       object: nil)
     }
     
     override func didReceiveMemoryWarning() {
@@ -74,39 +67,21 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
         super.viewWillDisappear(animated)
     }
     
-    private func getFriendsList(){
-        guard CheckConnection.isConnectedToNetwork() == true else {
-            return
+    @objc func FacebookFriendsListStateDidChange(){
+        if case .loading = FacebookFriendsListManager.instance.state {
+            refreshControl1.beginRefreshing()
+            myTable.isUserInteractionEnabled = false
         }
-        
-        //if friends list is 0, load user Facebook friends
-        guard self.user?.friends?.count != 0 else {
-            self.getFriends(mail: (self.user?.email)!)
-            print("chiamata1")
-            let date = Date()
-            self.defaults.set(date, forKey: "Data")
-            return
+        else {
+            refreshControl1.endRefreshing()
+            myTable.isUserInteractionEnabled = true
+            self.friendsList = FacebookFriendsListManager.instance.readContactList().facebookFriendsList
+            self.numAmici.title = String(self.friendsList!.count)
+            myTable.reloadData()
         }
-        
-        //if request is > 18000 seconds refresh list friends  with getFriends func
-        guard self.refreshUpdateFriendList() else {
-            self.updateData()
-            return
-        }
-        self.getFriends(mail: (self.user?.email)!)
-        print("chiamata2")
     }
-    
-    private func updateData(){
-        self.friendsList = CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: self.userId!)
-        self.user = CoreDataController.sharedIstance.findUserForIdApp(self.user?.idApp)
-        self.loadList()
-        self.myTable.reloadData()
-    }
-    
+
     func getFriends(mail: String){
-        print("Update Friends List")
-        
         
         CoreDataController.sharedIstance.deleteFriends((self.user?.idApp)!)
         
@@ -160,7 +135,7 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
                     FirebaseData.sharedIstance.readUserCityOfRecidenceFromIdFB(node: "users/\(idApp!)", onCompletion: { (error, cityOfRecidence) in
                         CoreDataController.sharedIstance.addFriendInUser(idAppUser: (self.user?.idApp)!, idFB: idFB, mail: mail, fullName: name, firstName: firstName, lastName: lastName, gender: nil, pictureUrl: url, cityOfRecidence: cityOfRecidence)
                         if i == (dati.count - 1) {
-                            self.updateData()
+                            
                         }
                     })
                 })
@@ -171,39 +146,11 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
         })
     }
     
-    func refreshUpdateFriendList() -> Bool{
-        //create first request Date
-        guard  defaults.object(forKey: "Data") != nil else {
-            let date = Date()
-            self.defaults.set(date, forKey: "Data")
-            print("data prima richiesta: ",defaults.object(forKey: "Data")!)
-            return true
-        }
-        
-        //current Date
-        let currentDate = Date()
-        
-        
-        // difference in seconds from TimeIntervalNow and one date
-        let diffTime = (defaults.object(forKey: "Data") as! Date).timeIntervalSinceNow * -1
-        print(diffTime)
-        
-        //if the request is > 1/2 gg (18000 sec) refresh FB Friends List
-        //for test: don't insert a value < 5
-        if diffTime > 18000 {
-            self.defaults.set(currentDate, forKey: "Data")
-            return true
-        }
-        return false
-    }
-    
-    
     func contentsFilter(text: String) {
-        print("sto filtrando i contenuti")
         listaFiltrata.removeAll(keepingCapacity: true)
+        
         for x in self.friendsList! {
             if x.fullName?.localizedLowercase.range(of: text.localizedLowercase) != nil {
-                print("aggiungo \(x.fullName!) alla listaFiltrata")
                 listaFiltrata.append(x)
             }
             self.myTable.reloadData()
@@ -211,24 +158,21 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     }
     
     func updateSearchResults(for: UISearchController){
-        print("Sto per iniziare una ricerca di \((resultSearchController?.searchBar.text!)!)")
         self.contentsFilter(text: (resultSearchController?.searchBar.text!)!)
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
         return 1
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        
         guard self.resultSearchController != nil else {
             return 0
         }
         if self.resultSearchController!.isActive {
             return self.listaFiltrata.count
         } else {
-            return self.friendsListPaginated!.count
+            return self.friendsList!.count
         }
     }
     
@@ -240,7 +184,7 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
             friend = listaFiltrata[indexPath.row]
         } else {
             // search bar is no active,friendsListPaginated is data source
-            friend = self.friendsListPaginated?[indexPath.row]
+            friend = self.friendsList?[indexPath.row]
         }
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "friendsCell", for: indexPath)
@@ -258,10 +202,8 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
             (cell as! FirendsListTableViewCell).forwardButton.isHidden = false
             (cell as! FirendsListTableViewCell).forwardButton.tag = indexPath.row
             (cell as! FirendsListTableViewCell).forwardButton.addTarget(self, action: #selector(forwardAction(_:)), for: .touchUpInside)
-        } 
-        
-        // If this image is already cached, don't re-download
-        
+        }
+
         CacheImage.getImage(url: friend?.pictureUrl, onCompletion: { (image) in
             guard image != nil else {
                 print("immagine utente non reperibile")
@@ -291,51 +233,7 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
         performSegue(withIdentifier: "unwindFromFriendsListToMyDrinks", sender: sender)
     }
     
-    private func loadList(){
-        self.friendsListPaginated = []
-        (page,friendsForPage,lastPageFriends) = calculatePagination()
-        if self.currentPage == page {
-            self.numberOfFriends = lastPageFriends!
-        } else if self.currentPage < page! {
-            self.numberOfFriends = friendsForPage!
-        } else {return}
-        self.currentPage += 1
-        self.end += numberOfFriends
-        self.start = end - numberOfFriends
-        for i in start ..< end {
-            //order is != nil when forward action is called. This code clean from friendsList  friends that has refused the order
-            if self.order != nil {
-                if (friendsList?[i])?.idFB != order?.userDestination?.idFB {
-                    self.friendsListPaginated?.append((friendsList?[i])!)
-                }
-            }else {
-                self.friendsListPaginated?.append((friendsList?[i])!)
-            }
-        }
-    }
-    
-    private func calculatePagination()->(page:Int?,friendsForPage:Int?,lastPageFriends:Int?){
-        
-        if let count = self.friendsList?.count  {
-            
-            switch count {
-            case 0...100:
-                return (PageSetting.cento.rawValue,count,0)
-            case 101...1000:
-                let pageI = count/PageSetting.mille.rawValue
-                return (pageI, PageSetting.mille.rawValue,count-(PageSetting.mille.rawValue*pageI))
-            case 1001...2000:
-                let pageI = count/PageSetting.duemila.rawValue
-                return (pageI, PageSetting.duemila.rawValue,count-(PageSetting.duemila.rawValue*pageI))
-            case 2001...5000:
-                let pageI = count/PageSetting.cinquemila.rawValue
-                return (pageI,PageSetting.cinquemila.rawValue,count-(PageSetting.cinquemila.rawValue*pageI))
-            default:
-                break
-            }
-        }
-        return (0,0,0)
-    }
+
     
     lazy var refreshControl1: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
@@ -345,11 +243,9 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     
     
     @objc func handleRefresh(_ refreshControl: UIRefreshControl) {
-        
-        self.loadList()
-        self.myTable.reloadData()
-        refreshControl.endRefreshing()
-        self.numAmici.title = String(self.friendsListPaginated!.count)
+        refreshControl.beginRefreshing()
+        myTable.isUserInteractionEnabled = false
+        FacebookFriendsListManager.instance.refreshContactList()
     }
     
     
@@ -373,7 +269,7 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
             guard let isSenderEmpty = sender else {
                 return
             }
-            let friend = self.friendsListPaginated?[(isSenderEmpty as! UIButton).tag]
+            let friend = self.friendsList?[(isSenderEmpty as! UIButton).tag]
             let userDestination = UserDestination(friend?.fullName,friend?.idFB,friend?.pictureUrl,nil,nil)
             (segue.destination as! MyOrderViewController).forwardOrder?.userDestination = userDestination
             
