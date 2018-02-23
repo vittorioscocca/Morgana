@@ -27,9 +27,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //Paypal sandbox credentials
         PayPalMobile.initializeWithClientIds(forEnvironments: [PayPalEnvironmentProduction: "ARowfMHmd5EwE2lUU2Gc3DkAwyQEFUi1H2qzmwhIiplZ9T2r0eqAAzh_qoE8O57fH6yEz6P9Kl6uRHU2",PayPalEnvironmentSandbox: "AfN_l2vZFwYniDa6bpCW3NmqrD4wX0VV7vH3VdDUb0Fjxsw2__X9gC0fee2VNKus-mRuvN4oHCjPJyBl"])
 
-        //Singleton initialization
-        _ = NetworkStatus.default
-        _ = FacebookFriendsListManager.instance
         //var token for Firebase and Facebook
         let fbToken = UserDefaults.standard
         let fireBaseToken = UserDefaults.standard
@@ -38,6 +35,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         //Firebase configuration
         FirebaseApp.configure()
+        //Singleton initialization
+        _ = NetworkStatus.default
+        _ = FacebookFriendsListManager.instance
+        _ = LoadRemoteProducts.instance
         
         //Firebase push notification
         if #available(iOS 10.0, *) {
@@ -77,6 +78,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         //FBSDKLoginButton.classForCoder()
         FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
+        
+        
         
         return true
     }

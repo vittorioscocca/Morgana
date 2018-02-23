@@ -125,6 +125,7 @@ class FacebookFriendsListManager: NSObject {
         }
     }
     
+    
     enum InternalError: Error {
         case unexpectedError(String)
         
@@ -151,6 +152,12 @@ class FacebookFriendsListManager: NSObject {
                 }
             }
         }
+    }
+    
+    enum RequestOutcome {
+        case transitoryError(Error)
+        case persistentError(ErrorCondition)
+        case success([Friend])
     }
     
     enum ContactListFreshness: Int {
@@ -194,12 +201,6 @@ class FacebookFriendsListManager: NSObject {
         }
     }
     
-    enum RequestOutcome {
-        case transitoryError(Error)
-        case persistentError(ErrorCondition)
-        case success([Friend])
-    }
-    
     private var internalState: InternalState
     
     private func setInternalState(_ newState: InternalState) {
@@ -224,7 +225,7 @@ class FacebookFriendsListManager: NSObject {
             print("Request of contact list ignored in state: \(internalState)")
             
         case let .startUp(fbTokenString), let .error(fbTokenString, _, _), .success(let fbTokenString, _, _, true):
-            connectToServer(freshness: freshness, completion: { (outcome) in
+            connectToFacebook(freshness: freshness, completion: { (outcome) in
                 switch self.internalState {
                 case let .stop(newFbTokenString, _), let .startUp(newFbTokenString), let .error(newFbTokenString, _, _), let .success(newFbTokenString, _, _, _):
                      if newFbTokenString != fbTokenString {
@@ -291,8 +292,7 @@ class FacebookFriendsListManager: NSObject {
     
     private var pendingRequests = 0
     
-    private func connectToServer(freshness: ContactListFreshness, completion: @escaping (RequestOutcome) -> ()) {
-        
+    private func connectToFacebook(freshness: ContactListFreshness, completion: @escaping (RequestOutcome) -> ()) {
         if  case .localCache = freshness{
             if let fbFriendsList = CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: self.userId!){
                 completion(.success(fbFriendsList))
@@ -303,9 +303,9 @@ class FacebookFriendsListManager: NSObject {
             let parameters_friend = ["fields" : "name, first_name, last_name, id, email, gender, picture.type(large)"]
             
             FBSDKGraphRequest(graphPath: "me/friends", parameters: parameters_friend, tokenString: fbTokenString, version: nil, httpMethod: "GET").start(completionHandler: {(connection,result,error) -> Void in
-                if ((error) != nil)
-                {
-                    // Process error
+                self.pendingRequests -= 1
+                print("Pendig request with freshness level \(freshness), served!. Actual pending requests: \(self.pendingRequests)")
+                if ((error) != nil) {
                     print("Error: \(error!)")
                     completion(.persistentError(.generalError(error!)))
                 }
@@ -321,6 +321,7 @@ class FacebookFriendsListManager: NSObject {
                 let dati: NSArray = newResult.object(forKey: "data") as! NSArray
                 
                 guard dati.count != 0 else {
+                    completion(.persistentError(.generalError(error!)))
                     return
                 }
                 
@@ -344,7 +345,6 @@ class FacebookFriendsListManager: NSObject {
                         }
                         guard idApp != nil else {return}
                         FirebaseData.sharedIstance.readUserCityOfRecidenceFromIdFB(node: "users/\(idApp!)", onCompletion: { (error, cityOfRecidence) in
-                            self.pendingRequests -= 1
                             CoreDataController.sharedIstance.addFriendInUser(idAppUser: (self.user?.idApp)!, idFB: idFB, mail: self.user?.email, fullName: name, firstName: firstName, lastName: lastName, gender: nil, pictureUrl: url, cityOfRecidence: cityOfRecidence)
                             if i == (dati.count - 1) {
                                 if let fbFriendsList = CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: self.userId!){

@@ -29,6 +29,7 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     var order: Order?
     var defaults = UserDefaults.standard
     var user: User?
+    var controller :UIAlertController?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,6 +59,10 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
                                        object: nil)
     }
     
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -71,14 +76,30 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
         if case .loading = FacebookFriendsListManager.instance.state {
             refreshControl1.beginRefreshing()
             myTable.isUserInteractionEnabled = false
-        }
-        else {
+        } else if case let .fatalError(error) = FacebookFriendsListManager.instance.state {
+            generateAlert(error: error.error)
+        } else {
             refreshControl1.endRefreshing()
             myTable.isUserInteractionEnabled = true
             self.friendsList = FacebookFriendsListManager.instance.readContactList().facebookFriendsList
             self.numAmici.title = String(self.friendsList!.count)
             myTable.reloadData()
         }
+    }
+    
+    func generateAlert(error: Error){
+        controller = UIAlertController(title: "Impossibile caricare i contatti",
+                                       message: error.localizedDescription,
+                                       preferredStyle: .alert)
+        let action = UIAlertAction(title: "CHIUDI", style: UIAlertActionStyle.default, handler:
+        {(paramAction:UIAlertAction!) in
+            
+            print("Il messaggio di chiusura è stato premuto")
+        })
+        
+        controller!.addAction(action)
+        self.present(controller!, animated: true, completion: nil)
+        
     }
 
     func getFriends(mail: String){
@@ -215,7 +236,6 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
                 }
             })
         })
-        print("Caricamento tablella ended")
         return cell
         
     }

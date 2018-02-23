@@ -25,7 +25,7 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
     enum ErrorMessages: String {
         case erroreTitle = "Attenzione"
         case enterOneProduct_message = "Inserisci almeno un prodotto"
-        case enterQuantity_message = "Inserisci una quantità di prodottommaggiore di 0"
+        case enterQuantity_message = "Inserisci una quantità di prodotto maggiore di 0"
     }
     
     var productCount = 0
@@ -67,13 +67,22 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
             }
             self.imageFriend_Picture.image = image
         })
-        
-        
-        
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(remoteProductsListDidChange),
+                                               name: .RemoteProductsListDidChange,
+                                               object: nil)
         // Connect data:
         self.pickerView.delegate = self
         self.pickerView.dataSource = self
         self.loadOfferte()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    @objc func remoteProductsListDidChange(){
+        loadOfferte()
     }
     
     override func didReceiveMemoryWarning() {
@@ -82,23 +91,12 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
     }
     
     private func loadOfferte(){
-        FireBaseAPI.readNodeOnFirebase(node: "merchant products", onCompletion: { (error, dictionary) in
-            guard error == nil else {
-                return
-            }
-            guard dictionary != nil else {
-                return
-            }
-            for (prodotto, costo) in dictionary! {
-                if prodotto != "autoId" {
-                    let prodottoConCosto = prodotto
-                    self.productsList.append(prodottoConCosto)
-                    self.offersDctionary[prodotto] = costo as? Double
-                }
-            }
+        if LoadRemoteProducts.instance.isNotNull() && LoadRemoteProducts.instance.isNotEmpty() {
+            self.productsList = LoadRemoteProducts.instance.products!
+            self.offersDctionary = LoadRemoteProducts.instance.offers!
             self.pickerView.reloadAllComponents()
             self.updateLabels(row: 0)
-        })
+        }
     }
     
     
@@ -130,7 +128,10 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
     
     // Catpure the picker view selection
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        updateLabels(row: row)
+        if LoadRemoteProducts.instance.isNotNull() && LoadRemoteProducts.instance.isNotEmpty() {
+            updateLabels(row: row)
+        }
+        
     }
     
     
