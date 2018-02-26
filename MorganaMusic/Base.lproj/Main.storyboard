@@ -297,7 +297,7 @@
                                                 <action selector="urlPrecedente_pressed:" destination="yl6-rj-otg" id="3HK-Y8-OHB"/>
                                             </connections>
                                         </barButtonItem>
-                                        <textField key="titleView" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" clearButtonMode="whileEditing" id="5Ns-am-L3b">
+                                        <textField key="titleView" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" clearButtonMode="whileEditing" id="5Ns-am-L3b">
                                             <rect key="frame" x="175" y="7" width="25" height="30"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                             <nil key="textColor"/>
@@ -1885,12 +1885,28 @@
                                     </navigationItem>
                                 </items>
                             </navigationBar>
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="74v-zx-k3r">
+                                <rect key="frame" x="169" y="315" width="37" height="37"/>
+                                <color key="color" red="0.74117647060000003" green="0.1529411765" blue="0.20784313730000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </activityIndicatorView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Loading..." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IBT-FP-KA6">
+                                <rect key="frame" x="0.0" y="361.5" width="375" height="33.5"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" red="0.74117647060000003" green="0.1529411765" blue="0.20784313730000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="fvb-co-DNo" firstAttribute="top" secondItem="1Wa-g1-TIe" secondAttribute="bottom" id="3HY-j4-XD0"/>
                             <constraint firstAttribute="trailing" secondItem="fvb-co-DNo" secondAttribute="trailing" id="4ne-DS-HAc"/>
+                            <constraint firstItem="74v-zx-k3r" firstAttribute="top" secondItem="IBT-FP-KA6" secondAttribute="bottom" constant="-80" id="Pm4-ja-mqJ"/>
+                            <constraint firstItem="IBT-FP-KA6" firstAttribute="height" secondItem="s6s-NQ-MEq" secondAttribute="height" multiplier="0.05" id="Sak-US-6NC"/>
+                            <constraint firstItem="74v-zx-k3r" firstAttribute="centerY" secondItem="s6s-NQ-MEq" secondAttribute="centerY" id="aCn-Vk-Wjp"/>
                             <constraint firstItem="1Wa-g1-TIe" firstAttribute="top" secondItem="U0M-CR-yd9" secondAttribute="bottom" id="dXq-Lh-Uzi"/>
+                            <constraint firstItem="74v-zx-k3r" firstAttribute="centerX" secondItem="s6s-NQ-MEq" secondAttribute="centerX" id="f2r-oL-m7W"/>
+                            <constraint firstItem="IBT-FP-KA6" firstAttribute="centerX" secondItem="74v-zx-k3r" secondAttribute="centerX" id="fBF-Vr-jh9"/>
+                            <constraint firstItem="IBT-FP-KA6" firstAttribute="width" secondItem="s6s-NQ-MEq" secondAttribute="width" id="flA-ZA-a5p"/>
                             <constraint firstItem="1Wa-g1-TIe" firstAttribute="leading" secondItem="s6s-NQ-MEq" secondAttribute="leading" id="hxA-0l-ZcT"/>
                             <constraint firstItem="fvb-co-DNo" firstAttribute="leading" secondItem="s6s-NQ-MEq" secondAttribute="leading" id="jnu-li-1jY"/>
                             <constraint firstAttribute="trailing" secondItem="1Wa-g1-TIe" secondAttribute="trailing" id="sUg-Vp-0dN"/>
@@ -1898,6 +1914,8 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="loading_label" destination="IBT-FP-KA6" id="dBU-Pp-3jN"/>
+                        <outlet property="myActivityIndicator" destination="74v-zx-k3r" id="PqQ-3K-yF1"/>
                         <outlet property="myTable" destination="fvb-co-DNo" id="SMw-az-E4M"/>
                         <outlet property="numAmici" destination="VRu-fU-8k5" id="GuR-hp-Avc"/>
                         <segue destination="tx2-nO-4fE" kind="unwind" identifier="unwindToOfferfromListFriend" unwindAction="unwindToOffer:" id="LWK-Sa-Dov"/>

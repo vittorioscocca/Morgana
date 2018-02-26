@@ -64,6 +64,7 @@ class LoadRemoteProducts {
     }
     
     @objc func applicationWillEnterForeground(){
+        print("Entering in foreground: Reload products")
         loadRemoteProducts()
     }
     

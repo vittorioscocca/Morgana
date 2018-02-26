@@ -82,6 +82,7 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
     }
     
     @objc func remoteProductsListDidChange(){
+        print("did receive product did change notification")
         loadOfferte()
     }
     

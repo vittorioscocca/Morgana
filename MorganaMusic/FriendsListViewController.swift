@@ -14,7 +14,9 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
 
     @IBOutlet weak var myTable: UITableView!
     @IBOutlet weak var numAmici: UIBarButtonItem!
-   
+    @IBOutlet weak var myActivityIndicator: UIActivityIndicatorView!
+    @IBOutlet weak var loading_label: UILabel!
+    
     var segueFrom: String?
     var resultSearchController: UISearchController?
     let fireBaseToken = UserDefaults.standard
@@ -30,12 +32,14 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     var defaults = UserDefaults.standard
     var user: User?
     var controller :UIAlertController?
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.myTable.dataSource = self
         self.myTable.delegate = self
         self.userId = fireBaseToken.object(forKey: "FireBaseToken")! as? String
+        //myActivityIndicator.isHidden = true
         self.resultSearchController = ({
             // creo un oggetto di tipo UISearchController
             let controller = UISearchController(searchResultsController: nil)
@@ -68,17 +72,31 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
         // Dispose of any resources that can be recreated.
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        FacebookFriendsListStateDidChange()
+    }
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
     }
     
     @objc func FacebookFriendsListStateDidChange(){
-        if case .loading = FacebookFriendsListManager.instance.state {
+        if case .loading = FacebookFriendsListManager.instance.state{
+            myActivityIndicator.startAnimating()
             refreshControl1.beginRefreshing()
             myTable.isUserInteractionEnabled = false
-        } else if case let .fatalError(error) = FacebookFriendsListManager.instance.state {
-            generateAlert(error: error.error)
+            print("*-*- passato")
         } else {
+            myActivityIndicator.stopAnimating()
+            loading_label.isHidden = true
+        }
+        
+        if case let .fatalError(error) = FacebookFriendsListManager.instance.state {
+            generateAlert(error: error.error)
+        }
+        
+        if case .success = FacebookFriendsListManager.instance.state{
             refreshControl1.endRefreshing()
             myTable.isUserInteractionEnabled = true
             self.friendsList = FacebookFriendsListManager.instance.readContactList().facebookFriendsList

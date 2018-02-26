@@ -183,15 +183,16 @@ class CoreDataController {
     
     
     //Carica tutti gli amici di uno user
-    func loadAllFriendsOfUser(idAppUser: String) ->[Friend]?{
+    func loadAllFriendsOfUser(idAppUser: String, completion:@ escaping ([Friend]?)->()){
         print("[CDC] Recupero tutti gli amici dell'utente: \(idAppUser) ")
         
         let user = findUserForIdApp(idAppUser)
         guard user != nil else  {
-            return nil
+            completion(nil)
+            return
         }
         let friends = user?.friends!.allObjects as! [Friend]
-        return friends
+        completion(friends)
         
     }
     

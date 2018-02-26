@@ -8,6 +8,7 @@
 
 import Foundation
 import FBSDKLoginKit
+import CoreData
 
 public extension NSNotification.Name {
     static let FacebookFriendsListStateDidChange = NSNotification.Name("FacebookFriendsListStateDidChangeNotification")
@@ -45,6 +46,7 @@ class FacebookFriendsListManager: NSObject {
     private var userId: String?
     private let fireBaseToken = UserDefaults.standard
     private let user: User?
+    private var context: NSManagedObjectContext
 
     init(dispatchQueue: DispatchQueue, networkStatus: NetworkStatus, notificationCenter: NotificationCenter, uiApplication: UIApplication) {
         self.dispatchQueue = dispatchQueue
@@ -54,6 +56,8 @@ class FacebookFriendsListManager: NSObject {
         internalState = FacebookFriendsListManager.setInitialState(networkStatus: networkStatus)
         self.userId = fireBaseToken.object(forKey: "FireBaseToken")! as? String
         self.user = CoreDataController.sharedIstance.findUserForIdApp(userId)
+        let application = uiApplication.delegate as! AppDelegate
+        self.context = application.persistentContainer.viewContext
         
         fbTokenString = UserDefaults.standard.object(forKey: "FBToken") as? String
         super.init()
@@ -294,9 +298,13 @@ class FacebookFriendsListManager: NSObject {
     
     private func connectToFacebook(freshness: ContactListFreshness, completion: @escaping (RequestOutcome) -> ()) {
         if  case .localCache = freshness{
-            if let fbFriendsList = CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: self.userId!){
-                completion(.success(fbFriendsList))
-            }
+            CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: (self.user?.idApp)!, completion: { (list) in
+                if let fbFriendsList = list {
+                    completion(.success(fbFriendsList))
+                }else {
+                    //completion(.transitoryError(Error))
+                }
+            })
         }
         else if case .fresh = freshness {
             CoreDataController.sharedIstance.deleteFriends((self.user?.idApp)!)
@@ -308,6 +316,11 @@ class FacebookFriendsListManager: NSObject {
                 if ((error) != nil) {
                     print("Error: \(error!)")
                     completion(.persistentError(.generalError(error!)))
+                }
+                guard result != nil else {
+                    print("Error: \(error!)")
+                    completion(.persistentError(.generalError(error!)))
+                    return
                 }
                 //numbers of total friends
                 let newResult = result as! NSDictionary
@@ -324,6 +337,7 @@ class FacebookFriendsListManager: NSObject {
                     completion(.persistentError(.generalError(error!)))
                     return
                 }
+                var fbList = [Friend]()
                 
                 for i in 0...(dati.count - 1) {
                     contFriends += 1
@@ -337,23 +351,47 @@ class FacebookFriendsListManager: NSObject {
                     let picture = valueDict["picture"] as! NSDictionary
                     let data = picture["data"] as? NSDictionary
                     let url = data?["url"] as? String
-                    
-                    FirebaseData.sharedIstance.readUserIdAppFromIdFB(node: "users", child: "idFB", idFB: idFB, onCompletion: { (error,idApp) in
+            
+                    FirebaseData.sharedIstance.readNodeFromIdFB(node: "users", child: "idFB", idFB: idFB, onCompletion: { (error,dictionary) in
                         guard error == nil else {
                             print(error!)
+                            //completion(.transitoryError(Error))
                             return
                         }
-                        guard idApp != nil else {return}
-                        FirebaseData.sharedIstance.readUserCityOfRecidenceFromIdFB(node: "users/\(idApp!)", onCompletion: { (error, cityOfRecidence) in
-                            CoreDataController.sharedIstance.addFriendInUser(idAppUser: (self.user?.idApp)!, idFB: idFB, mail: self.user?.email, fullName: name, firstName: firstName, lastName: lastName, gender: nil, pictureUrl: url, cityOfRecidence: cityOfRecidence)
-                            if i == (dati.count - 1) {
-                                if let fbFriendsList = CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: self.userId!){
-                                    completion(.success(fbFriendsList))
-                                }
+                        guard dictionary != nil else {
+                            print("Errore di lettura del dell'Ordine richiesto")
+                            //completion(.transitoryError(Error))
+                            return
+                        }
+                        var cityOfRecidence: String = ""
+                        
+                        for (key,value) in dictionary! {
+                            if key == "idApp" {
+                                cityOfRecidence = value as! String
                             }
-                        })
+                        }
+                        
+                        CoreDataController.sharedIstance.addFriendInUser(idAppUser: (self.user?.idApp)!, idFB: idFB, mail: self.user?.email, fullName: name, firstName: firstName, lastName: lastName, gender: nil, pictureUrl: url, cityOfRecidence: cityOfRecidence)
+                        
+                        let entityFriend = NSEntityDescription.entity(forEntityName: "Friend", in: self.context)
+                        let newFriend = Friend(entity: entityFriend!, insertInto: self.context)
+                        
+                        newFriend.user = self.user
+                        
+                        newFriend.idFB = idFB
+                        newFriend.fullName = name
+                        newFriend.firstName = firstName
+                        newFriend.lastName = lastName
+                        newFriend.gender = nil
+                        newFriend.pictureUrl = url
+                        newFriend.cityOfRecidence = cityOfRecidence
+                        
+                        fbList.append(newFriend)
+                        if i == (dati.count - 1) {
+                            print("DIMENSIONE FRIENDSLIST \(fbList.count)")
+                            completion(.success(fbList))
+                        }
                     })
-                    
                 }
                 print("Aggiornamento elenco amici di Facebook completato!. Inseriti \(contFriends) amici")
                 
@@ -367,8 +405,6 @@ class FacebookFriendsListManager: NSObject {
             }
         }
     }
-    
-   
     
     private func tryNewRequest(freshness: ContactListFreshness) {
         dispatchQueue.asyncAfter(deadline: DispatchTime.now() + FacebookFriendsListManager.requestRetryDelay , execute: {

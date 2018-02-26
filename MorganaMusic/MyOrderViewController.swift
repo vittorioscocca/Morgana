@@ -80,8 +80,11 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         NotificationCenter.default.addObserver(self, selector: #selector(reloadData), name: .FireBaseDataUserReadedNotification, object: nil)
        
-        self.friendsList = CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: self.uid!)
-        
+        CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: self.uid!, completion: { (list) in
+            if let friendsList = list {
+                self.friendsList = friendsList
+            }
+        })
         
         self.myTable.addSubview(refreshControl1)
         successView.isHidden = true

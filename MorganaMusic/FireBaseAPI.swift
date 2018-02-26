@@ -215,7 +215,6 @@ class FireBaseAPI {
     }
     
     //read node with query Limited
-    
     class func readNodeOnFirebaseQueryLimited (node: String, queryLimit: Int, onCompletion: @escaping (String?,[String:Any]?) -> ()){
         
         guard CheckConnection.isConnectedToNetwork() == true else {
@@ -272,6 +271,37 @@ class FireBaseAPI {
         })
         
         
+    }
+    
+    class func readNodeForValueEqualTo(node: String, child: String, value: String?, onCompletion: @escaping (String?,[String:Any]?) -> ()){
+        guard CheckConnection.isConnectedToNetwork() == true else {
+            error = "Connessione Internet Assente"
+            onCompletion(error,nil)
+            return
+        }
+        guard value != nil else {
+            error = "Valore \(child) nullo"
+            onCompletion(error,nil)
+            return
+        }
+        let query = ref.child(node).queryOrdered(byChild: child).queryEqual(toValue: value)
+        query.observeSingleEvent(of: .childAdded, with: { (snap) in
+            guard let snap_value = snap.value, snap.exists() else {
+                error = "Valore \(child) non trovato"
+                onCompletion(error,nil)
+                return
+            }
+            // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
+            let nodeDictionary = snap_value as! NSDictionary
+            dictionary = [:]
+            
+            // leggo i dati dell'ordine o offerte
+            
+            for (chiave,valore) in nodeDictionary {
+                dictionary?[chiave as! String] = valore
+            }
+            onCompletion(error,dictionary)
+        })
     }
     
     //update value

@@ -855,6 +855,18 @@ class FirebaseData {
         })
     }
     
+    //function  return node from his Facebook iD
+    func readNodeFromIdFB(node:String, child: String, idFB:String?, onCompletion: @escaping (String?,[String:Any]?)->()){
+        FireBaseAPI.readNodeForValueEqualTo(node: node, child: child, value: idFB, onCompletion: { (error,dictionary) in
+            guard error == nil else {
+                onCompletion(error,nil)
+                return
+            }
+            onCompletion(error,dictionary)
+        })
+    }
+    
+    
     func readUserCityOfRecidenceFromIdFB(node:String,  onCompletion: @escaping (String?,String?)->()){
         
         FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: node, onCompletion: { (error,dictionary) in
