@@ -651,6 +651,11 @@
                                     <constraint firstItem="X1k-un-xbl" firstAttribute="height" secondItem="Vbe-tu-LhV" secondAttribute="height" multiplier="0.45" id="ymM-uo-0dP"/>
                                 </constraints>
                             </view>
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="c8I-Vf-zJg">
+                                <rect key="frame" x="169" y="283" width="37" height="37"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="color" red="0.74117647060000003" green="0.1529411765" blue="0.20784313730000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <constraints>
@@ -673,6 +678,7 @@
                     <connections>
                         <outlet property="drinksList_segmentControl" destination="f2c-43-M4V" id="LKG-cW-Qxk"/>
                         <outlet property="menuButton" destination="6zP-F5-UCm" id="mMw-cU-hol"/>
+                        <outlet property="myActivityIndicator" destination="c8I-Vf-zJg" id="rTd-4M-SlJ"/>
                         <outlet property="myTable" destination="9fE-t2-pG0" id="dFd-5L-bxu"/>
                         <outlet property="successView" destination="Vbe-tu-LhV" id="ghD-O1-whg"/>
                         <segue destination="lRN-Du-Who" kind="show" identifier="segueToOrderDetails" id="VOt-f0-ljU"/>
@@ -2890,6 +2896,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="UQB-mz-UCf"/>
-        <segue reference="B23-cs-HaJ"/>
+        <segue reference="OXA-AZ-LfE"/>
     </inferredMetricsTieBreakers>
 </document>

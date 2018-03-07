@@ -58,6 +58,7 @@
 		2A8576F71EC456E800D41949 /* CartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8576F61EC456E800D41949 /* CartViewController.swift */; };
 		2A86BB6E1F47432100CE336B /* OrderSentDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A86BB6D1F47432100CE336B /* OrderSentDetailsViewController.swift */; };
 		2A8CA5A51EFC230300B0DF55 /* UpdateBadgeInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8CA5A41EFC230300B0DF55 /* UpdateBadgeInfo.swift */; };
+		2A93C7B4204FED8900921DDF /* OrdersListManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A93C7B3204FED8900921DDF /* OrdersListManager.swift */; };
 		2A9A7ADC1FAFC5C60085AA1F /* CreditsPaymentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9A7ADB1FAFC5C60085AA1F /* CreditsPaymentViewController.swift */; };
 		2A9A7ADE1FAFE2910085AA1F /* LocalAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A9A7ADD1FAFE2910085AA1F /* LocalAuthentication.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		2A9B63BE1E96731B00862AC5 /* CoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9B63BD1E96731B00862AC5 /* CoreData.swift */; };
@@ -171,6 +172,7 @@
 		2A8576F61EC456E800D41949 /* CartViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CartViewController.swift; sourceTree = "<group>"; };
 		2A86BB6D1F47432100CE336B /* OrderSentDetailsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderSentDetailsViewController.swift; sourceTree = "<group>"; };
 		2A8CA5A41EFC230300B0DF55 /* UpdateBadgeInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateBadgeInfo.swift; sourceTree = "<group>"; };
+		2A93C7B3204FED8900921DDF /* OrdersListManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrdersListManager.swift; sourceTree = "<group>"; };
 		2A9A7ADB1FAFC5C60085AA1F /* CreditsPaymentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditsPaymentViewController.swift; sourceTree = "<group>"; };
 		2A9A7ADD1FAFE2910085AA1F /* LocalAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LocalAuthentication.framework; path = System/Library/Frameworks/LocalAuthentication.framework; sourceTree = SDKROOT; };
 		2A9B63BD1E96731B00862AC5 /* CoreData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreData.swift; sourceTree = "<group>"; };
@@ -282,6 +284,7 @@
 				2AA4B96E1F755E9E00F4FD48 /* Company.swift */,
 				2AD5C8111ECEDDBC001951C3 /* Payment.swift */,
 				2AFA98841EC19BCA0007CA33 /* Cart.swift */,
+				2A93C7B3204FED8900921DDF /* OrdersListManager.swift */,
 				2A1863AD1F5055DB00505F20 /* FirebaseData.swift */,
 				2A1863AF1F5055EA00505F20 /* PaymentsManager.swift */,
 				2A2AD5741F5DB6A200716149 /* PointsManager.swift */,
@@ -381,7 +384,6 @@
 				2AE35FAB1E93F99900DF453F /* UserViewController.swift */,
 				2AD8C1421E9D486700017004 /* FriendActionViewController.swift */,
 				2A196854203F8A090036BDB9 /* LoadRemoteProducts.swift */,
-				2A19684E203F3EC40036BDB9 /* FacebookFriendsList.swift */,
 				2A6971201EB9CA7F0036E3C5 /* FriendsListViewController.swift */,
 				2AC63AF21E9DFFCE00A9F91E /* FirendsListTableViewCell.swift */,
 				2A6971221EB9D9A20036E3C5 /* OrderViewController.swift */,
@@ -430,6 +432,7 @@
 				2A6809AC1F7962CC00D813FF /* TextFieldController.swift */,
 				2A6CC8AB1F85BD310056129C /* MorganaMusicSettings.swift */,
 				2A56BBFF1F97584D00C72860 /* CacheImage.swift */,
+				2A19684E203F3EC40036BDB9 /* FacebookFriendsList.swift */,
 			);
 			name = SupportingFiles;
 			sourceTree = "<group>";
@@ -773,6 +776,7 @@
 				2A9A7ADC1FAFC5C60085AA1F /* CreditsPaymentViewController.swift in Sources */,
 				2ABD93BB1F18DF5C00F28632 /* NotificationsCenter.swift in Sources */,
 				2AA4B96F1F755E9E00F4FD48 /* Company.swift in Sources */,
+				2A93C7B4204FED8900921DDF /* OrdersListManager.swift in Sources */,
 				2A3492EF1F98AB6D00F2C6A7 /* MenuTableViewController.swift in Sources */,
 				2A196855203F8A090036BDB9 /* LoadRemoteProducts.swift in Sources */,
 				2A3492F11F98B99800F2C6A7 /* UserProfileMenuRowTableViewCell.swift in Sources */,

@@ -23,11 +23,11 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var drinksList_segmentControl: UISegmentedControl!
     @IBOutlet var successView: UIView!
     @IBOutlet var menuButton: UIBarButtonItem!
+    @IBOutlet weak var myActivityIndicator: UIActivityIndicatorView!
     
     var user: User?
     var friendsList: [Friend]?
     var uid: String?
-    var nowReadingOrdersAndOffersOnFirebase: Bool?
     
     //device memory
     var fireBaseToken = UserDefaults.standard
@@ -70,29 +70,27 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             menuButton.action = #selector(SWRevealViewController.revealToggle(_:))
             view.addGestureRecognizer(self.revealViewController().panGestureRecognizer())
         }
-        self.nowReadingOrdersAndOffersOnFirebase = false
         
         self.setSegmentcontrol()
-    
         self.uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
         self.user = CoreDataController.sharedIstance.findUserForIdApp(self.uid)
         self.updateSegmentControl()
         
-        NotificationCenter.default.addObserver(self, selector: #selector(reloadData), name: .FireBaseDataUserReadedNotification, object: nil)
-       
-        CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: self.uid!, completion: { (list) in
-            if let friendsList = list {
-                self.friendsList = friendsList
-            }
-        })
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(FireBaseDataUserReadedNotification),
+                                               name: .FireBaseDataUserReadedNotification,
+                                               object: nil)
+        
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(OrdersListStateDidChange),
+                                               name: .OrdersListStateDidChange,
+                                               object: nil)
+        
+        self.ordersSent = OrdersListManager.instance.readOrdersList().ordersList.oredersSentList
+        self.ordersReceived = OrdersListManager.instance.readOrdersList().ordersList.oredersReceivedList
         
         self.myTable.addSubview(refreshControl1)
         successView.isHidden = true
-    }
-    
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -104,28 +102,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        //Daily control for order expiration date
-        let itsTimeToUpdate = shouldUpdateDrinksTable(SegmentControlBadge: 0, timeReaded: self.lastOrderReceivedReadedTimestamp.object(forKey: "lastOrderReceivedReadedTimestamp") as? Date)
-        
-        if (itsTimeToUpdate || self.firebaseObserverKilled.bool(forKey: "firebaseObserverKilled")) && !self.nowReadingOrdersAndOffersOnFirebase! {
-            self.readOrdersSent()
-            self.readOrderReceived()
-            var currentDate = Date()
-            currentDate = Calendar.current.date(byAdding:.hour,value: 2,to: currentDate)!
-            self.lastOrderSentReadedTimestamp.set(currentDate, forKey: "lastOrderReceivedReadedTimestamp")
-            
-            if self.firebaseObserverKilled.bool(forKey: "firebaseObserverKilled") {
-                self.firebaseObserverKilled.set(false, forKey: "firebaseObserverKilled")
-            }
-            print("aggiornamento giornaliero effettuato")
-        }
-        
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        
+        OrdersListStateDidChange()
     }
     
     //remove all observers utilized into controller
@@ -138,7 +115,29 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         self.firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")*/
     }
     
-    @objc private func reloadData() {
+    @objc func OrdersListStateDidChange(){
+        if case .loading = OrdersListManager.instance.state{
+            myActivityIndicator.startAnimating()
+            refreshControl1.beginRefreshing()
+            myTable.isUserInteractionEnabled = false
+        } else {
+            myActivityIndicator.stopAnimating()
+        }
+        
+        if case let .fatalError(error) = OrdersListManager.instance.state {
+            print("Errore stato fatal error \(error)")
+        }
+        
+        if case .success = OrdersListManager.instance.state{
+            refreshControl1.endRefreshing()
+            myTable.isUserInteractionEnabled = true
+            self.ordersSent = OrdersListManager.instance.readOrdersList().ordersList.oredersSentList
+            self.ordersReceived = OrdersListManager.instance.readOrdersList().ordersList.oredersReceivedList
+            myTable.reloadData()
+        }
+    }
+    
+    @objc private func FireBaseDataUserReadedNotification() {
         self.myTable.reloadData()
     }
     
@@ -218,67 +217,6 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         self.drinksList_segmentControl.setTitle("Inviati", forSegmentAt: 0)
     }
     
-    private func deleteClimbedOrder(ordersSent: [Order])->[Order]{
-        var newProduct = [Product]()
-        
-        for order in ordersSent {
-            for product in order.prodotti!{
-                if product.productName?.range(of:"_climbed") == nil {
-                    newProduct.append(product)
-                }
-            }
-            order.prodotti = newProduct
-            newProduct.removeAll()
-        }
-        return ordersSent
-    }
-    
-    func readOrdersSent(){
-        self.nowReadingOrdersAndOffersOnFirebase = true
-
-        FirebaseData.sharedIstance.readOrdersSentOnFireBase(user: self.user!, friendsList: friendsList, onCompletion: { (ordersSent) in
-            guard !ordersSent.isEmpty else {
-                print("errore di lettura su ordini inviati: array orderSent vuoto")
-                return
-            }
-            self.nowReadingOrdersAndOffersOnFirebase = false
-            self.ordersSent = self.deleteClimbedOrder(ordersSent: ordersSent)
-            //self.myTable.reloadData()
-        })
-    }
-    
-    private func getClimbedOrders(ordersReceived: [Order])->[Order]{
-        var newProduct = [Product]()
-        
-        for order in ordersReceived {
-            for product in order.prodotti!{
-                if product.productName?.range(of:"_climbed") != nil && product.quantity != 0 {
-                    product.productName = product.productName?.replacingOccurrences(of: "_climbed", with: "", options: .regularExpression)
-                    newProduct.append(product)
-                }
-            }
-            if newProduct.count != 0 {
-                order.prodotti = newProduct
-            }
-            newProduct.removeAll()
-        }
-        return ordersReceived
-    }
-    
-    func readOrderReceived() {
-        self.nowReadingOrdersAndOffersOnFirebase = true
-        
-        FirebaseData.sharedIstance.readOrderReceivedOnFireBase(user: self.user!, onCompletion: { (ordersReceived) in
-            guard !ordersReceived.isEmpty else {
-                print("errore di lettura su ordini inviati")
-                return
-            }
-            self.nowReadingOrdersAndOffersOnFirebase = false
-            self.ordersReceived = self.getClimbedOrders(ordersReceived: ordersReceived)
-            //self.myTable.reloadData()
-        })
-    }
-
     private func readAndSolvePendingPayPalPayment(order: Order, paymentId: String,onCompletion: @escaping () -> ()){
         let ref = Database.database().reference()
         //self.pendingPayments.removeAll()
@@ -506,9 +444,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 //cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
                 (cell as? OrderReceivedTableViewCell)?.cellReaded = false
                 
-            } else{
-                cell?.accessoryType = UITableViewCellAccessoryType.checkmark
-            }
+            } 
             
         }
         return cell!
@@ -536,7 +472,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
     
-    private func schdeleRememberExpiryNotification(order: Order){
+    private func scheduleRememberExpiryNotification(order: Order){
         let ref = Database.database().reference()
         ref.child("sessions").setValue(ServerValue.timestamp())
         ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
@@ -609,7 +545,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                     FirebaseData.sharedIstance.user = self.user
                     FirebaseData.sharedIstance.acceptOrder(state: "Offerta accettata", userFullName: (self.user?.fullName)!, userIdApp: (self.user?.idApp)!, comapanyId: (self.ordersReceived[indexPath.row].company?.companyId)!, userSenderIdApp: (self.ordersReceived[indexPath.row].userSender?.idApp)!, idOrder: self.ordersReceived[indexPath.row].idOfferta!, autoIdOrder: self.ordersReceived[indexPath.row].orderAutoId)
                     self.scheduleExpiryNotification(order: self.ordersReceived[indexPath.row])
-                    self.schdeleRememberExpiryNotification(order: self.ordersReceived[indexPath.row])
+                    self.scheduleRememberExpiryNotification(order: self.ordersReceived[indexPath.row])
                     self.ordersReceived[indexPath.row].acceptOffer()
                     tableView.setEditing(false, animated: true)
                     self.performSegue(withIdentifier: "segueToOrderDetails", sender: indexPath)
@@ -731,7 +667,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             print("segment control clicked pari a 0")
             //da impelemtare la notifica per i pagamenti inviati appena vatto il pagamento il quale si trova ancora nello stato pending
             if self.drinksList_segmentControl.titleForSegment(at: 0) != "Inviati" {
-                self.readOrdersSent()
+                OrdersListManager.instance.refreshOrdersList()
                 print("ho aggiornato gli Ordini-Inviati da Firebase")
             }
             self.resetSegmentControl0()
@@ -740,7 +676,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         } else if sender.selectedSegmentIndex == 1{
             print("segment control clicked pari a 1")
             if self.drinksList_segmentControl.titleForSegment(at: 1) != "Ricevuti" {
-                self.readOrderReceived()
+                OrdersListManager.instance.refreshOrdersList()
                 print("ho aggiornato gli Ordini-Ricevuti da Firebase")
             }
             self.resetSegmentControl1()
@@ -758,7 +694,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             let orderReceived = self.ordersReceived[indexPath.row]
             if  orderReceived.offerState == "Offerta accettata" ||  orderReceived.offerState == "Offerta scalata" {
                 if self.drinksList_segmentControl.titleForSegment(at: 1) != "Ricevuti" {
-                    self.readOrderReceived()
+                    OrdersListManager.instance.refreshOrdersList()
                     print("ho aggiornato gli Ordini-Ricevuti da Firebase")
                 }
                 self.performSegue(withIdentifier: "segueToOrderDetails", sender: indexPath)
@@ -788,7 +724,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 tableView.deselectRow(at: indexPath, animated: true)
             }else {
                 if self.drinksList_segmentControl.titleForSegment(at: 0) != "Inviati" {
-                    self.readOrdersSent()
+                    OrdersListManager.instance.refreshOrdersList()
                     print("ho aggiornato gli Ordini-Inviati da Firebase")
                 }
                 self.performSegue(withIdentifier: "segueToOrderOfferedDetails", sender: indexPath)
@@ -842,7 +778,6 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     func startActivityIndicator(_ title: String) {
-        
         strLabel.removeFromSuperview()
         activityIndicator.removeFromSuperview()
         effectView.removeFromSuperview()
@@ -870,7 +805,6 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     func stopActivityIndicator() {
-        
         strLabel.removeFromSuperview()
         activityIndicator.removeFromSuperview()
         effectView.removeFromSuperview()
@@ -1014,50 +948,18 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         return refreshControl
     }()
     
-    //The view is updated only when there is a notification or another day is past
-    private func shouldUpdateDrinksTable(SegmentControlBadge: Int?, timeReaded: Date?)->Bool{
-        guard SegmentControlBadge != nil else {
-            return false
-        }
-        guard timeReaded != nil else {
-            return false
-        }
-        
-        var dayLimit = Calendar.current.date(byAdding:.day,value: 1,to: timeReaded!)
-        dayLimit = Calendar.current.date(bySettingHour: 2, minute: 0, second: 0, of: dayLimit!)
-        var currentDate = Date()
-        currentDate = Calendar.current.date(byAdding:.hour,value: 2,to: currentDate)!
-        
-        print("dayLimit:  \(dayLimit!)")
-        print("current Date: \(currentDate)")
-
-        return SegmentControlBadge != 0 || (currentDate >= dayLimit!) || firebaseObserverKilled.bool(forKey: "firebaseObserverKilled")
-        
-    }
-
     @objc func handleRefresh(_ refreshControl: UIRefreshControl) {
-        if drinksList_segmentControl.selectedSegmentIndex == 0 {
-            print("segment control clicked pari a 0")
-            if shouldUpdateDrinksTable(SegmentControlBadge: self.productSendBadge.object(forKey: "paymentOfferedBadge") as? Int, timeReaded: lastOrderSentReadedTimestamp.object(forKey: "ordersSentReadedTimestamp") as? Date){
-                self.readOrdersSent()
-                print("refresh effettuato")
-                self.productSendBadge.set(0, forKey: "paymentOfferedBadge")
-                
-            } else {print("refresh non effettuato")}
-            
-        } else if drinksList_segmentControl.selectedSegmentIndex == 1{
-            print("segment control clicked pari a 1")
-            if shouldUpdateDrinksTable(SegmentControlBadge: self.productSendBadge.object(forKey: "productOfferedBadge") as? Int, timeReaded: lastOrderReceivedReadedTimestamp.object(forKey: "lastOrderReceivedReadedTimestamp") as? Date){
-                self.readOrderReceived()
-                print("refresh effettuato")
-                self.productSendBadge.set(0, forKey: "productOfferedBadge")
-            } else {print("refresh non effettuato")}
-        }
+        refreshControl.beginRefreshing()
+        myTable.isUserInteractionEnabled = false
+        OrdersListManager.instance.refreshOrdersList()
+        self.productSendBadge.set(0, forKey: "paymentOfferedBadge")
+        
+        (drinksList_segmentControl.selectedSegmentIndex == 0) ? self.productSendBadge.set(0, forKey: "paymentOfferedBadge") : self.productSendBadge.set(0, forKey: "productOfferedBadge")
+        
         if firebaseObserverKilled.bool(forKey: "firebaseObserverKilled") {
             firebaseObserverKilled.set(false, forKey: "firebaseObserverKilled")
         }
-        refreshControl.endRefreshing()
-        
+
     }
     
     private func showSuccess() {
@@ -1086,7 +988,6 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     @IBAction func unwindToMyDrinksWitoutValue(_ sender: UIStoryboardSegue) {
         print("unwind eseguito")
     }
-    
     
     @IBAction func unwindToMyDrinks(_ sender: UIStoryboardSegue) {
         guard sender.identifier != nil else {
@@ -1118,15 +1019,5 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             break
         }
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
 }

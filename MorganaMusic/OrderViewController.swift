@@ -150,7 +150,6 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         guard CheckConnection.isConnectedToNetwork() == true else {
             return
         }
-        print("siamo in drinks")
         //effettuo logout FB
         let loginManager = FBSDKLoginManager()
         loginManager.logOut()
@@ -173,7 +172,6 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         appDelegate.window!.rootViewController = loginPage
     }
-    
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return self.sectionTitle.count

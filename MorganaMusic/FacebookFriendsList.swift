@@ -82,7 +82,7 @@ class FacebookFriendsListManager: NSObject {
     
     private static func setInitialState(networkStatus: NetworkStatus) -> InternalState {
         let fbToken = UserDefaults.standard.object(forKey: "FBToken") as? String
-        if let fbCredentials =  fbToken{
+        if let fbCredentials =  fbToken, networkStatus.online{
             return .startUp(fbCredentials)
         } else {
             return .stop(fbToken!, online: networkStatus.online)
@@ -96,35 +96,35 @@ class FacebookFriendsListManager: NSObject {
             switch self.internalState {
             case let .stop(fbTokenString, _):
                 if (self.fbTokenString != nil) && online {
-                    print("fbTokenString is complete and network is online, starting up")
+                    print("[FBFriendsListManager]: fbTokenString is complete and network is online, starting up")
                     self.setInternalState(.startUp(fbTokenString))
                 }
                 else {
-                    print("Credentials are incomplete or network is offline, won't start up")
+                    print("[FBFriendsListManager]: Credentials are incomplete or network is offline, won't start up")
                     self.setInternalState(.stop(fbTokenString,online: online))
                 }
                 
             case let .startUp(fbTokenString), let .error(fbTokenString, _, _):
                 if !online {
-                    print("Network offline, stopping")
+                    print("[FBFriendsListManager]: Network offline, stopping")
                     self.setInternalState(.stop(fbTokenString, online: false))
                 }
                 else {
-                    print("Network is now online, all processes restored ")
+                    print("[FBFriendsListManager]: Network is now online, all processes restored ")
                 }
                 
             case let .success(fbTokenString, contactList, freshness, _):
-                print("Network is online, network status updated")
+                print("[FBFriendsListManager]: Network is online, network status updated")
                 self.setInternalState(.success(fbTokenString, contactList, freshness, online: online))
             }
-            print("Automatic refresh started, due to the switch to a different network connection")
+            print("[FBFriendsListManager]: Automatic refresh started, due to the switch to a different network connection")
             self.requestContactList(freshness: .localCache)
         }
     }
     
     @objc func applicationWillEnterForeground() {
         dispatchQueue.async {
-            print("Application will enter foreground: automatic refresh started")
+            print("[FBFriendsListManager]: Application will enter foreground: automatic refresh started")
             self.requestContactList(freshness: .fresh)
         }
     }
@@ -137,7 +137,7 @@ class FacebookFriendsListManager: NSObject {
             get {
                 switch self {
                 case let .unexpectedError(description):
-                    return "Unexpected error: \(description)"
+                    return "[FBFriendsListManager]: Unexpected error: \(description)"
                 }
             }
         }
@@ -178,13 +178,13 @@ class FacebookFriendsListManager: NSObject {
         var description: String {
             switch self {
             case .stop:
-                return "STOP"
+                return "[FBFriendsListManager]: STOP"
             case .startUp:
-                return "STARTUP"
+                return "[FBFriendsListManager]: STARTUP"
             case .error:
-                return "ERROR"
+                return "[FBFriendsListManager]: ERROR"
             case .success:
-                return "SUCCESS"
+                return "[FBFriendsListManager]: SUCCESS"
             }
         }
         
@@ -210,14 +210,14 @@ class FacebookFriendsListManager: NSObject {
     private func setInternalState(_ newState: InternalState) {
         let oldState = internalState
         
-        print("Internal state did change: \(oldState) -> \(newState)")
+        print("[FBFriendsListManager]: Internal state did change: \(oldState) -> \(newState)")
         internalState = newState
         
         dispatchQueue.async {
-            print("Notifying state changed")
+            print("[FBFriendsListManager]: Notifying state changed")
             self.notificationCenter.post(name: .FacebookFriendsListStateDidChange, object: self)
             if oldState.fbTokenString != newState.fbTokenString {
-                print("Notifying data changed")
+                print("[FBFriendsListManager]: Notifying data changed")
                 self.notificationCenter.post(name: .FacebookFriendsListListDataDidChange, object: self)
             }
         }
@@ -226,16 +226,16 @@ class FacebookFriendsListManager: NSObject {
     private func requestContactList(freshness: ContactListFreshness) {
         switch internalState {
         case .stop:
-            print("Request of contact list ignored in state: \(internalState)")
+            print("[FBFriendsListManager]: Request of contact list ignored in state: \(internalState)")
             
         case let .startUp(fbTokenString), let .error(fbTokenString, _, _), .success(let fbTokenString, _, _, true):
             connectToFacebook(freshness: freshness, completion: { (outcome) in
                 switch self.internalState {
                 case let .stop(newFbTokenString, _), let .startUp(newFbTokenString), let .error(newFbTokenString, _, _), let .success(newFbTokenString, _, _, _):
                      if newFbTokenString != fbTokenString {
-                        print("Request of contact list ignored: detected new credentials")
+                        print("[FBFriendsListManager]: Request of contact list ignored: detected new credentials")
                             if case .startUp = self.internalState {
-                                print("Detected new credential in startup state: new request of server contact list started")
+                                print("[FBFriendsListManager]: Detected new facebook credential in startup state: new request of facebook friends list started")
                                 self.requestContactList(freshness: freshness)
                             }
                             return
@@ -246,25 +246,25 @@ class FacebookFriendsListManager: NSObject {
                 case let .transitoryError(error):
                     switch self.internalState {
                     case .stop:
-                        print("Request failed due to a transitory error: \(error)")
+                        print("[FBFriendsListManager]: Request failed due to a transitory error: \(error)")
                         
                     case .error, .startUp,.success:
-                        print("Request failed due to a transitory error: \(error)")
+                        print("[FBFriendsListManager]: Request failed due to a transitory error: \(error)")
                         self.tryNewRequest(freshness: freshness)
                     }
                     
                 case let .persistentError(errorCondition):
                     switch self.internalState {
                     case .stop, .success:
-                        print("Request failed due to a persistent error: \(errorCondition.error)")
+                        print("[FBFriendsListManager]: Request failed due to a persistent error: \(errorCondition.error)")
                         
                     case let .startUp(credentials):
-                        print( "Initial request failed due to a persistent error: \(errorCondition.error)")
+                        print( "[FBFriendsListManager]: Initial request failed due to a persistent error: \(errorCondition.error)")
                         self.setInternalState(.error(credentials, errorCondition, freshness))
                         
                     case let .error(credentials, _, currentFreshness):
                         if freshness.rawValue >= currentFreshness.rawValue {
-                            print("Updating fatal error: \(errorCondition.error) ")
+                            print("[FBFriendsListManager]: Updating fatal error: \(errorCondition.error) ")
                             self.setInternalState(.error(credentials, errorCondition, freshness))
                         }
                     }
@@ -272,25 +272,25 @@ class FacebookFriendsListManager: NSObject {
                 case let .success(fbFriendsList):
                     switch self.internalState {
                     case .stop:
-                        print("Server contact list ignored in state \(self.internalState)")
+                        print("[FBFriendsListManager]: Facebook friends list ignored in state \(self.internalState)")
                         
                     case let .startUp(fbTokenString), let .error(fbTokenString, _, _):
-                        print("Initial contact list request was succes")
+                        print("[FBFriendsListManager]: Initial contact list request was succes")
                         self.setInternalState(.success(fbTokenString, fbFriendsList, freshness, online: true))
                         
                     case let .success(credentials, _, currentFreshness, online):
                         if freshness.rawValue >= currentFreshness.rawValue {
-                            print("Contact list updated")
+                            print("[FBFriendsListManager]: Contact list updated")
                             self.setInternalState(.success(credentials, fbFriendsList, freshness, online: online))
                         } else {
-                            print("Server contact list ignored: current contact list was fresher")
+                            print("[FBFriendsListManager]: Facebook friends list ignored: current contact list was fresher")
                         }
                     }
                 }
             })
             
         case .success(_, _, _, false):
-            print("Request of contact list ignored due to lost network connection")
+            print("[FBFriendsListManager]: Request of contact list ignored due to lost network connection")
         }
     }
     
@@ -312,13 +312,19 @@ class FacebookFriendsListManager: NSObject {
             
             FBSDKGraphRequest(graphPath: "me/friends", parameters: parameters_friend, tokenString: fbTokenString, version: nil, httpMethod: "GET").start(completionHandler: {(connection,result,error) -> Void in
                 self.pendingRequests -= 1
-                print("Pendig request with freshness level \(freshness), served!. Actual pending requests: \(self.pendingRequests)")
+                print("[FBFriendsListManager]: Pendig request with freshness level \(freshness), served!. Actual pending requests: \(self.pendingRequests)")
+                
+                self.dispatchQueue.async {
+                    print("[FBFriendsListManager]: Facebook friends List state did change")
+                    self.notificationCenter.post(name: .FacebookFriendsListStateDidChange, object: self)
+                }
+                
                 if ((error) != nil) {
-                    print("Error: \(error!)")
+                    print("[FBFriendsListManager]: Error: \(error!)")
                     completion(.persistentError(.generalError(error!)))
                 }
                 guard result != nil else {
-                    print("Error: \(error!)")
+                    print("[FBFriendsListManager]: Error: \(error!)")
                     completion(.persistentError(.generalError(error!)))
                     return
                 }
@@ -327,7 +333,7 @@ class FacebookFriendsListManager: NSObject {
                 let summary = newResult["summary"] as! NSDictionary
                 let counts = summary["total_count"] as! NSNumber
                 
-                print("Totale amici letti:  \(counts)")
+                print("[FBFriendsListManager]: Totale amici letti:  \(counts)")
                 var contFriends = 0
                 
                 //self.startActivityIndicator("Carico lista amici...")
@@ -359,7 +365,7 @@ class FacebookFriendsListManager: NSObject {
                             return
                         }
                         guard dictionary != nil else {
-                            print("Errore di lettura del dell'Ordine richiesto")
+                            print("[FBFriendsListManager]: Errore di lettura del dell'Ordine richiesto")
                             //completion(.transitoryError(Error))
                             return
                         }
@@ -388,19 +394,19 @@ class FacebookFriendsListManager: NSObject {
                         
                         fbList.append(newFriend)
                         if i == (dati.count - 1) {
-                            print("DIMENSIONE FRIENDSLIST \(fbList.count)")
+                            print("[FBFriendsListManager]: DIMENSIONE FRIENDSLIST \(fbList.count)")
                             completion(.success(fbList))
                         }
                     })
                 }
-                print("Aggiornamento elenco amici di Facebook completato!. Inseriti \(contFriends) amici")
+                print("[FBFriendsListManager]: Aggiornamento elenco amici di Facebook completato!. Inseriti \(contFriends) amici")
                 
             })
             pendingRequests += 1
-            print("New request with freshness level \(freshness). Actual pending requests: \(self.pendingRequests)")
+            print("[FBFriendsListManager]: New request with freshness level \(freshness). Actual pending requests: \(self.pendingRequests)")
     
             dispatchQueue.async {
-                print("Server Contact List state did change")
+                print("[FBFriendsListManager]: Facebook friends List state did change")
                 self.notificationCenter.post(name: .FacebookFriendsListStateDidChange, object: self)
             }
         }
@@ -408,18 +414,18 @@ class FacebookFriendsListManager: NSObject {
     
     private func tryNewRequest(freshness: ContactListFreshness) {
         dispatchQueue.asyncAfter(deadline: DispatchTime.now() + FacebookFriendsListManager.requestRetryDelay , execute: {
-            print("Trying a new request of Contact List afer 10 seconds")
+            print("[FBFriendsListManager]: Trying a new request of Contact List afer 10 seconds")
             switch self.internalState {
             case .stop, .success(_, _, _, false):
-                print("Reconnect to server request ingored: network connection or credentials error")
+                print("[FBFriendsListManager]: Reconnect to facebook request ingored: network connection or credentials error")
                 break
             case .startUp, .error, .success(_, _, _, true):
                 if self.uiApplication.applicationState == .active {
-                    print("Automatic refresh of Contact List correctly aperformed afer 10 seconds")
+                    print("[FBFriendsListManager]: Automatic refresh of Contact List correctly aperformed afer 10 seconds")
                     self.requestContactList(freshness: freshness)
                 }
                 else {
-                    print("Automatic refresh of Contact List won't be performed in background mode")
+                    print("[FBFriendsListManager]: Automatic refresh of Contact List won't be performed in background mode")
                 }
             }
         })
@@ -455,7 +461,7 @@ class FacebookFriendsListManager: NSObject {
     }
     
     public func refreshContactList(){
-        print("Refresh requested")
+        print("[FBFriendsListManager]: Refresh requested")
         
         dispatchQueue.async {
             self.requestContactList(freshness: .fresh)

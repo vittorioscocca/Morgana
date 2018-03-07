@@ -47,8 +47,7 @@ class FirebaseData {
     // Firebase data is organaized as: orderSent, ordereReceived, orderPayment, productsSentDetails
     
     var user: User?
-    //var userDestination: UserDestination?
-    //var order: Order?
+    var serverTime: TimeInterval? = nil
     
     var ordersSent: [Order]
     var ordersReceived: [Order]
@@ -369,6 +368,32 @@ class FirebaseData {
             onCompletion(self.companies)
         })
     }
+    
+    func mangeExiredOffers(timeStamp:TimeInterval, order: Order, ref: DatabaseReference){
+        let date = NSDate(timeIntervalSince1970: timeStamp/1000)
+        let dateFormatter = DateFormatter()
+        dateFormatter.amSymbol = "AM"
+        dateFormatter.pmSymbol = "PM"
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
+        let dateString = dateFormatter.string(from: date as Date)
+        let finalDate = dateFormatter.date(from: dateString)
+        self.lastOrderSentReadedTimestamp.set(finalDate!, forKey: "ordersSentReadedTimestamp")
+        
+        let date1Formatter = DateFormatter()
+        date1Formatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
+        date1Formatter.locale = Locale.init(identifier: "it_IT")
+        
+        let dateObj = date1Formatter.date(from: order.expirationeDate!)
+        if dateObj! < finalDate! {
+            order.offerState = "Scaduta"
+            ref.child("ordersSent/\((self.user?.idApp)!)/\((order.company?.companyId)!)/\(order.idOfferta!)").updateChildValues(["offerState" : "Scaduta"])
+            ref.child("ordersReceived/\((order.userDestination?.idApp)!)/\((order.company?.companyId)!)/\(order.ordersSentAutoId)").updateChildValues(["offerState" : "Scaduta"])
+            
+            let msg = "Il prodotto che ti è stato offerto da \((self.user?.fullName)!) è scaduto"
+            NotificationsCenter.sendNotification(userDestinationIdApp: (order.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
+            self.updateNumberPendingProductsOnFireBase((order.userDestination?.idApp)!, recOrPurch: "received")
+        }
+    }
 
     //READ ORDERS ON FIREBASE
     func readOrdersSentOnFireBase(user: User, friendsList: [Friend]?,onCompletion: @escaping ([Order])->()){
@@ -391,6 +416,7 @@ class FirebaseData {
                     order.orderAutoId = (id_offer as? String)!
                     let orderDataDictionary = orderData as? NSDictionary
                     
+                    //filtering deleted data
                     if orderDataDictionary?["viewState"] as? String != "deleted" {
                         order.expirationeDate = orderDataDictionary?["expirationDate"] as? String
                         order.paymentState = orderDataDictionary?["paymentState"] as? String
@@ -425,37 +451,20 @@ class FirebaseData {
                                 }
                             }
                         }
-                        
+                        //filtering expired data
                         if order.offerState != "Scaduta" {
                             self.scheduleExpiryNotification(order: order)
-                            ref.child("sessions").setValue(ServerValue.timestamp())
-                            ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
-                                let timeStamp = snap.value! as! TimeInterval
-                                let date = NSDate(timeIntervalSince1970: timeStamp/1000)
-                                
-                                let dateFormatter = DateFormatter()
-                                dateFormatter.amSymbol = "AM"
-                                dateFormatter.pmSymbol = "PM"
-                                dateFormatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
-                                let dateString = dateFormatter.string(from: date as Date)
-                                let finalDate = dateFormatter.date(from: dateString)
-                                self.lastOrderSentReadedTimestamp.set(finalDate!, forKey: "ordersSentReadedTimestamp")
-                                
-                                let date1Formatter = DateFormatter()
-                                date1Formatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
-                                date1Formatter.locale = Locale.init(identifier: "it_IT")
-                                
-                                let dateObj = date1Formatter.date(from: order.expirationeDate!)
-                                if dateObj! < finalDate! {
-                                    order.offerState = "Scaduta"
-                                    ref.child("ordersSent/\((self.user?.idApp)!)/\((order.company?.companyId)!)/\(order.idOfferta!)").updateChildValues(["offerState" : "Scaduta"])
-                                    ref.child("ordersReceived/\((order.userDestination?.idApp)!)/\((order.company?.companyId)!)/\(order.ordersSentAutoId)").updateChildValues(["offerState" : "Scaduta"])
+                            if self.serverTime == nil {
+                                ref.child("sessions").setValue(ServerValue.timestamp())
+                                ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
+                                    let timeStamp = snap.value! as! TimeInterval
+                                    self.serverTime = timeStamp
+                                    self.mangeExiredOffers(timeStamp: self.serverTime!, order: order, ref: ref)
                                     
-                                    let msg = "Il prodotto che ti è stato offerto da \((self.user?.fullName)!) è scaduto"
-                                    NotificationsCenter.sendNotification(userDestinationIdApp: (order.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
-                                    self.updateNumberPendingProductsOnFireBase((order.userDestination?.idApp)!, recOrPurch: "received")
-                                }
-                            })
+                                })
+                            }else {
+                                self.mangeExiredOffers(timeStamp: self.serverTime!, order: order, ref: ref)
+                            }
                         }
                         
                         if order.paymentState != "Valid"  {

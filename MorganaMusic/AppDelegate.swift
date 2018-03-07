@@ -39,6 +39,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ = NetworkStatus.default
         _ = FacebookFriendsListManager.instance
         _ = LoadRemoteProducts.instance
+        _ = OrdersListManager.instance
         
         //Firebase push notification
         if #available(iOS 10.0, *) {

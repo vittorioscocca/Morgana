@@ -39,7 +39,6 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
         self.myTable.dataSource = self
         self.myTable.delegate = self
         self.userId = fireBaseToken.object(forKey: "FireBaseToken")! as? String
-        //myActivityIndicator.isHidden = true
         self.resultSearchController = ({
             // creo un oggetto di tipo UISearchController
             let controller = UISearchController(searchResultsController: nil)
@@ -118,71 +117,6 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
         controller!.addAction(action)
         self.present(controller!, animated: true, completion: nil)
         
-    }
-
-    func getFriends(mail: String){
-        
-        CoreDataController.sharedIstance.deleteFriends((self.user?.idApp)!)
-        
-        let fbToken = UserDefaults.standard
-        let fbTokenString = fbToken.object(forKey: "FBToken") as? String
-        
-        
-        let parameters_friend = ["fields" : "name, first_name, last_name, id, email, gender, picture.type(large)"]
-        
-        FBSDKGraphRequest(graphPath: "me/friends", parameters: parameters_friend, tokenString: fbTokenString, version: nil, httpMethod: "GET").start(completionHandler: {(connection,result, error) -> Void in
-            if ((error) != nil)
-            {
-                // Process error
-                print("Error: \(error!)")
-                return
-            }
-            //numbers of total friends
-            let newResult = result as! NSDictionary
-            let summary = newResult["summary"] as! NSDictionary
-            let counts = summary["total_count"] as! NSNumber
-            
-            print("Totale amici letti:  \(counts)")
-            var contFriends = 0
-            
-            //self.startActivityIndicator("Carico lista amici...")
-            let dati: NSArray = newResult.object(forKey: "data") as! NSArray
-            
-            guard dati.count != 0 else {
-                return
-            }
-            
-            for i in 0...(dati.count - 1) {
-                contFriends += 1
-                let valueDict: NSDictionary = dati[i] as! NSDictionary
-                let name = valueDict["name"] as? String
-                let idFB = valueDict["id"] as! String
-                let firstName = valueDict["first_name"] as! String
-                let lastName = valueDict["last_name"] as! String
-                
-                //let gender = valueDict["gender"] as! String
-                let picture = valueDict["picture"] as! NSDictionary
-                let data = picture["data"] as? NSDictionary
-                let url = data?["url"] as? String
-                
-                FirebaseData.sharedIstance.readUserIdAppFromIdFB(node: "users", child: "idFB", idFB: idFB, onCompletion: { (error,idApp) in
-                    guard error == nil else {
-                        print(error!)
-                        return
-                    }
-                    guard idApp != nil else {return}
-                    FirebaseData.sharedIstance.readUserCityOfRecidenceFromIdFB(node: "users/\(idApp!)", onCompletion: { (error, cityOfRecidence) in
-                        CoreDataController.sharedIstance.addFriendInUser(idAppUser: (self.user?.idApp)!, idFB: idFB, mail: mail, fullName: name, firstName: firstName, lastName: lastName, gender: nil, pictureUrl: url, cityOfRecidence: cityOfRecidence)
-                        if i == (dati.count - 1) {
-                            
-                        }
-                    })
-                })
-                
-            }
-            print("Aggiornamento elnco amici di Facebook completato!. Inseriti \(contFriends) amici")
-            
-        })
     }
     
     func contentsFilter(text: String) {
