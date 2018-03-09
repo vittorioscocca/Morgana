@@ -60,7 +60,7 @@ class OrdersListManager: NSObject {
         self.friendsList = facebookFriendsListManager.readContactList().facebookFriendsList
         
         internalState = OrdersListManager.setInitialState(friendslist: friendsList,networkStatus: networkStatus)
-        self.userId = fireBaseToken.object(forKey: "FireBaseToken")! as? String
+        self.userId = fireBaseToken.object(forKey: "FireBaseToken") as? String
         self.user = CoreDataController.sharedIstance.findUserForIdApp(userId)
     
         super.init()
@@ -403,15 +403,7 @@ class OrdersListManager: NSObject {
         }
         else if case .fresh = freshness {
             FirebaseData.sharedIstance.readOrdersSentOnFireBase(user: self.user!, friendsList: currentFriendsList, onCompletion: { (ordersSent) in
-                guard !ordersSent.isEmpty else {
-                    print("[OrdersListManager]: errore di lettura su ordini inviati: array orderSent vuoto")
-                    return
-                }
                 FirebaseData.sharedIstance.readOrderReceivedOnFireBase(user: self.user!, onCompletion: { (ordersReceived) in
-                    guard !ordersReceived.isEmpty else {
-                        print("[OrdersListManager]: errore di lettura su ordini inviati")
-                        return
-                    }
                     self.pendingRequests -= 1
                     print("[OrdersListManager]: Pendig request with freshness level \(freshness), served!. Actual pending requests: \(self.pendingRequests)")
                     self.dispatchQueue.async {
@@ -463,8 +455,8 @@ class OrdersListManager: NSObject {
             switch internalState{
             case .stop:
                 return .loading
-            case .startUp:
-                return .loading
+            case let .startUp(friendsList):
+                return  .loading
             case let .error(_, error, _):
                 return .fatalError(error)
             case .success:

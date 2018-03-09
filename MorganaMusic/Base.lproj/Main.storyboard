@@ -178,7 +178,7 @@
                     <view key="view" contentMode="scaleToFill" id="djS-70-tBs">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </view>
                     <connections>
                         <segue destination="cLG-ke-kkE" kind="custom" identifier="sw_rear" customClass="SWRevealViewControllerSegueSetController" id="fOA-cd-6ud"/>
@@ -297,7 +297,7 @@
                                                 <action selector="urlPrecedente_pressed:" destination="yl6-rj-otg" id="3HK-Y8-OHB"/>
                                             </connections>
                                         </barButtonItem>
-                                        <textField key="titleView" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" clearButtonMode="whileEditing" id="5Ns-am-L3b">
+                                        <textField key="titleView" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" clearButtonMode="whileEditing" id="5Ns-am-L3b">
                                             <rect key="frame" x="175" y="7" width="25" height="30"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                             <nil key="textColor"/>
@@ -344,7 +344,7 @@
                             <constraint firstItem="gkg-43-Kk6" firstAttribute="top" secondItem="SUG-QP-4iC" secondAttribute="bottom" id="lyQ-I0-LnT"/>
                         </constraints>
                     </view>
-                    <tabBarItem key="tabBarItem" title="Eventi" image="Events" id="2Kf-ng-yeF"/>
+                    <tabBarItem key="tabBarItem" tag="3" title="Eventi" image="Events" id="2Kf-ng-yeF"/>
                     <navigationItem key="navigationItem" title="Title" id="qYI-RY-Q8D"/>
                     <connections>
                         <outlet property="myProgressView" destination="gkg-43-Kk6" id="SEz-Gf-5Tt"/>
@@ -360,9 +360,8 @@
         <scene sceneID="08j-ZE-JsK">
             <objects>
                 <navigationController title="Offri un drink!" id="q8S-sk-Ip6" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Offri" image="Offri Drinks" id="AB4-FA-vxc"/>
+                    <tabBarItem key="tabBarItem" tag="4" title="Offri" image="Offri Drinks" id="AB4-FA-vxc"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="kGO-So-1V7">
-                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <color key="barTintColor" red="0.74117647058823533" green="0.15294117647058825" blue="0.20784313725490194" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -383,9 +382,8 @@
         <scene sceneID="dm9-c8-urC">
             <objects>
                 <navigationController id="Twe-G4-k48" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="I miei ordini" image="I miei Drinks" id="WHZ-dN-Gmt"/>
+                    <tabBarItem key="tabBarItem" tag="2" title="I miei ordini" image="I miei Drinks" id="WHZ-dN-Gmt"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="OrU-1j-REL">
-                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <color key="barTintColor" red="0.74117647060000003" green="0.1529411765" blue="0.20784313730000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -1058,7 +1056,7 @@
         <!--Classifica-->
         <scene sceneID="KxM-lK-7uC">
             <objects>
-                <viewController id="fuV-Ed-7Nt" sceneMemberID="viewController">
+                <viewController id="fuV-Ed-7Nt" customClass="UserPointsViewController" customModule="MorganaMusic" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="1eo-V9-nUx"/>
                         <viewControllerLayoutGuide type="bottom" id="I2j-oN-utN"/>
@@ -1068,7 +1066,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" red="0.89917574440000003" green="1" blue="0.18725536640000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </view>
-                    <tabBarItem key="tabBarItem" title="Classifica" image="Podio" id="g7x-AI-eai"/>
+                    <tabBarItem key="tabBarItem" tag="1" title="Classifica" image="Podio" id="g7x-AI-eai"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="sIc-TX-aio" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -2657,7 +2655,8 @@
         <!--Home-->
         <scene sceneID="sy1-33-u4f">
             <objects>
-                <tabBarController storyboardIdentifier="HomeViewController" title="Home" useStoryboardIdentifierAsRestorationIdentifier="YES" id="5qJ-N0-cAO" sceneMemberID="viewController">
+                <tabBarController storyboardIdentifier="HomeViewController" title="Home" useStoryboardIdentifierAsRestorationIdentifier="YES" id="5qJ-N0-cAO" customClass="UIBackgroundTabBarController" customModule="MorganaMusic" customModuleProvider="target" sceneMemberID="viewController">
+                    <nil key="simulatedBottomBarMetrics"/>
                     <tabBar key="tabBar" contentMode="scaleToFill" id="1ub-Jb-LYj">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="49"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -2896,6 +2895,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="UQB-mz-UCf"/>
-        <segue reference="OXA-AZ-LfE"/>
+        <segue reference="B23-cs-HaJ"/>
     </inferredMetricsTieBreakers>
 </document>

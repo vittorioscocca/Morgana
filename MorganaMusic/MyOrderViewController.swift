@@ -14,9 +14,6 @@ import FirebaseMessaging
 import FirebaseInstanceID
 import UserNotifications
 
-
-
-
 class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
     @IBOutlet weak var myTable: UITableView!
@@ -116,9 +113,10 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     @objc func OrdersListStateDidChange(){
+        print("stato attuale Order list", OrdersListManager.instance.state)
         if case .loading = OrdersListManager.instance.state{
             myActivityIndicator.startAnimating()
-            refreshControl1.beginRefreshing()
+            //refreshControl1.beginRefreshing()
             myTable.isUserInteractionEnabled = false
         } else {
             myActivityIndicator.stopAnimating()
@@ -131,6 +129,8 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         if case .success = OrdersListManager.instance.state{
             refreshControl1.endRefreshing()
             myTable.isUserInteractionEnabled = true
+            self.ordersSent.removeAll()
+            self.ordersReceived.removeAll()
             self.ordersSent = OrdersListManager.instance.readOrdersList().ordersList.oredersSentList
             self.ordersReceived = OrdersListManager.instance.readOrdersList().ordersList.oredersReceivedList
             myTable.reloadData()
@@ -959,7 +959,6 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         if firebaseObserverKilled.bool(forKey: "firebaseObserverKilled") {
             firebaseObserverKilled.set(false, forKey: "firebaseObserverKilled")
         }
-
     }
     
     private func showSuccess() {

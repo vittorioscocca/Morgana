@@ -214,7 +214,7 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                         if (result.token) != nil {
                             print("User logged on Facebook")
                             //save token on UserDefaults
-                            self.fbToken.set(FBSDKAccessToken.current().tokenString!, forKey: "FBToken")
+                            self.fbToken.set(FBSDKAccessToken.current()?.tokenString, forKey: "FBToken")
                             
                             self.fetchProfile()
                             

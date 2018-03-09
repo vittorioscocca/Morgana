@@ -404,6 +404,86 @@ class FireBaseAPI {
     class func removeObserver (node: String){
         ref.child(node).removeAllObservers()
     }
+    
+    //PAGINATION while scrolling for MyOrderView
+    /*
+    func retrievePost(offset: NSNumber, callFlag: Bool, completion: (result: AnyObject?, error: NSError?)->()){
+        // As this method is called from viewDidLoad and fetches 20 records at first.
+        // Later when user scrolls down to bottom, its called again
+        let postsRef = ref.child(kDBPostRef)
+        var startingValue:AnyObject?
+        // starting  value will be nil when this method is called from viewDidLoad as the offset is not set
+        
+        if callFlag{
+            if offset == 0{
+                startingValue = nil
+            }
+            else{
+                startingValue = offset
+            }
+        } else{
+            // get offset from the offsetArray
+            startingValue = self.findOffsetFromArray()
+            
+        }
+        // sort records by pOrder fetch offset+1 records
+        self.refHandler = postsRef.queryOrderedByChild("pOrder").queryStartingAtValue(startingValue).queryLimitedToFirst(kPostLimit + 1).observeEventType(FIRDataEventType.Value, withBlock: { (snapshot) in
+            // flag is for setting the last record/ 21st as offset
+            var flag = 0
+            
+            let tempPost = NSMutableSet()
+            // iterate over children and add to tempPost
+            for item in snapshot.children {
+                
+                // check for offet, the last row(21st) is offset ; Do not add last element in the main table list
+                flag += 1
+                if flag == 21 && callFlag == true{
+                    // this row is offset
+                    self.kOffset = item.value?["pOrder"] as! NSNumber
+                    self.offSetArray?.append(self.kOffset)
+                    continue
+                }
+                // create Post object
+                let post = Post(snapshot: item as! FIRDataSnapshot)
+                
+                // append to tempPost
+                tempPost.addObject(post)
+            }
+            // return to the closure
+            completion(result:tempPost, error:nil)
+        })
 
+        func updateNewRecords(offset:NSNumber, callFlag: Bool){
+            self.retrievePost(offset,callFlag:callFlag) { (result,error) -> Void in
+                //            let tempArray = result as! [Post]
+                let oldSet = Set(self.posts)
+                var unionSet = oldSet.union(result as! Set<Post>)
+                unionSet = unionSet.union(unionSet)
+                self.posts = Array(unionSet)
+                self.postsCopy = self.posts
+                //          print(self.posts.count)
+                self.posts.sortInPlace({ $0.pOrder> $1.pOrder})
+                self.reloadTableData()
+            }
+        }
+        
+        func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+            
+            // UITableView only moves in one direction, y axis
+            let currentOffset = scrollView.contentOffset.y
+            let maximumOffset = scrollView.contentSize.height - scrollView.frame.size.height
+            
+            // Change 10.0 to adjust the distance from bottom
+            if maximumOffset - currentOffset <= 10.0 {
+                self.updateNewRecords(self.kOffset, callFlag:true)
+            }
+        }
+        
+        // find the offset from the offsetDict
+        func findOffsetFromArray() -> NSNumber{
+            let idx = self.kClickedRow/20 // kClickedRow is the updated row in the table view
+            return self.offSetArray![idx]
+            
+        }*/
     
 }

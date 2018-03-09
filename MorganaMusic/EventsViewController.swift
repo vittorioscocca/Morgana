@@ -35,22 +35,16 @@ class EventsViewController: UIViewController, UITextFieldDelegate{
         
     }
     
+    deinit {
+        self.webView?.removeObserver(self, forKeyPath: "estimatedProgress")
+    }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.setWebView()
     }
     
-    
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        self.webView?.removeObserver(self, forKeyPath: "estimatedProgress")
-    }
-    
     private func setWebView(){
         self.webView.addObserver(self, forKeyPath: "estimatedProgress", options: .new, context: nil)
-        
-        
         self.loadURL("www.facebook.com/pg/morganamusiclub/events/?ref=page_internal") // invoco la funzione loadURL e richiedo la visualizzazione del sito di partenza
         self.myTextField_field.text = "https://goo.gl/1CSLF4"
     }

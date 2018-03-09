@@ -54,7 +54,7 @@ class FacebookFriendsListManager: NSObject {
         self.notificationCenter = notificationCenter
         self.uiApplication = uiApplication
         internalState = FacebookFriendsListManager.setInitialState(networkStatus: networkStatus)
-        self.userId = fireBaseToken.object(forKey: "FireBaseToken")! as? String
+        self.userId = fireBaseToken.object(forKey: "FireBaseToken") as? String
         self.user = CoreDataController.sharedIstance.findUserForIdApp(userId)
         let application = uiApplication.delegate as! AppDelegate
         self.context = application.persistentContainer.viewContext
@@ -82,10 +82,10 @@ class FacebookFriendsListManager: NSObject {
     
     private static func setInitialState(networkStatus: NetworkStatus) -> InternalState {
         let fbToken = UserDefaults.standard.object(forKey: "FBToken") as? String
-        if let fbCredentials =  fbToken, networkStatus.online{
+        if let fbCredentials = fbToken, networkStatus.online{
             return .startUp(fbCredentials)
         } else {
-            return .stop(fbToken!, online: networkStatus.online)
+            return .stop("", online: networkStatus.online)
         }
     }
     

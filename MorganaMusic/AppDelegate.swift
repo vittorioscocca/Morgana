@@ -15,13 +15,67 @@ import FirebaseMessaging
 import UserNotifications
 
 
+public extension NSNotification.Name {
+    static let didOpenApplicationFromLetOrderShortCutNotification = NSNotification.Name("AppDelegateDidOpenApplicationFromLetOrderShortCutNotification")
+    static let didOpenApplicationFromUserPointsShortCutNotification = NSNotification.Name("AppDelegateDidOpenApplicationFromUserPointsShortShortCutNotification")
+    static let didOpenApplicationFromMyOrderShortCutNotification = NSNotification.Name("AppDelegateDidOpenApplicationFromMyOrderShortCutNotification")
+    static let didOpenApplicationFromEventsShortCutNotification = NSNotification.Name("AppDelegateDidOpenApplicationFromEventsShortCutNotification")
+}
+
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
+    var lastViewControllerOnQuick = UserDefaults.standard
+    
+    enum ShortcutIdentifier: String {
+        case letOrder
+        case myOrder
+        
+        init?(fullType: String) {
+            guard let last = fullType.components(separatedBy: ".").last else { return nil }
+            self.init(rawValue: last)
+        }
+        
+        var type: String {
+            return Bundle.main.bundleIdentifier! + ".\(self.rawValue)"
+        }
+    }
+    
+    static let applicationShortcutUserInfoIconKey = "applicationShortcutUserInfoIconKey"
+    
     var window: UIWindow?
+    var launchedShortcutItem: UIApplicationShortcutItem?
+    
     //for Firebase push notification
     let gcmMessageIDKey = "gcm.message_id"
+    
+    @objc private func initializeDynamicShortcuts() {
+        var shortcutItems :[UIApplicationShortcutItem] = []
+        
+        // Construct dynamic short #1
+        let shortcut1UserInfo = [AppDelegate.applicationShortcutUserInfoIconKey: UIApplicationShortcutIconType.invitation.rawValue]
+        let shortcut1 = UIMutableApplicationShortcutItem(type: ShortcutIdentifier.letOrder.type,
+                                                         localizedTitle:"Offi ad un amico",
+                                                         localizedSubtitle: "",
+                                                         icon: UIApplicationShortcutIcon(type: .invitation),
+                                                         userInfo: shortcut1UserInfo)
+        shortcutItems.append(shortcut1)
+        
+        // Construct dynamic short #2
+        let shortcut2UserInfo = [AppDelegate.applicationShortcutUserInfoIconKey: UIApplicationShortcutIconType.favorite.rawValue]
+        let shortcut2 = UIMutableApplicationShortcutItem(type: ShortcutIdentifier.myOrder.type,
+                                                         localizedTitle:"I miei ordini",
+                                                         localizedSubtitle: "",
+                                                         icon: UIApplicationShortcutIcon(type: .favorite),
+                                                         userInfo: shortcut2UserInfo)
+        
+        shortcutItems.append(shortcut2)
+        
+        
+        UIApplication.shared.shortcutItems = shortcutItems
+        
+    }
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         //Paypal sandbox credentials
@@ -64,25 +118,83 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             
             // For iOS 10 data message (sent via FCM)
             Messaging.messaging().delegate = self
-            
         }
         
         application.registerForRemoteNotifications()
         
-        
         guard (( uidFB == nil) && (uidFiB == nil)) else{
-
             print("[DEBUG] Salto il login iniziale")
             MorganaMusicActivate()
             updateFacebookAndFirebaseInfo()
             return true
         }
+        
         //FBSDKLoginButton.classForCoder()
         FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
         
+        initializeDynamicShortcuts()
         
-        
+        if let shortcutItem = launchOptions?[UIApplicationLaunchOptionsKey.shortcutItem] as? UIApplicationShortcutItem {
+            if !handleShortCutItem(shortcutItem){
+                return false
+            }
+        }
+
         return true
+    }
+    
+    func MorganaMusicActivate(){
+        //let vc = storybard.instantiateViewController(withIdentifier: "HomeViewController") //HomeViewController
+        
+        if lastViewControllerOnQuick.object(forKey: "lastViewControllerOnQuick") != nil{
+            switch lastViewControllerOnQuick.object(forKey: "lastViewControllerOnQuick") as! Int {
+            case 0:
+                NotificationCenter.default.post(name: .didOpenApplicationFromLetOrderShortCutNotification, object: nil)
+            case 1:
+                NotificationCenter.default.post(name: .didOpenApplicationFromUserPointsShortCutNotification, object: nil)
+            case 2:
+                NotificationCenter.default.post(name: .didOpenApplicationFromMyOrderShortCutNotification, object: nil)
+            case 3:
+                NotificationCenter.default.post(name: .didOpenApplicationFromEventsShortCutNotification, object: nil)
+            default:
+                break
+            }
+        } else {
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let vc = storyboard.instantiateViewController(withIdentifier: "SWRevealController") //HomeViewController
+            self.window?.rootViewController = vc
+        }
+ 
+    }
+    
+    func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
+        let handledShortCutItem = handleShortCutItem(shortcutItem)
+        completionHandler(handledShortCutItem)
+    }
+    
+    func handleShortCutItem(_ shortcutItem: UIApplicationShortcutItem) -> Bool {
+        guard ShortcutIdentifier(fullType: shortcutItem.type) != nil else { return false }
+        guard let shortCutType = shortcutItem.type as String? else { return false }
+        
+        switch shortCutType {
+        case ShortcutIdentifier.letOrder.type:
+            NotificationCenter.default.post(name: .didOpenApplicationFromLetOrderShortCutNotification, object: nil)
+            return true
+        case ShortcutIdentifier.myOrder.type:
+//            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+//            let rootVC = storyboard.instantiateViewController(withIdentifier: "HomeViewController") as! UIBackgroundTabBarController
+//            rootVC.tabBarController!.selectedViewController = storyboard.instantiateViewController(withIdentifier: "myDrinks")
+//            let myOrderViewCOntroller = MyOrderViewController()
+//            myOrderViewCOntroller.revealViewController().pushFrontViewController(tabBarController, animated: true)
+//            let vc = storyboard.instantiateViewController(withIdentifier: "SWRevealController") //HomeViewController
+            //let tabBarController = rootVC.fr as? UITabBarController
+//            self.window?.rootViewController = rootVC
+
+            NotificationCenter.default.post(name: .didOpenApplicationFromMyOrderShortCutNotification, object: nil)
+            return true
+        default:
+            return false
+        }
     }
     
     func updateFacebookAndFirebaseInfo(){
@@ -237,6 +349,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         self.saveContext()
         killFirebaseObserver()
+        lastViewControllerOnQuick.set(nil, forKey: "lastViewControllerOnQuick")
     }
     
     func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {

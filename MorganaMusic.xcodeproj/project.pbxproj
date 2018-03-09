@@ -19,6 +19,8 @@
 		2A196855203F8A090036BDB9 /* LoadRemoteProducts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A196854203F8A090036BDB9 /* LoadRemoteProducts.swift */; };
 		2A1A5EC41ECCAD4500A0144A /* PaymentTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1A5EC31ECCAD4500A0144A /* PaymentTableViewCell.swift */; };
 		2A1A5EC61ECCB55600A0144A /* PaymentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1A5EC51ECCB55600A0144A /* PaymentViewController.swift */; };
+		2A1BF7912051841E00CA322A /* UIBackgroundTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1BF7902051841E00CA322A /* UIBackgroundTabBarController.swift */; };
+		2A1BF7932051898100CA322A /* UserPointsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1BF7922051898100CA322A /* UserPointsViewController.swift */; };
 		2A1D14EC1F644DDC00C2F5E2 /* QrReaderViewControllerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1D14EB1F644DDC00C2F5E2 /* QrReaderViewControllerViewController.swift */; };
 		2A1FEA161F9D02050064AF6C /* CompanyProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1FEA151F9D02050064AF6C /* CompanyProfileViewController.swift */; };
 		2A206B971F0B79990080235B /* FireBaseAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A206B961F0B79990080235B /* FireBaseAPI.swift */; };
@@ -131,6 +133,8 @@
 		2A196854203F8A090036BDB9 /* LoadRemoteProducts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadRemoteProducts.swift; sourceTree = "<group>"; };
 		2A1A5EC31ECCAD4500A0144A /* PaymentTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PaymentTableViewCell.swift; sourceTree = "<group>"; };
 		2A1A5EC51ECCB55600A0144A /* PaymentViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PaymentViewController.swift; sourceTree = "<group>"; };
+		2A1BF7902051841E00CA322A /* UIBackgroundTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIBackgroundTabBarController.swift; sourceTree = "<group>"; };
+		2A1BF7922051898100CA322A /* UserPointsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPointsViewController.swift; sourceTree = "<group>"; };
 		2A1D14EB1F644DDC00C2F5E2 /* QrReaderViewControllerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QrReaderViewControllerViewController.swift; sourceTree = "<group>"; };
 		2A1FEA151F9D02050064AF6C /* CompanyProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanyProfileViewController.swift; sourceTree = "<group>"; };
 		2A206B961F0B79990080235B /* FireBaseAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FireBaseAPI.swift; sourceTree = "<group>"; };
@@ -409,6 +413,8 @@
 				2AD430111F9F3869003B6E7A /* UserQrCodeViewController.swift */,
 				2AD430131F9F5DED003B6E7A /* UserCityAndBirthdayViewController.swift */,
 				2A9A7ADB1FAFC5C60085AA1F /* CreditsPaymentViewController.swift */,
+				2A1BF7902051841E00CA322A /* UIBackgroundTabBarController.swift */,
+				2A1BF7922051898100CA322A /* UserPointsViewController.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -738,6 +744,7 @@
 				2AFA98891EC1CE470007CA33 /* CartUserTableViewCell.swift in Sources */,
 				2ADD700D1F9E225100410DC9 /* CompanyParameters.swift in Sources */,
 				2AE35FA21E93F00F00DF453F /* LoginViewController.swift in Sources */,
+				2A1BF7932051898100CA322A /* UserPointsViewController.swift in Sources */,
 				2A1A5EC61ECCB55600A0144A /* PaymentViewController.swift in Sources */,
 				2A9B63BE1E96731B00862AC5 /* CoreData.swift in Sources */,
 				2A8576F71EC456E800D41949 /* CartViewController.swift in Sources */,
@@ -783,6 +790,7 @@
 				2A051E731F9D5F1900DADF00 /* CompanyParametersViewController.swift in Sources */,
 				2A6E266D1E9BFCF600C1FC64 /* User+CoreDataProperties.swift in Sources */,
 				2A6971231EB9D9A20036E3C5 /* OrderViewController.swift in Sources */,
+				2A1BF7912051841E00CA322A /* UIBackgroundTabBarController.swift in Sources */,
 				2A196851203F42A30036BDB9 /* NetworkStatus.swift in Sources */,
 				2A53AB6D1EB135D60018B8E9 /* InitialSliderViewController.swift in Sources */,
 				2A56BC001F97584D00C72860 /* CacheImage.swift in Sources */,
