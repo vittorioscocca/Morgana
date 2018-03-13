@@ -90,10 +90,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //Firebase configuration
         FirebaseApp.configure()
         //Singleton initialization
+        _ = FirebaseData.sharedIstance
         _ = NetworkStatus.default
         _ = FacebookFriendsListManager.instance
         _ = LoadRemoteProducts.instance
         _ = OrdersListManager.instance
+        
         
         //Firebase push notification
         if #available(iOS 10.0, *) {
@@ -122,7 +124,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         application.registerForRemoteNotifications()
         
-        guard (( uidFB == nil) && (uidFiB == nil)) else{
+        guard (( uidFB == nil) && (uidFiB == nil) && lastViewControllerOnQuick.object(forKey: "lastViewControllerOnQuick") == nil) else{
             print("[DEBUG] Salto il login iniziale")
             MorganaMusicActivate()
             updateFacebookAndFirebaseInfo()
@@ -146,8 +148,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func MorganaMusicActivate(){
         //let vc = storybard.instantiateViewController(withIdentifier: "HomeViewController") //HomeViewController
         
-        if lastViewControllerOnQuick.object(forKey: "lastViewControllerOnQuick") != nil{
-            switch lastViewControllerOnQuick.object(forKey: "lastViewControllerOnQuick") as! Int {
+        if let lastController = lastViewControllerOnQuick.object(forKey: "lastViewControllerOnQuick") as? Int {
+            switch lastController {
             case 0:
                 NotificationCenter.default.post(name: .didOpenApplicationFromLetOrderShortCutNotification, object: nil)
             case 1:
@@ -164,7 +166,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             let vc = storyboard.instantiateViewController(withIdentifier: "SWRevealController") //HomeViewController
             self.window?.rootViewController = vc
         }
- 
     }
     
     func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
@@ -175,21 +176,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func handleShortCutItem(_ shortcutItem: UIApplicationShortcutItem) -> Bool {
         guard ShortcutIdentifier(fullType: shortcutItem.type) != nil else { return false }
         guard let shortCutType = shortcutItem.type as String? else { return false }
+        lastViewControllerOnQuick.set(nil, forKey: "lastViewControllerOnQuick")
         
         switch shortCutType {
         case ShortcutIdentifier.letOrder.type:
             NotificationCenter.default.post(name: .didOpenApplicationFromLetOrderShortCutNotification, object: nil)
             return true
         case ShortcutIdentifier.myOrder.type:
-//            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-//            let rootVC = storyboard.instantiateViewController(withIdentifier: "HomeViewController") as! UIBackgroundTabBarController
-//            rootVC.tabBarController!.selectedViewController = storyboard.instantiateViewController(withIdentifier: "myDrinks")
-//            let myOrderViewCOntroller = MyOrderViewController()
-//            myOrderViewCOntroller.revealViewController().pushFrontViewController(tabBarController, animated: true)
-//            let vc = storyboard.instantiateViewController(withIdentifier: "SWRevealController") //HomeViewController
-            //let tabBarController = rootVC.fr as? UITabBarController
-//            self.window?.rootViewController = rootVC
-
             NotificationCenter.default.post(name: .didOpenApplicationFromMyOrderShortCutNotification, object: nil)
             return true
         default:
@@ -202,7 +195,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         let fbToken = UserDefaults.standard
         let fbTokenString = fbToken.object(forKey: "FBToken") as? String
-        
         
         FBSDKGraphRequest(graphPath: "me", parameters: parameters, tokenString: fbTokenString, version: nil, httpMethod: "GET").start(completionHandler: {(connection,result, error) -> Void in
             if ((error) != nil){
@@ -254,7 +246,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        
         let badgeCount = 0
         
         UIApplication.shared.applicationIconBadgeNumber = badgeCount + 1
@@ -324,16 +315,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
-        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-        // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
         killFirebaseObserver()
-        
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
         // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
         //activeFirebaseObserver()
-        
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
@@ -475,8 +462,6 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         feedbackGenerator.notificationOccurred(.success)
     }
     
-    
-    
     func setCategories(){
         
         let deleteExpirationAction = UNNotificationAction(identifier: "delete.action",title: "Non ricordarlmelo più",options: [])
@@ -549,23 +534,23 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             })
             
             FirebaseData.sharedIstance.changeSchedulationBirthday(scheduledBirthdayNotification: scheduledNotification!, idApp: userIdApp!, notificationIdentifier: notificationIdentifier!)
+            
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let rootVC = storyboard.instantiateViewController(withIdentifier: "HomeViewController") as! UITabBarController
+            self.window!.rootViewController = rootVC
+            NotificationCenter.default.post(name: .didOpenApplicationFromUserPointsShortCutNotification, object: nil)
         default:
             break
         }
-        
         
         if let id = userInfo["identifier"] as? String  {
             if id == "OrderSent" || id == "Consuption" {
                 
                 //when tap on notification user go to view notification target
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                /*
-                 let tabBarViewChild = storyboard.instantiateViewController(withIdentifier: "OfferViewController")
-                 UpdateBadgeInfo.sharedIstance.updateBadgeInformations(nsArray: tabBarViewChild.tabBarController?.tabBar.items as NSArray!)*/
-                
                 let rootVC = storyboard.instantiateViewController(withIdentifier: "HomeViewController") as! UITabBarController
-                rootVC.selectedIndex = 2 // Index of the tab bar item you want to present, as shown in question it seems is item 2
                 self.window!.rootViewController = rootVC
+                NotificationCenter.default.post(name: .didOpenApplicationFromMyOrderShortCutNotification, object: nil)
             }
         }
         completionHandler()

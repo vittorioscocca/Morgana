@@ -54,7 +54,7 @@ class FirebaseData {
     var companies: [Company]
     var lastOrderSentReadedTimestamp = UserDefaults.standard
     var lastOrderReceivedReadedTimestamp = UserDefaults.standard
-    
+    private let ref = Database.database().reference()
     var paymentAutoId: String?
     
     var idOrder: [String]?
@@ -336,7 +336,6 @@ class FirebaseData {
     }
     
     func readCompaniesOnFireBase(onCompletion: @escaping ([Company]?)->()){
-        let ref = Database.database().reference()
         self.ordersSent.removeAll()
         
         ref.child("merchant").observeSingleEvent(of:.value, with: { (snap) in
@@ -398,7 +397,7 @@ class FirebaseData {
     //READ ORDERS ON FIREBASE
     func readOrdersSentOnFireBase(user: User, friendsList: [Friend]?,onCompletion: @escaping ([Order])->()){
         self.user = user
-        let ref = Database.database().reference()
+        
         self.ordersSent.removeAll()
         
         ref.child("ordersSent/" + (self.user?.idApp)!).observe(.value, with: { (snap) in
@@ -455,15 +454,15 @@ class FirebaseData {
                         if order.offerState != "Scaduta" {
                             self.scheduleExpiryNotification(order: order)
                             if self.serverTime == nil {
-                                ref.child("sessions").setValue(ServerValue.timestamp())
-                                ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
+                                self.ref.child("sessions").setValue(ServerValue.timestamp())
+                                self.ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
                                     let timeStamp = snap.value! as! TimeInterval
                                     self.serverTime = timeStamp
-                                    self.mangeExiredOffers(timeStamp: self.serverTime!, order: order, ref: ref)
+                                    self.mangeExiredOffers(timeStamp: self.serverTime!, order: order, ref: self.ref)
                                     
                                 })
                             }else {
-                                self.mangeExiredOffers(timeStamp: self.serverTime!, order: order, ref: ref)
+                                self.mangeExiredOffers(timeStamp: self.serverTime!, order: order, ref: self.ref)
                             }
                         }
                         
@@ -492,7 +491,7 @@ class FirebaseData {
     }
     
     private func manageExpirationOrder(order: Order){
-        let ref = Database.database().reference()
+        
         if order.offerState != "Scaduta" {
             ref.child("sessions").setValue(ServerValue.timestamp())
             ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
@@ -506,17 +505,23 @@ class FirebaseData {
                 dateFormatter.pmSymbol = "PM"
                 dateFormatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
                 let dateString = dateFormatter.string(from: date as Date)
-                let currentDate = dateFormatter.date(from: dateString)
-                self.lastOrderReceivedReadedTimestamp.set(currentDate!, forKey: "lastOrderReceivedReadedTimestamp")
+                guard let currentDate = dateFormatter.date(from: dateString) else {
+                    return
+                }
+                self.lastOrderReceivedReadedTimestamp.set(currentDate, forKey: "lastOrderReceivedReadedTimestamp")
                 
                 let date1Formatter = DateFormatter()
                 date1Formatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
                 date1Formatter.locale = Locale.init(identifier: "it_IT")
-                
-                let expirationDate = date1Formatter.date(from: order.expirationeDate!)
-                if expirationDate! < currentDate! {
-                    ref.child("ordersReceived/\((self.user?.idApp)!)/\((order.company?.companyId)!)/\(order.orderAutoId)").updateChildValues(["offerState" : "Scaduta"])
-                    ref.child("ordersSent/\((order.userSender?.idApp)!)/\((order.company?.companyId)!)/\(order.idOfferta!)").updateChildValues(["offerState" : "Scaduta"])
+                guard let expDay = order.expirationeDate else {
+                    return
+                }
+                guard let expirationDate = date1Formatter.date(from: expDay) else {
+                    return
+                }
+                if expirationDate < currentDate {
+                    self.ref.child("ordersReceived/\((self.user?.idApp)!)/\((order.company?.companyId)!)/\(order.orderAutoId)").updateChildValues(["offerState" : "Scaduta"])
+                    self.ref.child("ordersSent/\((order.userSender?.idApp)!)/\((order.company?.companyId)!)/\(order.idOfferta!)").updateChildValues(["offerState" : "Scaduta"])
                     order.offerState = "Scaduta"
                     let msg = "Il prodotto che hai offerto a \((self.user?.fullName)!) è scaduto"
                     NotificationsCenter.sendNotification(userDestinationIdApp: (order.userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
@@ -587,7 +592,7 @@ class FirebaseData {
     }
     
     func readOrderReceivedOnFireBase(user: User, onCompletion: @escaping ([Order])->()) {
-        let ref = Database.database().reference()
+        
         self.user = user
         ref.child("ordersReceived/" + (self.user?.idApp)!).observe(.value, with: { (snap) in
             // controllo che lo snap dei dati non sia vuoto
@@ -751,7 +756,7 @@ class FirebaseData {
     }
     
     func updateNumberPendingProductsOnFireBase(_ idAppUserDestination: String, recOrPurch: String){
-        let ref = Database.database().reference()
+        
         ref.child("users/" + idAppUserDestination).observeSingleEvent(of: .value, with: { (snap) in
             guard snap.exists() else {return}
             guard snap.value != nil else {return}
@@ -775,7 +780,7 @@ class FirebaseData {
                     break
                 }
             }
-            ref.child("users/"+idAppUserDestination).updateChildValues([badgeValueToUpdate : badgeValue + 1])
+            self.ref.child("users/"+idAppUserDestination).updateChildValues([badgeValueToUpdate : badgeValue + 1])
         })
     }
 

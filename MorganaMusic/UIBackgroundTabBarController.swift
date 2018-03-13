@@ -9,6 +9,7 @@
 import UIKit
 
 fileprivate extension UITabBarController {
+    
     func indexOfItem(withTag tag: Int) -> Int? {
         return tabBar.items?.index(where: { $0.tag == tag })
     }
@@ -128,7 +129,6 @@ class UIBackgroundTabBarController: UITabBarController {
         }
     }
     
-    
     @objc func setViewControllerForLetOrderShortCutNotification(){
         final.set(ViewControllerTags.order.rawValue, forKey: "selectedViewController")
     }
@@ -136,7 +136,6 @@ class UIBackgroundTabBarController: UITabBarController {
     @objc func setViewControllerForUserPointsShortCutNotification(){
         final.set(ViewControllerTags.userPoints.rawValue, forKey: "selectedViewController")
     }
-    
     
     @objc func setViewControllerMyOrderShortCutNotification(){
         
@@ -147,6 +146,4 @@ class UIBackgroundTabBarController: UITabBarController {
         
         final.set(ViewControllerTags.eventsViewController.rawValue, forKey: "selectedViewController")
     }
-    
-
 }

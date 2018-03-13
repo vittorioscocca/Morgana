@@ -83,11 +83,16 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                                                name: .OrdersListStateDidChange,
                                                object: nil)
         
-        self.ordersSent = OrdersListManager.instance.readOrdersList().ordersList.oredersSentList
-        self.ordersReceived = OrdersListManager.instance.readOrdersList().ordersList.oredersReceivedList
+        self.ordersSent = OrdersListManager.instance.readOrdersList().ordersList.ordersSentList
+        self.ordersReceived = OrdersListManager.instance.readOrdersList().ordersList.ordersReceivedList
         
         self.myTable.addSubview(refreshControl1)
         successView.isHidden = true
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+        resetLists()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -112,11 +117,18 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         self.firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")*/
     }
     
+    func resetLists() {
+        //ordersSent.removeAll()
+        //ordersReceived.removeAll()
+    }
+    
     @objc func OrdersListStateDidChange(){
         print("stato attuale Order list", OrdersListManager.instance.state)
         if case .loading = OrdersListManager.instance.state{
             myActivityIndicator.startAnimating()
-            //refreshControl1.beginRefreshing()
+            if !ordersSent.isEmpty {
+                resetLists()
+            }
             myTable.isUserInteractionEnabled = false
         } else {
             myActivityIndicator.stopAnimating()
@@ -129,10 +141,22 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         if case .success = OrdersListManager.instance.state{
             refreshControl1.endRefreshing()
             myTable.isUserInteractionEnabled = true
-            self.ordersSent.removeAll()
-            self.ordersReceived.removeAll()
-            self.ordersSent = OrdersListManager.instance.readOrdersList().ordersList.oredersSentList
-            self.ordersReceived = OrdersListManager.instance.readOrdersList().ordersList.oredersReceivedList
+            
+            
+            let orderSentList = OrdersListManager.instance.readOrdersList().ordersList.ordersSentList
+            let orderRiceivedList = OrdersListManager.instance.readOrdersList().ordersList.ordersReceivedList
+            resetLists()
+            self.ordersSent = orderSentList
+            self.ordersReceived = orderRiceivedList
+//            if (!orderSentList.isEmpty && !orderRiceivedList.isEmpty) || (orderSentList.isEmpty && orderRiceivedList.isEmpty) {
+//                resetLists()
+//                self.ordersSent = orderSentList
+//                self.ordersReceived = orderRiceivedList
+//            } else if !orderSentList.isEmpty && orderRiceivedList.isEmpty {
+//                self.ordersSent += orderSentList
+//            } else if orderSentList.isEmpty && !orderRiceivedList.isEmpty{
+//                self.ordersReceived += orderRiceivedList
+//            }
             myTable.reloadData()
         }
     }
@@ -428,7 +452,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
                 DispatchQueue.main.async(execute: {
                     if let cellToUpdate = tableView.cellForRow(at: indexPath) {
-                        (cellToUpdate as! OrderReceivedTableViewCell).friendImageView.image = image
+                        (cellToUpdate as? OrderReceivedTableViewCell)?.friendImageView.image = image
                     }
                 })
             })
@@ -471,6 +495,25 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
         }
     }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+//        if self.drinksList_segmentControl.selectedSegmentIndex == 0 {
+//            if indexPath.row == ordersSent.count - 1{
+//                FirebaseData.sharedIstance.updateOdersSentKeyMapCursor()
+//                if !FirebaseData.sharedIstance.ordersSentPaginationdFinish() {
+//                    OrdersListManager.instance.onlyOrderSentRequest()
+//                }
+//            }
+//        } else {
+//            if indexPath.row == ordersReceived.count - 1 {
+//                FirebaseData.sharedIstance.updateReceivedKeyMapCursor()
+//                if !FirebaseData.sharedIstance.ordersReceivedPaginationdFinish() {
+//                    OrdersListManager.instance.onlyOrderReceivedRequest()
+//                }
+//            }
+//        }
+    }
+
     
     private func scheduleRememberExpiryNotification(order: Order){
         let ref = Database.database().reference()
@@ -951,6 +994,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     @objc func handleRefresh(_ refreshControl: UIRefreshControl) {
         refreshControl.beginRefreshing()
         myTable.isUserInteractionEnabled = false
+        resetLists()
         OrdersListManager.instance.refreshOrdersList()
         self.productSendBadge.set(0, forKey: "paymentOfferedBadge")
         

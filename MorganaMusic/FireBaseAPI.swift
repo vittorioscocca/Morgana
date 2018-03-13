@@ -304,6 +304,28 @@ class FireBaseAPI {
         })
     }
     
+    class func readFromTo(node: String,  atValue: String, limit: UInt, child: String, onCompletion: @escaping (String?,[String:Any]?) -> ()){
+        let query = ref.child(node).queryOrdered(byChild: child).queryEnding(atValue: atValue).queryLimited(toLast: limit)
+        
+        query.observeSingleEvent(of: .value, with: { snap in
+            guard let snap_value = snap.value, snap.exists() else {
+                error = "Valore \(child) non trovato"
+                onCompletion(error,nil)
+                return
+            }
+            // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
+            let nodeDictionary = snap_value as! NSDictionary
+            dictionary = [:]
+            
+            // leggo i dati dell'ordine o offerte
+            
+            for (chiave,valore) in nodeDictionary {
+                dictionary?[chiave as! String] = valore
+            }
+            onCompletion(error,dictionary)
+        })
+    }
+    
     //update value
     class func updateNode (node: String, value: [String:Any]){
         ref.child(node).updateChildValues(value)
@@ -426,6 +448,12 @@ class FireBaseAPI {
             startingValue = self.findOffsetFromArray()
             
         }
+     ref.queryOrderedByKey().queryEnding(atValue: "last_fetched_element_key").queryLimited(toLast: limit).observeSingleEvent(of: .value, with: { snapshot in
+     
+     // Do stuff with this page of elements
+     //...
+     
+     })
         // sort records by pOrder fetch offset+1 records
         self.refHandler = postsRef.queryOrderedByChild("pOrder").queryStartingAtValue(startingValue).queryLimitedToFirst(kPostLimit + 1).observeEventType(FIRDataEventType.Value, withBlock: { (snapshot) in
             // flag is for setting the last record/ 21st as offset

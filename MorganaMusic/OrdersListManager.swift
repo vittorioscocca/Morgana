@@ -15,20 +15,20 @@ public extension NSNotification.Name {
 }
 
 class OrdersList {
-    private let oredersSentList: [Order]
-    private let oredersReceivedList: [Order]
+    private let ordersSentList: [Order]
+    private let ordersReceivedList: [Order]
     
     var isEmpty: Bool {
-        return oredersSentList.isEmpty && oredersReceivedList.isEmpty
+        return ordersSentList.isEmpty && ordersReceivedList.isEmpty
     }
     
-    fileprivate init(oredersSentList: [Order], oredersReceivedList: [Order]){
-        self.oredersSentList = oredersSentList
-        self.oredersReceivedList = oredersReceivedList
+    fileprivate init(ordersSentList: [Order], ordersReceivedList: [Order]){
+        self.ordersSentList = ordersSentList
+        self.ordersReceivedList = ordersReceivedList
     }
     
-    var ordersList :(oredersSentList:[Order],oredersReceivedList:[Order]) {
-        return (oredersSentList,oredersReceivedList)
+    var ordersList :(ordersSentList:[Order],ordersReceivedList:[Order]) {
+        return (ordersSentList,ordersReceivedList)
     }
 }
 
@@ -455,7 +455,7 @@ class OrdersListManager: NSObject {
             switch internalState{
             case .stop:
                 return .loading
-            case let .startUp(friendsList):
+            case .startUp:
                 return  .loading
             case let .error(_, error, _):
                 return .fatalError(error)
@@ -480,7 +480,7 @@ class OrdersListManager: NSObject {
     }
     
     public func readOrdersList()-> OrdersList {
-        return OrdersList(oredersSentList: internalState.ordersList.ordersSentList,
-                          oredersReceivedList: internalState.ordersList.ordersReceivedList)
+        return OrdersList(ordersSentList: internalState.ordersList.ordersSentList,
+                          ordersReceivedList: internalState.ordersList.ordersReceivedList)
     }
 }

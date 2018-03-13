@@ -234,11 +234,11 @@ class FacebookFriendsListManager: NSObject {
                 case let .stop(newFbTokenString, _), let .startUp(newFbTokenString), let .error(newFbTokenString, _, _), let .success(newFbTokenString, _, _, _):
                      if newFbTokenString != fbTokenString {
                         print("[FBFriendsListManager]: Request of contact list ignored: detected new credentials")
-                            if case .startUp = self.internalState {
-                                print("[FBFriendsListManager]: Detected new facebook credential in startup state: new request of facebook friends list started")
-                                self.requestContactList(freshness: freshness)
-                            }
-                            return
+                        if case .startUp = self.internalState {
+                            print("[FBFriendsListManager]: Detected new facebook credential in startup state: new request of facebook friends list started")
+                            self.requestContactList(freshness: freshness)
+                        }
+                        return
                     }
                 }
                 
