@@ -178,13 +178,13 @@ class FacebookFriendsListManager: NSObject {
         var description: String {
             switch self {
             case .stop:
-                return "[FBFriendsListManager]: STOP"
+                return "STOP"
             case .startUp:
-                return "[FBFriendsListManager]: STARTUP"
+                return "STARTUP"
             case .error:
-                return "[FBFriendsListManager]: ERROR"
+                return "ERROR"
             case .success:
-                return "[FBFriendsListManager]: SUCCESS"
+                return "SUCCESS"
             }
         }
         
@@ -345,6 +345,7 @@ class FacebookFriendsListManager: NSObject {
                 }
                 var fbList = [Friend]()
                 
+                print("[FBFriendsListManager]: dimensione array", dati.count)
                 for i in 0...(dati.count - 1) {
                     contFriends += 1
                     let valueDict: NSDictionary = dati[i] as! NSDictionary
@@ -393,7 +394,8 @@ class FacebookFriendsListManager: NSObject {
                         newFriend.cityOfRecidence = cityOfRecidence
                         
                         fbList.append(newFriend)
-                        if i == (dati.count - 1) {
+                        print("[FBFriendsListManager]: i: \(i), daticount: \(dati.count - 1)")
+                        if fbList.count == dati.count {
                             print("[FBFriendsListManager]: DIMENSIONE FRIENDSLIST \(fbList.count)")
                             completion(.success(fbList))
                         }

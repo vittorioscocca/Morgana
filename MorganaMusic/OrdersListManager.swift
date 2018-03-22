@@ -34,10 +34,10 @@ class OrdersList {
 
 class OrdersListManager: NSObject {
     public static let instance = OrdersListManager(dispatchQueue: DispatchQueue.main,
-                                                            networkStatus: NetworkStatus.default,
-                                                            notificationCenter: NotificationCenter.default,
-                                                            uiApplication: UIApplication.shared,
-                                                            facebookFriendsListManager: FacebookFriendsListManager.instance)
+                                                   networkStatus: NetworkStatus.default,
+                                                   notificationCenter: NotificationCenter.default,
+                                                   uiApplication: UIApplication.shared,
+                                                   facebookFriendsListManager: FacebookFriendsListManager.instance)
     
     private var dispatchQueue: DispatchQueue
     private var networkStatus: NetworkStatus
@@ -62,7 +62,7 @@ class OrdersListManager: NSObject {
         internalState = OrdersListManager.setInitialState(friendslist: friendsList,networkStatus: networkStatus)
         self.userId = fireBaseToken.object(forKey: "FireBaseToken") as? String
         self.user = CoreDataController.sharedIstance.findUserForIdApp(userId)
-    
+        
         super.init()
         
         self.notificationCenter.addObserver(self,
@@ -91,7 +91,7 @@ class OrdersListManager: NSObject {
     private static func setInitialState(friendslist: [Friend], networkStatus: NetworkStatus) -> InternalState {
         
         if !friendslist.isEmpty && networkStatus.online{
-                return .startUp(friendslist)
+            return .startUp(friendslist)
         }
         return .stop(friendslist, online: networkStatus.online)
     }
@@ -139,7 +139,7 @@ class OrdersListManager: NSObject {
                 }
                 else if newFriendsList != friendsList {
                     if online {
-                        print("[OrdersListManager]: New credentials detected, starting up with new credentials")
+                        print("[OrdersListManager]: New Friends List detected, starting up with new credentials")
                         self.setInternalState(.startUp(newFriendsList))
                     }
                     else {
@@ -240,13 +240,13 @@ class OrdersListManager: NSObject {
         var description: String {
             switch self {
             case .stop:
-                return "[OrdersListManager]: STOP"
+                return "STOP"
             case .startUp:
-                return "[OrdersListManager]: STARTUP"
+                return "STARTUP"
             case .error:
-                return "[OrdersListManager]: ERROR"
+                return "ERROR"
             case .success:
-                return "[OrdersListManager]: SUCCESS"
+                return "SUCCESS"
             }
         }
         
@@ -292,6 +292,7 @@ class OrdersListManager: NSObject {
             print("[OrdersListManager]: Request of contact list ignored in state: \(internalState)")
             
         case let .startUp(friendsList), let .error(friendsList, _, _), .success(let friendsList, _, _, _, true):
+            guard pendingRequests == 0 else {return}
             connectToFirebase(freshness: freshness, currentFriendsList: friendsList, completion: { (outcome) in
                 switch self.internalState {
                 case let .stop(newFriendsList, _), let .startUp(newFriendsList), let .error(newFriendsList, _, _), let .success(newFriendsList, _, _, _, _):
@@ -404,11 +405,13 @@ class OrdersListManager: NSObject {
         else if case .fresh = freshness {
             FirebaseData.sharedIstance.readOrdersSentOnFireBase(user: self.user!, friendsList: currentFriendsList, onCompletion: { (ordersSent) in
                 FirebaseData.sharedIstance.readOrderReceivedOnFireBase(user: self.user!, onCompletion: { (ordersReceived) in
-                    self.pendingRequests -= 1
-                    print("[OrdersListManager]: Pendig request with freshness level \(freshness), served!. Actual pending requests: \(self.pendingRequests)")
-                    self.dispatchQueue.async {
-                        print("[OrdersListManager]: Server Contact List state did change")
-                        self.notificationCenter.post(name: .OrdersListStateDidChange, object: self)
+                    if self.pendingRequests > 0 {
+                        self.pendingRequests -= 1
+                        print("[OrdersListManager]: Pendig request with freshness level \(freshness), served!. Actual pending requests: \(self.pendingRequests)")
+                        self.dispatchQueue.async {
+                            print("[OrdersListManager]: Server Contact List state did change")
+                            self.notificationCenter.post(name: .OrdersListStateDidChange, object: self)
+                        }
                     }
                     completion(.success(self.deleteClimbedOrder(ordersSent: ordersSent), self.getClimbedOrders(ordersReceived: ordersReceived)))
                 })
@@ -484,3 +487,4 @@ class OrdersListManager: NSObject {
                           ordersReceivedList: internalState.ordersList.ordersReceivedList)
     }
 }
+
