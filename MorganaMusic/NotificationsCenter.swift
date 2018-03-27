@@ -234,18 +234,14 @@ class NotificationsCenter{
         })
     }
 
-        
-        
-    
-    
-    class func localNotification(title: String, body: String) {
+    class func pointsNotification(title: String, body: String) {
         let center = UNUserNotificationCenter.current()
         let content = UNMutableNotificationContent()
         
         content.title = title
         content.body = body
         content.categoryIdentifier = "alert"
-        content.userInfo = ["gcm.message_id": "LocalAlert"]
+        content.userInfo = ["identifier": "CumulatedPoints"]
         content.sound = UNNotificationSound.default()
         //content.subtitle = "Lets code,Talk is cheap"
         //To Present image in notification 

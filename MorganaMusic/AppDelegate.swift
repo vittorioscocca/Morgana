@@ -405,7 +405,7 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         print("Will Present")
         // Print full message.
         print("%@", userInfo)
-        print("Message ID: \(userInfo["gcm.message_id"]!)")
+        print("Message ID: \(userInfo["identifier"]!)")
         
         //Local Notification
         if notification.request.identifier == "LocalAlert"{
@@ -416,19 +416,19 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             completionHandler( [.alert,.sound,.badge])
         }
         //Local Notification
-        if userInfo["gcm.message_id"] as! String == "expiratedOrder"{
+        if userInfo["identifier"] as! String == "expiratedOrder"{
             print(notification.request.identifier)
             completionHandler( [.alert,.sound,.badge])
         }
         
         //Local Notification
-        if userInfo["gcm.message_id"] as! String == "expiratedOrder"{
+        if userInfo["identifier"] as! String == "expiratedOrder"{
             print(notification.request.identifier)
             completionHandler( [.alert,.sound,.badge])
         }
         
         //Local Notification
-        if userInfo["gcm.message_id"] as! String == "birthdayNotification"{
+        if userInfo["identifier"] as! String == "birthdayNotification"{
             print(notification.request.identifier)
             completionHandler( [.alert,.sound,.badge])
         }
@@ -479,10 +479,6 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         print("Did Receive")
         let userInfo = response.notification.request.content.userInfo
-        // Print message ID.
-        if let messageID = userInfo[gcmMessageIDKey] {
-            print("Message ID: \(messageID)")
-        }
         
         // Print full message.
         print(userInfo)
@@ -544,13 +540,14 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         }
         
         if let id = userInfo["identifier"] as? String  {
-            if id == "OrderSent" || id == "Consuption" {
-                
-                //when tap on notification user go to view notification target
-                let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                let rootVC = storyboard.instantiateViewController(withIdentifier: "HomeViewController") as! UITabBarController
-                self.window!.rootViewController = rootVC
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let rootVC = storyboard.instantiateViewController(withIdentifier: "HomeViewController") as! UITabBarController
+            self.window!.rootViewController = rootVC
+            
+            if id == "OrderSent" || id == "Consuption" || id == "OrderAction" {
                 NotificationCenter.default.post(name: .didOpenApplicationFromMyOrderShortCutNotification, object: nil)
+            } else if id == "CumulatedPoints" {
+                NotificationCenter.default.post(name: .didOpenApplicationFromUserPointsShortCutNotification, object: nil)
             }
         }
         completionHandler()
