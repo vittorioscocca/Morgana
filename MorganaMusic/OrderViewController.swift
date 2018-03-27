@@ -300,7 +300,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
     
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        if (sectionTitle[indexPath.section] == sectionTitle[1]) {
+        if (sectionTitle[indexPath.section] == sectionTitle[2]) {
             if indexPath.row < (Order.sharedIstance.prodotti?.count)! - 1{
                 return true
             }

@@ -56,10 +56,12 @@ class FirebaseData {
     var lastOrderSentReadedTimestamp = UserDefaults.standard
     var lastOrderReceivedReadedTimestamp = UserDefaults.standard
     private let ref = Database.database().reference()
-    var paymentAutoId: String?
+    private var paymentAutoId: String?
     
     private let companyID = "mr001"
-    var firstKnownKey: String? = nil
+    private let dimPageScroll: UInt = 10
+    private var firstKnownKeyOrderSent: String?
+    private var firstKnownKeyOrderReceived: String?
     
     var idOrder: [String]?
     
@@ -71,6 +73,8 @@ class FirebaseData {
         idOrder = [String]()
         companies = [Company]()
         friendList = [Friend]()
+        firstKnownKeyOrderSent = nil
+        firstKnownKeyOrderReceived = nil
         notificationCenter = NotificationCenter.default
     }
     
@@ -114,7 +118,6 @@ class FirebaseData {
     }
     
     private func saveOrdersSentOnFireBase (badgeValue: Int?, order: Order, onCompletion: @escaping ()->()){
-        
         order.orderAutoId = FireBaseAPI.setId(node: "ordersSent/\((self.user?.idApp)!)/\((order.company?.companyId)!)")
         order.ordersSentAutoId = FireBaseAPI.setId(node: "ordersReceived/\((order.userDestination?.idApp)!)/\((order.company?.companyId)!)")
         
@@ -136,7 +139,6 @@ class FirebaseData {
     func saveCartOnFirebase(user: User, badgeValue: Int?,  onCompletion: @escaping ()->()){
         self.user = user
         var workItems = [DispatchWorkItem]()
-        
         
         for order in Cart.sharedIstance.carrello{
             self.paymentAutoId = FireBaseAPI.setId(node: "pendingPayments/\((self.user?.idApp)!)/\((order.company?.companyId)!)")
@@ -242,7 +244,6 @@ class FirebaseData {
     }
     
     private func saveOrderOnFirebase(orderDetails: [String:Any],companyId: String,onCompletion: @escaping ()->()) {
-        
         FireBaseAPI.saveNodeOnFirebase(node: "ordersReceived/\(orderDetails["IdAppUserDestination"]! as! String)/\(companyId)/\(orderDetails["autoId"] as! String)", dictionaryToSave: orderDetails, onCompletion: { (error) in
             guard error == nil else {
                 print("read error on Firebase")
@@ -404,29 +405,29 @@ class FirebaseData {
             let order: Order = Order(prodotti: [], userDestination: UserDestination(nil,nil,nil,nil,nil), userSender: UserDestination(nil,nil,nil,nil,nil))
             order.company?.companyId = self.companyID //companyId as? String
             order.idOfferta = id_offer as? String
-            print("*******",id_offer)
-            
             
             order.orderAutoId = (id_offer as? String)!
-            let orderDataDictionary = orderData as? NSDictionary
+            guard let orderDataDictionary = orderData as? NSDictionary else {
+                return
+            }
             
             //filtering deleted data
-            if orderDataDictionary?["viewState"] as? String != "deleted" {
-                order.expirationeDate = orderDataDictionary?["expirationDate"] as? String
-                order.paymentState = orderDataDictionary?["paymentState"] as? String
-                order.offerState = orderDataDictionary?["offerState"] as? String
-                order.userDestination?.idFB = orderDataDictionary?["facebookUserDestination"] as? String
-                order.dataCreazioneOfferta = orderDataDictionary?["offerCreationDate"] as? String
-                order.userDestination?.idApp = orderDataDictionary?["IdAppUserDestination"] as? String
-                order.timeStamp = orderDataDictionary?["timestamp"] as! TimeInterval
-                order.pendingPaymentAutoId = orderDataDictionary?["pendingPaymentAutoId"] as! String
-                order.ordersSentAutoId = orderDataDictionary?["ordersSentAutoId"] as! String
-                order.userSender?.idApp = orderDataDictionary?["userSender"] as? String
-                order.orderNotificationIsScheduled = orderDataDictionary?["orderNotificationIsScheduled"] as? Bool
-                order.consumingDate = orderDataDictionary?["consumingDate"] as? String
-                order.viewState = orderDataDictionary?["viewState"] as? String
+            if orderDataDictionary["viewState"] as? String != "deleted" {
+                order.expirationeDate = orderDataDictionary["expirationDate"] as? String
+                order.paymentState = orderDataDictionary["paymentState"] as? String
+                order.offerState = orderDataDictionary["offerState"] as? String
+                order.userDestination?.idFB = orderDataDictionary["facebookUserDestination"] as? String
+                order.dataCreazioneOfferta = orderDataDictionary["offerCreationDate"] as? String
+                order.userDestination?.idApp = orderDataDictionary["IdAppUserDestination"] as? String
+                order.timeStamp = orderDataDictionary["timestamp"] as! TimeInterval
+                order.pendingPaymentAutoId = orderDataDictionary["pendingPaymentAutoId"] as! String
+                order.ordersSentAutoId = orderDataDictionary["ordersSentAutoId"] as! String
+                order.userSender?.idApp = orderDataDictionary["userSender"] as? String
+                order.orderNotificationIsScheduled = orderDataDictionary["orderNotificationIsScheduled"] as? Bool
+                order.consumingDate = orderDataDictionary["consumingDate"] as? String
+                order.viewState = orderDataDictionary["viewState"] as? String
                 
-                if  orderDataDictionary?["orderReaded"] as? String == "true"{
+                if  orderDataDictionary["orderReaded"] as? String == "true"{
                     order.orderReaded = true
                 } else {
                     order.orderReaded = false
@@ -482,15 +483,7 @@ class FirebaseData {
         }
         
         self.ordersSent.sort(by: {self.timestampTodateObject(timestamp: $0.timeStamp) > self.timestampTodateObject(timestamp: $1.timeStamp)})
-        
-        
-        self.firstKnownKey = self.ordersSent.last?.idOfferta
-        
-        
-        for elem in self.ordersSent {
-            print("\n \n \n")
-            print("******* \(elem.idOfferta!)")
-        }
+        self.firstKnownKeyOrderSent = self.ordersSent.last?.idOfferta
         
         self.readProductsSentDetails(ordersToRead: self.ordersSent, onCompletion: {
             self.notificationCenter.post(name: .FireBaseDataUserReadedNotification, object: nil)
@@ -498,17 +491,17 @@ class FirebaseData {
         })
     }
     
-    //Pagination
+    //Reload for infinitive scroll
     func readOrdersSentOnFireBaseRange(user: User, onCompletion: @escaping ([Order])->()){
-        guard let checkFirstKnowKey = firstKnownKey else {
+        guard let checkFirstKnowKey = firstKnownKeyOrderSent else {
             return
         }
         self.user = user
-
+        
         ref.child("ordersSent/" + (self.user?.idApp)!+"/\(companyID)")
             .queryOrderedByKey()
             .queryEnding(atValue: checkFirstKnowKey)
-            .queryLimited(toLast: 15)
+            .queryLimited(toLast: self.dimPageScroll)
             .observe(.value, with: { (snap) in
                 
                 guard snap.exists() else {return}
@@ -523,7 +516,7 @@ class FirebaseData {
                 self.readOrderSentDictionary(orderDictionary: orderDictionary, onCompletion: { (orderSent) in
                     onCompletion(self.ordersSent)
                 })
-        })
+            })
     }
     
     //READ ORDERS ON FIREBASE
@@ -534,7 +527,7 @@ class FirebaseData {
         
         ref.child("ordersSent/" + (self.user?.idApp)!+"/\(companyID)")
             .queryOrderedByKey()
-            .queryLimited(toLast: 15)
+            .queryLimited(toLast: self.dimPageScroll)
             .observe(.value, with: { (snap) in
                 
                 guard snap.exists() else {
@@ -556,7 +549,6 @@ class FirebaseData {
     }
     
     private func manageExpirationOrder(order: Order){
-        
         if order.offerState != "Scaduta" {
             ref.child("sessions").setValue(ServerValue.timestamp())
             ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
@@ -598,9 +590,8 @@ class FirebaseData {
         }
     }
     
-    private func readOrder(order:Order,controlExpirationDate: Bool, dataOrder: NSDictionary) {
-        
-        for (chiave,valore) in dataOrder {
+    private func readOrderData(order: Order,orderDataDictionary: NSDictionary) -> Order {
+        for (chiave,valore) in orderDataDictionary {
             switch chiave as! String {
             case "expirationDate":
                 order.expirationeDate = valore as? String
@@ -650,73 +641,121 @@ class FirebaseData {
                 break
             }
         }
-        if controlExpirationDate {
-            self.manageExpirationOrder(order: order)
-        }
-        
+        return order
     }
     
-    func readOrderReceivedOnFireBase(user: User, onCompletion: @escaping ([Order])->()) {
+    private func readOrderReceivedDictionary(dataOrder: NSDictionary, onCompletion: @escaping ([Order])->()) {
         
-        self.user = user
-        ref.child("ordersReceived/" + (self.user?.idApp)!).observe(.value, with: { (snap) in
-            // controllo che lo snap dei dati non sia vuoto
-            guard snap.exists() else {
-                onCompletion([])
-                return}
-            guard snap.value != nil else {
-                onCompletion([])
-                return
+        ref.child("ordersReceived/" + (self.user?.idApp)! + "/\(companyID)/scanningQrCode").observeSingleEvent(of: .value, with: { (snap) in
+            if (snap.value as? Bool)! == true {
+                let activeViewController = UIApplication.topViewController(UIApplication.shared.keyWindow?.rootViewController?.childViewControllers[1])
+                if activeViewController is QROrderGenerationViewController {
+                    (activeViewController as! QROrderGenerationViewController).unwind()
+                }
+                FireBaseAPI.updateNode(node: "ordersReceived/\((self.user?.idApp)!)/\(self.companyID)", value: ["scanningQrCode":false])
             }
-            
-            self.ordersReceived.removeAll()
-            
-            // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
-            let dizionario_offerte = snap.value! as! NSDictionary
-            
-            for (companyId,dataOrder) in dizionario_offerte {
+        })
+        
+        var order: Order = Order(prodotti: [], userDestination: UserDestination(nil,nil,nil,nil,nil), userSender: UserDestination(nil,nil,nil,nil,nil))
+        
+        for (orderId, dati_pendingOffers) in dataOrder {
+            if orderId as? String != "scanningQrCode" {
+                order = Order(prodotti: [], userDestination: UserDestination(nil,nil,nil,nil,nil), userSender: UserDestination(nil,nil,nil,nil,nil))
+                order.company?.companyId = self.companyID
+                order.orderAutoId = orderId as! String
                 
-                // leggo i dati dell'ordine o offerte
-                var order: Order = Order(prodotti: [], userDestination: UserDestination(nil,nil,nil,nil,nil), userSender: UserDestination(nil,nil,nil,nil,nil))
-                
-                for (orderId, dati_pendingOffers) in dataOrder as! NSDictionary {
-                    if orderId as? String != "scanningQrCode" {
-                        order = Order(prodotti: [], userDestination: UserDestination(nil,nil,nil,nil,nil), userSender: UserDestination(nil,nil,nil,nil,nil))
-                        order.company?.companyId = companyId as? String
-                        order.orderAutoId = orderId as! String
-                        self.readOrder(order: order,controlExpirationDate: true, dataOrder: dati_pendingOffers as! NSDictionary)
-                        if order.viewState != "deleted" {
-                            if order.paymentState == "Valid" && order.offerState != "Offerta rifiutata" && order.offerState != "Offerta inoltrata" {
-                                self.ordersReceived.append(order)
-                            }
-                            //if consumption is before expirationDate, scheduled notification is killed
-                            if order.offerState == "Offerta consumata" {
-                                //attenzione killa ogni volta che carica le offeerte, deve farlo una volta
-                                let center = UNUserNotificationCenter.current()
-                                center.removePendingNotificationRequests(withIdentifiers: ["expirationDate-"+order.idOfferta!,"RememberExpiration-"+order.idOfferta!])
-                                print("scheduled notification killed")
-                            }
-                        }
-                        
-                    } else if (dati_pendingOffers as? Bool)! == true {
-                        
-                        let activeViewController = UIApplication.topViewController(UIApplication.shared.keyWindow?.rootViewController?.childViewControllers[1])
-                        if activeViewController is QROrderGenerationViewController {
-                            (activeViewController as! QROrderGenerationViewController).unwind()
-                        }
-                        FireBaseAPI.updateNode(node: "ordersReceived/\((self.user?.idApp)!)/\(companyId)", value: ["scanningQrCode":false])
+                guard let orderDataDictionary = dati_pendingOffers as? NSDictionary else {
+                    return
+                }
+                order = readOrderData(order: order, orderDataDictionary: orderDataDictionary)
+                manageExpirationOrder(order: order)
+                if order.viewState != "deleted" {
+                    if order.paymentState == "Valid" && order.offerState != "Offerta rifiutata" && order.offerState != "Offerta inoltrata" {
+                        self.ordersReceived.append(order)
+                    }
+                    //if consumption is before expirationDate, scheduled notification is killed
+                    if order.offerState == "Offerta consumata" {
+                        //attenzione killa ogni volta che carica le offeerte, deve farlo una volta
+                        let center = UNUserNotificationCenter.current()
+                        center.removePendingNotificationRequests(withIdentifiers: ["expirationDate-"+order.idOfferta!,"RememberExpiration-"+order.idOfferta!])
+                        print("scheduled notification killed")
                     }
                 }
+                
             }
-            self.ordersReceived.sort(by: {self.timestampTodateObject(timestamp: $0.timeStamp) > self.timestampTodateObject(timestamp: $1.timeStamp)})
-            
-            self.readUserSender(ordersToRead: self.ordersReceived, onCompletion: {
-                self.readProductsSentDetails(ordersToRead: self.ordersReceived, onCompletion: {
-                    self.notificationCenter.post(name: .FireBaseDataUserReadedNotification, object: nil)
+        }
+        
+        for order in self.ordersReceived {
+            self.ordersReceived = self.ordersReceived.filter({$0.timeStamp != order.timeStamp})
+            self.ordersReceived.append(order)
+        }
+        
+        self.ordersReceived.sort(by: {self.timestampTodateObject(timestamp: $0.timeStamp) > self.timestampTodateObject(timestamp: $1.timeStamp)})
+        
+        self.firstKnownKeyOrderReceived = self.ordersReceived.last?.idOfferta
+        
+        self.readUserSender(ordersToRead: self.ordersReceived, onCompletion: {
+            self.readProductsSentDetails(ordersToRead: self.ordersReceived, onCompletion: {
+                self.notificationCenter.post(name: .FireBaseDataUserReadedNotification, object: nil)
+                onCompletion(self.ordersReceived)
+            })
+        })
+    }
+    //Reload for infinitive scroll
+    func readOrdersReceivedOnFireBaseRange(user: User, onCompletion: @escaping ([Order])->()){
+        guard let checkFirstKnowKey = firstKnownKeyOrderReceived else {
+            return
+        }
+        self.user = user
+        
+        ref.child("ordersReceived/" + (self.user?.idApp)!+"/\(companyID)")
+            .queryOrderedByKey()
+            .queryEnding(atValue: checkFirstKnowKey)
+            .queryLimited(toLast: self.dimPageScroll)
+            .observe(.value, with: { (snap) in
+                
+                guard snap.exists() else {return}
+                guard snap.value != nil else {return}
+                //self.orders
+                guard let ordersDictionary = (snap.value! as? NSDictionary) else {
+                    return
+                }
+                guard ordersDictionary.count > 1 else {
+                    return
+                }
+                self.readOrderReceivedDictionary(dataOrder: ordersDictionary, onCompletion: { (orderReceived) in
                     onCompletion(self.ordersReceived)
                 })
             })
-        })
+    }
+    
+    func readOrderReceivedOnFireBase(user: User, onCompletion: @escaping ([Order])->()) {
+        self.user = user
+        self.ordersReceived.removeAll()
+        
+        ref.child("ordersReceived/" + (self.user?.idApp)!+"/\(companyID)")
+            .queryOrderedByKey()
+            .queryLimited(toLast: self.dimPageScroll)
+            .observe(.value, with: { (snap) in
+                // controllo che lo snap dei dati non sia vuoto
+                guard snap.exists() else {
+                    onCompletion([])
+                    return}
+                
+                guard snap.value != nil else {
+                    onCompletion([])
+                    return
+                }
+                self.ordersReceived.removeAll()
+                
+                // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
+                guard let ordersDictionary = snap.value as? NSDictionary else {
+                    return
+                }
+                self.readOrderReceivedDictionary(dataOrder: ordersDictionary, onCompletion: { (orderReceived) in
+                    onCompletion(self.ordersReceived)
+                })
+            })
     }
     
     func readSingleOrder (userId: String, companyId: String, orderId: String, onCompletion: @escaping ([Order])->()){
@@ -726,14 +765,16 @@ class FirebaseData {
                 print("Errore di connessione")
                 return
             }
-            guard dictionary != nil else {
+            guard let orderDictionary = dictionary as NSDictionary? else {
                 print("Errore di lettura del dell'Ordine richiesto")
                 return
             }
-            let order = Order(prodotti: [], userDestination: UserDestination(nil,nil,nil,nil,nil), userSender: UserDestination(nil,nil,nil,nil,nil))
+            
+            var order = Order(prodotti: [], userDestination: UserDestination(nil,nil,nil,nil,nil), userSender: UserDestination(nil,nil,nil,nil,nil))
             order.company?.companyId = companyId
             order.orderAutoId = orderId
-            self.readOrder(order: order, controlExpirationDate: false, dataOrder: dictionary! as NSDictionary)
+            order = self.readOrderData(order: order, orderDataDictionary: orderDictionary)
+            
             orders.append(order)
             self.readUserSender(ordersToRead: orders, onCompletion: {
                 self.readProductsSentDetails(ordersToRead: orders, onCompletion: {
@@ -750,24 +791,21 @@ class FirebaseData {
         
         print("Orders Received contiene \(self.ordersReceived.count) ordini")
         for singleOrder in ordersToRead{
-            node = "users/" + (singleOrder.userSender?.idApp)!
-            print("user sender letto", (singleOrder.userSender?.idApp)! )
-            
-            //dispatchGroup.enter()
-            //queue.async(group: dispatchGroup){
-            FireBaseAPI.readNodeOnFirebaseWithOutAutoIdHandler(node: node, beginHandler: {
-                dispatchGroup.enter()
-                queue.async(group: dispatchGroup){
-                    print("user letto", node)
-                }
-            }, completionHandler: {(error, userData) in
-                guard error == nil else {return}
-                guard userData != nil else {return}
-                singleOrder.userSender?.fullName = userData!["fullName"] as? String
-                singleOrder.userSender?.pictureUrl = userData!["pictureUrl"] as? String
-                dispatchGroup.leave()
-            })
-            //}
+            if let idApp = singleOrder.userSender?.idApp {
+                node = "users/" + idApp
+                FireBaseAPI.readNodeOnFirebaseWithOutAutoIdHandler(node: node, beginHandler: {
+                    dispatchGroup.enter()
+                    queue.async(group: dispatchGroup){
+                        print("user letto", node)
+                    }
+                }, completionHandler: {(error, userData) in
+                    guard error == nil else {return}
+                    guard userData != nil else {return}
+                    singleOrder.userSender?.fullName = userData!["fullName"] as? String
+                    singleOrder.userSender?.pictureUrl = userData!["pictureUrl"] as? String
+                    dispatchGroup.leave()
+                })
+            }
         }
         
         dispatchGroup.notify(queue: DispatchQueue.main) {
@@ -950,7 +988,6 @@ class FirebaseData {
         })
     }
     
-    
     func readUserCityOfRecidenceFromIdFB(node:String,  onCompletion: @escaping (String?,String?)->()){
         
         FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: node, onCompletion: { (error,dictionary) in
@@ -994,6 +1031,4 @@ class FirebaseData {
             print("Offerta crediti accettata e prossima Data di notifica  aggiornata al \(nextScheduledBirthdayNotification)")
         })
     }
-    
 }
-

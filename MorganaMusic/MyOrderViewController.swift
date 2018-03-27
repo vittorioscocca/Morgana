@@ -49,21 +49,17 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     var activityIndicator: UIActivityIndicatorView = UIActivityIndicatorView()
     var strLabel = UILabel()
     let effectView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
-    
-    private var willUpdate: Bool!
+    private var willUpdate = (orderSent: true, orderReceived: true)
     
     //forward action var
     var forwardOrder :Order?
     var oldFriendDestination: UserDestination?
-    
     var pendingPaymentId = String()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.myTable.dataSource = self
         self.myTable.delegate = self
-        
-        willUpdate = true
         
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
         navigationController?.navigationBar.shadowImage = UIImage()
@@ -98,43 +94,17 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     deinit {
         NotificationCenter.default.removeObserver(self)
-        resetLists()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
         self.updateSegmentControl()
-        //self.myTable.reloadData()
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        //OrdersListStateDidChange()
-    }
-    
-    //remove all observers utilized into controller
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        /*
-        FireBaseAPI.removeObserver(node: "users/" + (self.user?.idApp)!)
-        FireBaseAPI.removeObserver(node: "ordersSent/" + (self.user?.idApp)!)
-        FireBaseAPI.removeObserver(node: "orderReceived/" + (self.user?.idApp)!)
-        self.firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")*/
-    }
-    
-    func resetLists() {
-        //ordersSent.removeAll()
-        //ordersReceived.removeAll()
     }
     
     @objc func OrdersListStateDidChange(){
         print("stato attuale Order list", OrdersListManager.instance.state)
         if case .loading = OrdersListManager.instance.state{
             myActivityIndicator.startAnimating()
-            if !ordersSent.isEmpty {
-                resetLists()
-            }
             myTable.isUserInteractionEnabled = false
         } else {
             myActivityIndicator.stopAnimating()
@@ -147,23 +117,11 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         if case .success = OrdersListManager.instance.state{
             refreshControl1.endRefreshing()
             myTable.isUserInteractionEnabled = true
-            
-            
             let orderSentList = OrdersListManager.instance.readOrdersList().ordersList.ordersSentList
             let orderRiceivedList = OrdersListManager.instance.readOrdersList().ordersList.ordersReceivedList
-            resetLists()
-            willUpdate = true
-            self.ordersSent = orderSentList
-            self.ordersReceived = orderRiceivedList
-//            if (!orderSentList.isEmpty && !orderRiceivedList.isEmpty) || (orderSentList.isEmpty && orderRiceivedList.isEmpty) {
-//                resetLists()
-//                self.ordersSent = orderSentList
-//                self.ordersReceived = orderRiceivedList
-//            } else if !orderSentList.isEmpty && orderRiceivedList.isEmpty {
-//                self.ordersSent += orderSentList
-//            } else if orderSentList.isEmpty && !orderRiceivedList.isEmpty{
-//                self.ordersReceived += orderRiceivedList
-//            }
+            willUpdate = (orderSent: true, orderReceived: true)
+            ordersSent = orderSentList
+            ordersReceived = orderRiceivedList
             myTable.reloadData()
         }
     }
@@ -505,25 +463,26 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if self.drinksList_segmentControl.selectedSegmentIndex == 0 {
-            print("ecccooocococ indexPath: \(indexPath.row)")
-            if indexPath.row == ordersSent.count - 2 && willUpdate{
+            if indexPath.row == ordersSent.count - 2 && willUpdate.orderSent {
                 FirebaseData.sharedIstance.readOrdersSentOnFireBaseRange(user: self.user!, onCompletion: { (order) in
-                    print("ecccooocococ  \(self.ordersSent.count) e \(order.count)")
                     guard self.ordersSent.count < order.count else {
-                        print("ecccooocococ esco ")
-                        self.willUpdate = false
+                        self.willUpdate.orderSent = false
                         return
                     }
                     self.ordersSent = order
                     self.myTable.reloadData()
-                    print("ecccooocococ  reload")
                 })
             }
         } else {
-            if indexPath.row == ordersReceived.count - 2 {
-               
-                //OrdersListManager.instance.refreshOrdersList()
-                
+            if indexPath.row == ordersReceived.count - 2 && willUpdate.orderReceived {
+                FirebaseData.sharedIstance.readOrdersReceivedOnFireBaseRange(user: self.user!, onCompletion: { (order) in
+                    guard self.ordersReceived.count < order.count else {
+                        self.willUpdate.orderReceived = false
+                        return
+                    }
+                    self.ordersReceived = order
+                    self.myTable.reloadData()
+                })
             }
         }
     }
@@ -749,11 +708,11 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         if  thisCell is OrderReceivedTableViewCell  {
             let orderReceived = self.ordersReceived[indexPath.row]
             if  orderReceived.offerState == "Offerta accettata" ||  orderReceived.offerState == "Offerta scalata" {
-                if self.drinksList_segmentControl.titleForSegment(at: 1) != "Ricevuti" {
+                if drinksList_segmentControl.titleForSegment(at: 1) != "Ricevuti" {
                     OrdersListManager.instance.refreshOrdersList()
                     print("ho aggiornato gli Ordini-Ricevuti da Firebase")
                 }
-                self.performSegue(withIdentifier: "segueToOrderDetails", sender: indexPath)
+                performSegue(withIdentifier: "segueToOrderDetails", sender: indexPath)
                 tableView.deselectRow(at: indexPath, animated: true)
                 
                 (thisCell as? OrderReceivedTableViewCell)?.cellReaded = true
@@ -767,14 +726,14 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 msg += "\nFai swipe sulla riga:\nAccetta o Rifiuta l'offerta"
                 self.generateAlert(title: "Guarda cosa ti ha offerto \((orderReceived.userSender?.fullName)!)", msg: msg, indexPath: indexPath )
             }
-            self.resetSegmentControl1()
+            resetSegmentControl1()
             
         }else if thisCell is OrderSentTableViewCell {
             let orderSent = self.ordersSent[indexPath.row]
             if (thisCell as! OrderSentTableViewCell).createDate.text == "Clicca per verificare il pagamento" {
-                self.startActivityIndicator("Processing...")
-                self.pendingPaymentId = orderSent.pendingPaymentAutoId
-                self.readAndSolvePendingPayPalPayment(order: orderSent,paymentId: pendingPaymentId){
+                startActivityIndicator("Processing...")
+                pendingPaymentId = orderSent.pendingPaymentAutoId
+                readAndSolvePendingPayPalPayment(order: orderSent,paymentId: pendingPaymentId){
                     print("Pending payments resolved")
                 }
                 tableView.deselectRow(at: indexPath, animated: true)
@@ -783,9 +742,9 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                     OrdersListManager.instance.refreshOrdersList()
                     print("ho aggiornato gli Ordini-Inviati da Firebase")
                 }
-                self.performSegue(withIdentifier: "segueToOrderOfferedDetails", sender: indexPath)
+                performSegue(withIdentifier: "segueToOrderOfferedDetails", sender: indexPath)
                 tableView.deselectRow(at: indexPath, animated: true)
-                self.resetSegmentControl0()
+                resetSegmentControl0()
             }
             (thisCell as? OrderSentTableViewCell)?.cellReaded = true
             FireBaseAPI.updateNode(node: "ordersSent/\((self.user?.idApp)!)/\((orderSent.company?.companyId)!)/\(orderSent.idOfferta!)", value: ["orderReaded" : "true"])
@@ -803,31 +762,25 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
         switch identifier {
         case "segueToOrderDetails":
-            guard let path = sender else {
-                return
-            }
+            guard let path = sender else {return}
             let offertaRicevuta = self.ordersReceived[(path as! IndexPath).row]
             (segue.destination as! QROrderGenerationViewController).offertaRicevuta = offertaRicevuta
-            (segue.destination as! QROrderGenerationViewController).user = self.user
+            (segue.destination as! QROrderGenerationViewController).user = user
             (segue.destination as! QROrderGenerationViewController).dataScadenza = offertaRicevuta.expirationeDate
-            
-            
-            guard self.ordersReceived[(path as! IndexPath).row].orderReaded == false else {
-                return
-            }
+            guard self.ordersReceived[(path as! IndexPath).row].orderReaded == false else {return}
             break
+            
         case "segueToOrderOfferedDetails":
-            guard let path = sender else {
-                return
-            }
+            guard let path = sender else {return}
             let orderSent = self.ordersSent[(path as! IndexPath).row]
             (segue.destination as! OrderSentDetailsViewController).offertaInviata = orderSent
             break
             
         case "segueToForwardToFriend":
             (segue.destination as! FriendsListViewController).segueFrom = "myDrinks"
-            (segue.destination as! FriendsListViewController).order = self.forwardOrder
+            (segue.destination as! FriendsListViewController).order = forwardOrder
             break
+            
         default:
             break
         }
@@ -837,12 +790,10 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         strLabel.removeFromSuperview()
         activityIndicator.removeFromSuperview()
         effectView.removeFromSuperview()
-        
         strLabel = UILabel(frame: CGRect(x: 50, y: 0, width: 170, height: 46))
         strLabel.text = title
         strLabel.font = UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
         strLabel.textColor = UIColor(white: 0.9, alpha: 0.7)
-        
         effectView.frame = CGRect(x: view.frame.midX - strLabel.frame.width/2, y: view.frame.midY - strLabel.frame.height/2 , width: 200, height: 46)
         effectView.layer.cornerRadius = 15
         effectView.layer.masksToBounds = true
@@ -1007,12 +958,11 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     @objc func handleRefresh(_ refreshControl: UIRefreshControl) {
         refreshControl.beginRefreshing()
         myTable.isUserInteractionEnabled = false
-        willUpdate = true
-        resetLists()
+        willUpdate = (orderSent: true, orderReceived: true)
         OrdersListManager.instance.refreshOrdersList()
-        self.productSendBadge.set(0, forKey: "paymentOfferedBadge")
+        productSendBadge.set(0, forKey: "paymentOfferedBadge")
         
-        (drinksList_segmentControl.selectedSegmentIndex == 0) ? self.productSendBadge.set(0, forKey: "paymentOfferedBadge") : self.productSendBadge.set(0, forKey: "productOfferedBadge")
+        (drinksList_segmentControl.selectedSegmentIndex == 0) ? self.productSendBadge.set(0, forKey: "paymentOfferedBadge") : productSendBadge.set(0, forKey: "productOfferedBadge")
         
         if firebaseObserverKilled.bool(forKey: "firebaseObserverKilled") {
             firebaseObserverKilled.set(false, forKey: "firebaseObserverKilled")
