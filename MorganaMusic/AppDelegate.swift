@@ -545,8 +545,8 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         
         if let id = userInfo["identifier"] as? String  {
             if id == "OrderSent" || id == "Consuption" {
-                
                 //when tap on notification user go to view notification target
+                //TODO: Find all target for notification
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
                 let rootVC = storyboard.instantiateViewController(withIdentifier: "HomeViewController") as! UITabBarController
                 self.window!.rootViewController = rootVC
