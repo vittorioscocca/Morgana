@@ -399,6 +399,39 @@ class FirebaseData {
         }
     }
     
+    private func deleteClimbedOrder(ordersSent: [Order])->[Order]{
+        var newProduct = [Product]()
+        
+        for order in ordersSent {
+            for product in order.prodotti!{
+                if product.productName?.range(of:"_climbed") == nil {
+                    newProduct.append(product)
+                }
+            }
+            order.prodotti = newProduct
+            newProduct.removeAll()
+        }
+        return ordersSent
+    }
+    
+    private func getClimbedOrders(ordersReceived: [Order])->[Order]{
+        var newProduct = [Product]()
+        
+        for order in ordersReceived {
+            for product in order.prodotti!{
+                if product.productName?.range(of:"_climbed") != nil && product.quantity != 0 {
+                    product.productName = product.productName?.replacingOccurrences(of: "_climbed", with: "", options: .regularExpression)
+                    newProduct.append(product)
+                }
+            }
+            if newProduct.count != 0 {
+                order.prodotti = newProduct
+            }
+            newProduct.removeAll()
+        }
+        return ordersReceived
+    }
+    
     func readOrderSentDictionary(orderDictionary: NSDictionary,onCompletion: @escaping ([Order])->()){
         
         for (id_offer, orderData) in orderDictionary {
@@ -514,7 +547,7 @@ class FirebaseData {
                     return
                 }
                 self.readOrderSentDictionary(orderDictionary: orderDictionary, onCompletion: { (orderSent) in
-                    onCompletion(self.ordersSent)
+                    onCompletion(self.deleteClimbedOrder(ordersSent: self.ordersSent))
                 })
             })
     }
@@ -543,7 +576,7 @@ class FirebaseData {
                     return
                 }
                 self.readOrderSentDictionary(orderDictionary: orderDictionary, onCompletion: { (orderSent) in
-                    onCompletion(self.ordersSent)
+                    onCompletion(self.deleteClimbedOrder(ordersSent: orderSent))
                 })
             })
     }
@@ -697,7 +730,7 @@ class FirebaseData {
         self.readUserSender(ordersToRead: self.ordersReceived, onCompletion: {
             self.readProductsSentDetails(ordersToRead: self.ordersReceived, onCompletion: {
                 self.notificationCenter.post(name: .FireBaseDataUserReadedNotification, object: nil)
-                onCompletion(self.ordersReceived)
+                onCompletion(self.getClimbedOrders(ordersReceived: self.ordersReceived))
             })
         })
     }
@@ -724,7 +757,7 @@ class FirebaseData {
                     return
                 }
                 self.readOrderReceivedDictionary(dataOrder: ordersDictionary, onCompletion: { (orderReceived) in
-                    onCompletion(self.ordersReceived)
+                    onCompletion(self.getClimbedOrders(ordersReceived: orderReceived))
                 })
             })
     }
@@ -753,7 +786,7 @@ class FirebaseData {
                     return
                 }
                 self.readOrderReceivedDictionary(dataOrder: ordersDictionary, onCompletion: { (orderReceived) in
-                    onCompletion(self.ordersReceived)
+                    onCompletion(orderReceived)
                 })
             })
     }
