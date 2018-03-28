@@ -84,6 +84,10 @@ class LoadRemoteProducts {
             guard dictionary != nil else {
                 return
             }
+            
+            self.productsList = [String]()
+            self.offersDctionary = [String : Double]()
+            
             for (prodotto, costo) in dictionary! {
                 if prodotto != "autoId" {
                     let prodottoConCosto = prodotto
