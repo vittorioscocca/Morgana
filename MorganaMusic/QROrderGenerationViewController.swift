@@ -167,7 +167,6 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
         imgQRCode.image = image
     }
     
-    
     func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         return 2
@@ -184,9 +183,7 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
         }else {
             return 1
         }
-        
     }
-    
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "orderCell", for: indexPath)

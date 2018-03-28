@@ -360,39 +360,6 @@ class OrdersListManager: NSObject {
     
     private var pendingRequests = 0
     
-    private func deleteClimbedOrder(ordersSent: [Order])->[Order]{
-        var newProduct = [Product]()
-        
-        for order in ordersSent {
-            for product in order.prodotti!{
-                if product.productName?.range(of:"_climbed") == nil {
-                    newProduct.append(product)
-                }
-            }
-            order.prodotti = newProduct
-            newProduct.removeAll()
-        }
-        return ordersSent
-    }
-    
-    private func getClimbedOrders(ordersReceived: [Order])->[Order]{
-        var newProduct = [Product]()
-        
-        for order in ordersReceived {
-            for product in order.prodotti!{
-                if product.productName?.range(of:"_climbed") != nil && product.quantity != 0 {
-                    product.productName = product.productName?.replacingOccurrences(of: "_climbed", with: "", options: .regularExpression)
-                    newProduct.append(product)
-                }
-            }
-            if newProduct.count != 0 {
-                order.prodotti = newProduct
-            }
-            newProduct.removeAll()
-        }
-        return ordersReceived
-    }
-    
     private func connectToFirebase(freshness: ContactListFreshness, currentFriendsList: [Friend], completion: @escaping (RequestOutcome) -> ()) {
         if  case .localCache = freshness{
             switch internalState{
@@ -413,7 +380,7 @@ class OrdersListManager: NSObject {
                             self.notificationCenter.post(name: .OrdersListStateDidChange, object: self)
                         }
                     }
-                    completion(.success(self.deleteClimbedOrder(ordersSent: ordersSent), self.getClimbedOrders(ordersReceived: ordersReceived)))
+                    completion(.success(ordersSent, ordersReceived))
                 })
             })
             pendingRequests += 1

@@ -1020,6 +1020,8 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                     FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase((self.oldFriendDestination?.idApp)!, recOrPurch: "received")
                 })
             })
+            break
+        case "unwindToMyDrinks":
             
             break
         default:
