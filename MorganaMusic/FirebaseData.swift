@@ -687,50 +687,49 @@ class FirebaseData {
                 }
                 FireBaseAPI.updateNode(node: "ordersReceived/\((self.user?.idApp)!)/\(self.companyID)", value: ["scanningQrCode":false])
             }
-        })
-        
-        var order: Order = Order(prodotti: [], userDestination: UserDestination(nil,nil,nil,nil,nil), userSender: UserDestination(nil,nil,nil,nil,nil))
-        
-        for (orderId, dati_pendingOffers) in dataOrder {
-            if orderId as? String != "scanningQrCode" {
-                order = Order(prodotti: [], userDestination: UserDestination(nil,nil,nil,nil,nil), userSender: UserDestination(nil,nil,nil,nil,nil))
-                order.company?.companyId = self.companyID
-                order.orderAutoId = orderId as! String
-                
-                guard let orderDataDictionary = dati_pendingOffers as? NSDictionary else {
-                    return
-                }
-                order = readOrderData(order: order, orderDataDictionary: orderDataDictionary)
-                manageExpirationOrder(order: order)
-                if order.viewState != "deleted" {
-                    if order.paymentState == "Valid" && order.offerState != "Offerta rifiutata" && order.offerState != "Offerta inoltrata" {
-                        self.ordersReceived.append(order)
+            var order: Order = Order(prodotti: [], userDestination: UserDestination(nil,nil,nil,nil,nil), userSender: UserDestination(nil,nil,nil,nil,nil))
+            
+            for (orderId, dati_pendingOffers) in dataOrder {
+                if orderId as? String != "scanningQrCode" {
+                    order = Order(prodotti: [], userDestination: UserDestination(nil,nil,nil,nil,nil), userSender: UserDestination(nil,nil,nil,nil,nil))
+                    order.company?.companyId = self.companyID
+                    order.orderAutoId = orderId as! String
+                    
+                    guard let orderDataDictionary = dati_pendingOffers as? NSDictionary else {
+                        return
                     }
-                    //if consumption is before expirationDate, scheduled notification is killed
-                    if order.offerState == "Offerta consumata" {
-                        //attenzione killa ogni volta che carica le offeerte, deve farlo una volta
-                        let center = UNUserNotificationCenter.current()
-                        center.removePendingNotificationRequests(withIdentifiers: ["expirationDate-"+order.idOfferta!,"RememberExpiration-"+order.idOfferta!])
-                        print("scheduled notification killed")
+                    order = self.readOrderData(order: order, orderDataDictionary: orderDataDictionary)
+                    self.manageExpirationOrder(order: order)
+                    if order.viewState != "deleted" {
+                        if order.paymentState == "Valid" && order.offerState != "Offerta rifiutata" && order.offerState != "Offerta inoltrata" {
+                            self.ordersReceived.append(order)
+                        }
+                        //if consumption is before expirationDate, scheduled notification is killed
+                        if order.offerState == "Offerta consumata" {
+                            //attenzione killa ogni volta che carica le offeerte, deve farlo una volta
+                            let center = UNUserNotificationCenter.current()
+                            center.removePendingNotificationRequests(withIdentifiers: ["expirationDate-"+order.idOfferta!,"RememberExpiration-"+order.idOfferta!])
+                            print("scheduled notification killed")
+                        }
                     }
+                    
                 }
-                
             }
-        }
-        
-        for order in self.ordersReceived {
-            self.ordersReceived = self.ordersReceived.filter({$0.timeStamp != order.timeStamp})
-            self.ordersReceived.append(order)
-        }
-        
-        self.ordersReceived.sort(by: {self.timestampTodateObject(timestamp: $0.timeStamp) > self.timestampTodateObject(timestamp: $1.timeStamp)})
-        
-        self.firstKnownKeyOrderReceived = self.ordersReceived.last?.idOfferta
-        
-        self.readUserSender(ordersToRead: self.ordersReceived, onCompletion: {
-            self.readProductsSentDetails(ordersToRead: self.ordersReceived, onCompletion: {
-                self.notificationCenter.post(name: .FireBaseDataUserReadedNotification, object: nil)
-                onCompletion(self.getClimbedOrders(ordersReceived: self.ordersReceived))
+            
+            for order in self.ordersReceived {
+                self.ordersReceived = self.ordersReceived.filter({$0.timeStamp != order.timeStamp})
+                self.ordersReceived.append(order)
+            }
+            
+            self.ordersReceived.sort(by: {self.timestampTodateObject(timestamp: $0.timeStamp) > self.timestampTodateObject(timestamp: $1.timeStamp)})
+            
+            self.firstKnownKeyOrderReceived = self.ordersReceived.last?.idOfferta
+            
+            self.readUserSender(ordersToRead: self.ordersReceived, onCompletion: {
+                self.readProductsSentDetails(ordersToRead: self.ordersReceived, onCompletion: {
+                    self.notificationCenter.post(name: .FireBaseDataUserReadedNotification, object: nil)
+                    onCompletion(self.getClimbedOrders(ordersReceived: self.ordersReceived))
+                })
             })
         })
     }
