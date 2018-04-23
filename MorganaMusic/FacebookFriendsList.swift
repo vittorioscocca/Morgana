@@ -42,10 +42,10 @@ class FacebookFriendsListManager: NSObject {
     private var notificationCenter: NotificationCenter
     private let uiApplication: UIApplication
     private static let requestRetryDelay: DispatchTimeInterval = DispatchTimeInterval.seconds(10)
-    private let fbTokenString: String?
+    private var fbTokenString: String?
     private var userId: String?
     private let fireBaseToken = UserDefaults.standard
-    private let user: User?
+    private var user: User?
     private var context: NSManagedObjectContext
 
     init(dispatchQueue: DispatchQueue, networkStatus: NetworkStatus, notificationCenter: NotificationCenter, uiApplication: UIApplication) {
@@ -73,6 +73,12 @@ class FacebookFriendsListManager: NSObject {
                                             name: .UIApplicationWillEnterForeground,
                                             object: uiApplication)
         
+        self.notificationCenter.addObserver(self,
+                                            selector: #selector(fbTokenDidChange),
+                                            name: .FbTokenDidChangeNotification,
+                                            object: nil)
+        
+        
         requestContactList(freshness: .fresh)
     }
     
@@ -86,6 +92,16 @@ class FacebookFriendsListManager: NSObject {
             return .startUp(fbCredentials)
         } else {
             return .stop("", online: networkStatus.online)
+        }
+    }
+    
+    @objc private func fbTokenDidChange(){
+        fbTokenString = UserDefaults.standard.object(forKey: "FBToken") as? String
+        if let fbCredentials = fbTokenString {
+            userId = fireBaseToken.object(forKey: "FireBaseToken") as? String
+            self.user = CoreDataController.sharedIstance.findUserForIdApp(userId)
+            setInternalState(.startUp(fbCredentials))
+            self.requestContactList(freshness: .fresh)
         }
     }
     

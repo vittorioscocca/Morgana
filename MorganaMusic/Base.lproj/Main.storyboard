@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
         <capability name="Alignment constraints to the first baseline" minToolsVersion="6.0"/>
         <capability name="Baseline standard spacing" minToolsVersion="9.0"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
@@ -354,7 +354,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Wzq-cM-N7W" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1295.2" y="-1117.6911544227887"/>
+            <point key="canvasLocation" x="1294.5" y="-1118.5"/>
         </scene>
         <!--Offri un drink!-->
         <scene sceneID="08j-ZE-JsK">
@@ -362,6 +362,7 @@
                 <navigationController title="Offri un drink!" id="q8S-sk-Ip6" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" tag="4" title="Offri" image="Offri Drinks" id="AB4-FA-vxc"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="kGO-So-1V7">
+                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <color key="barTintColor" red="0.74117647058823533" green="0.15294117647058825" blue="0.20784313725490194" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -384,6 +385,7 @@
                 <navigationController id="Twe-G4-k48" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" tag="2" title="I miei ordini" image="I miei Drinks" id="WHZ-dN-Gmt"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="OrU-1j-REL">
+                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <color key="barTintColor" red="0.74117647060000003" green="0.1529411765" blue="0.20784313730000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -1347,7 +1349,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="Ax7-NO-rJB">
-                                <rect key="frame" x="0.0" y="44" width="375" height="623"/>
+                                <rect key="frame" x="0.0" y="44" width="375" height="573.5"/>
                             </mapView>
                             <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="C3t-RO-CYH">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -1357,16 +1359,30 @@
                                     </navigationItem>
                                 </items>
                             </navigationBar>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cbg-Oi-Q8z">
+                                <rect key="frame" x="0.0" y="600.5" width="375" height="66.5"/>
+                                <color key="backgroundColor" red="0.61176470589999998" green="0.1176470588" blue="0.16862745100000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <state key="normal" title="REGISTRATI">
+                                    <color key="titleColor" red="0.99990516900000004" green="1" blue="0.99987047910000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="onCheckIn:" destination="OUB-LF-oAx" eventType="touchUpInside" id="IfR-8i-hHh"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="C3t-RO-CYH" firstAttribute="leading" secondItem="XHA-i2-ATG" secondAttribute="leading" id="5iN-24-ZWd"/>
-                            <constraint firstItem="aJU-sH-2ag" firstAttribute="top" secondItem="Ax7-NO-rJB" secondAttribute="bottom" id="AOL-zk-0YN"/>
                             <constraint firstItem="Ax7-NO-rJB" firstAttribute="leading" secondItem="XHA-i2-ATG" secondAttribute="leading" id="Eg2-ZK-lAD"/>
+                            <constraint firstAttribute="trailing" secondItem="cbg-Oi-Q8z" secondAttribute="trailing" id="HNe-Qa-I9J"/>
+                            <constraint firstItem="aJU-sH-2ag" firstAttribute="top" secondItem="cbg-Oi-Q8z" secondAttribute="bottom" id="MZE-fP-fPm"/>
                             <constraint firstAttribute="trailing" secondItem="C3t-RO-CYH" secondAttribute="trailing" id="RIm-g7-TNK"/>
                             <constraint firstAttribute="trailing" secondItem="Ax7-NO-rJB" secondAttribute="trailing" id="VCb-3Y-8uJ"/>
                             <constraint firstItem="Ax7-NO-rJB" firstAttribute="top" secondItem="C3t-RO-CYH" secondAttribute="bottom" id="gvX-BV-FYF"/>
+                            <constraint firstItem="cbg-Oi-Q8z" firstAttribute="firstBaseline" secondItem="Ax7-NO-rJB" secondAttribute="baseline" constant="22" symbolType="layoutAnchor" id="wAN-6O-ozv"/>
+                            <constraint firstItem="cbg-Oi-Q8z" firstAttribute="leading" secondItem="XHA-i2-ATG" secondAttribute="leading" id="wCi-sT-giy"/>
                             <constraint firstItem="C3t-RO-CYH" firstAttribute="top" secondItem="XHA-i2-ATG" secondAttribute="top" id="ybL-K2-D67"/>
+                            <constraint firstItem="cbg-Oi-Q8z" firstAttribute="height" secondItem="XHA-i2-ATG" secondAttribute="height" multiplier="0.1" id="yjF-t2-FDC"/>
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Map" image="Map" id="1rA-EI-ATG"/>
@@ -1377,7 +1393,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="2av-ni-Wtl" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1295" y="-2634"/>
+            <point key="canvasLocation" x="1293.5999999999999" y="-2634.3328335832084"/>
         </scene>
         <!--Il tuo profilo-->
         <scene sceneID="Vbw-99-meq">
@@ -2074,7 +2090,7 @@
                         <segue destination="uLa-7x-16s" kind="unwind" identifier="unwindToOffer" unwindAction="unwindToOffer:" id="UBb-Ww-xz4"/>
                         <segue destination="BI0-tg-3ae" kind="presentation" identifier="segueToPayement" id="Jc7-8B-p64"/>
                         <segue destination="uLa-7x-16s" kind="unwind" identifier="unwindToOfferFromCartWithoutData" unwindAction="unwindToOffer:" id="0jN-uM-Z1e"/>
-                        <segue destination="3lh-Az-WJQ" kind="showDetail" identifier="segueToCartOrderDetails" action="showViewController:sender:" id="8fp-Cv-Bie"/>
+                        <segue destination="3lh-Az-WJQ" kind="showDetail" identifier="segueToCartOrderDetails" id="8fp-Cv-Bie"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="IyU-7O-rPg" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -2894,7 +2910,7 @@
         <image name="userDefault" width="245" height="232"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="UQB-mz-UCf"/>
+        <segue reference="r3Q-88-d0j"/>
         <segue reference="OXA-AZ-LfE"/>
     </inferredMetricsTieBreakers>
 </document>

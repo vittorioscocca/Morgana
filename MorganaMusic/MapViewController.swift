@@ -56,10 +56,10 @@ class MapViewController: UIViewController, CLLocationManagerDelegate {
             
         }
         
-        self.readMerchantLocationFromFireBase(onCompletion:  {
+        self.readMerchantLocationFromFireBase(onCompletion:  { (coordinates) in
             
-            if self.merchantCoordinate.latitude != nil  && self.merchantCoordinate.longitude != nil{
-                self.merchantLocation = CLLocationCoordinate2D(latitude: self.merchantCoordinate.latitude!, longitude: self.merchantCoordinate.longitude!)
+            if coordinates.latitude != nil  && coordinates.longitude != nil {
+                self.merchantLocation = CLLocationCoordinate2D(latitude: coordinates.latitude!, longitude: coordinates.longitude!)
                 let annotion = MKPointAnnotation()
                 annotion.coordinate = self.merchantLocation!
                 annotion.title = "Morgana Music Club"
@@ -69,39 +69,71 @@ class MapViewController: UIViewController, CLLocationManagerDelegate {
         
     }
     
-    /* continuos updating locations
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        
-        
-        //if we have the coordinates from manager
-        if let location = locationManager.location?.coordinate{
-            
-            userLocation = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
-            
-            let region = MKCoordinateRegion(center: userLocation!, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
-            
-            myMap.setRegion(region, animated: true)
-            let annotion = MKPointAnnotation()
-            annotion.coordinate = userLocation!
-            annotion.title = "Your Position"
-            myMap.addAnnotation(annotion)
-            
-        }
-        
-        self.readMerchantLocationFromFireBase(onCompletion:  {
-            
-            if self.merchantCoordinate.latitude != nil  && self.merchantCoordinate.longitude != nil{
-                self.merchantLocation = CLLocationCoordinate2D(latitude: self.merchantCoordinate.latitude!, longitude: self.merchantCoordinate.longitude!)
-                let annotion = MKPointAnnotation()
-                annotion.coordinate = self.merchantLocation!
-                annotion.title = "Morgana Music Club"
-                self.myMap.addAnnotation(annotion)
+//    //continuos updating locations
+//    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+//
+//
+//        /*if we have the coordinates from manager
+//        if let location = locationManager.location?.coordinate{
+//
+//            userLocation = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
+//
+//
+//            let region = MKCoordinateRegion(center: userLocation!, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+//            myMap.setRegion(region, animated: true)
+//            let annotion = MKPointAnnotation()
+//            annotion.coordinate = userLocation!
+//            annotion.title = "Your Position"
+//            myMap.addAnnotation(annotion)
+//
+//        }*/
+//
+//        self.readMerchantLocationFromFireBase(onCompletion:  { (localCoordinates) in
+//            if let location = self.locationManager.location?.coordinate,
+//                localCoordinates.latitude != nil  && localCoordinates.longitude != nil
+//            {
+//                let userLocation = CLLocation(latitude: location.latitude, longitude: location.longitude)
+//                let merchantLocation = CLLocation(latitude: localCoordinates.latitude!, longitude: localCoordinates.longitude!)
+//                let distanceInMeters = userLocation.distance(from: merchantLocation)
+//                if distanceInMeters < 5 {
+//                    print("****** SI sei vicino")
+//                }else {
+//                    print("****** Troppo Lontano")
+//                }
+//            }
+//
+//
+//            /*
+//            let annotion = MKPointAnnotation()
+//            annotion.coordinate = self.merchantLocation!
+//            annotion.title = "Morgana Music Club"
+//            self.myMap.addAnnotation(annotion)*/
+//
+//        })
+//
+//    }
+    // manual merchant check-in
+    @IBAction func onCheckIn(_ sender: UIButton) {
+        readMerchantLocationFromFireBase(onCompletion:  { (localCoordinates) in
+            if let location = self.locationManager.location?.coordinate,
+                localCoordinates.latitude != nil  && localCoordinates.longitude != nil
+            {
+                let userLocation = CLLocation(latitude: location.latitude, longitude: location.longitude)
+                let merchantLocation = CLLocation(latitude: localCoordinates.latitude!, longitude: localCoordinates.longitude!)
+                let distanceInMeters = userLocation.distance(from: merchantLocation)
+                if distanceInMeters < 5 {
+                    print("****** SI sei vicino")
+                }else {
+                    print("****** Troppo Lontano")
+                }
             }
         })
-        
-    }*/
+            
+    }
     
-    private func readMerchantLocationFromFireBase (onCompletion: @escaping () -> ()){
+    
+    private func readMerchantLocationFromFireBase (onCompletion: @escaping( (latitude:CLLocationDegrees? ,longitude:CLLocationDegrees?)) -> ()){
+        var coordinates: (latitude:CLLocationDegrees? ,longitude:CLLocationDegrees?)
         FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "merchant/mr001", onCompletion:{ (error,dictionary) in
             guard error == nil else {
                 return
@@ -112,17 +144,17 @@ class MapViewController: UIViewController, CLLocationManagerDelegate {
             for (chiave,valore) in dictionary! {
                 switch chiave {
                 case "latitude":
-                    self.merchantCoordinate.latitude = valore as? CLLocationDegrees
+                    coordinates.latitude = valore as? CLLocationDegrees
                     
                     break
                 case "longitude":
-                    self.merchantCoordinate.longitude = valore as? CLLocationDegrees
+                    coordinates.longitude = valore as? CLLocationDegrees
                     break
                 default:
                     break
                 }
             }
-            onCompletion()
+            onCompletion(coordinates)
         })
     }
     

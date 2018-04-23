@@ -48,7 +48,7 @@ class OrdersListManager: NSObject {
     
     private var userId: String?
     private let fireBaseToken = UserDefaults.standard
-    private let user: User?
+    private var user: User?
     private var friendsList: [Friend]
     
     init(dispatchQueue: DispatchQueue, networkStatus: NetworkStatus, notificationCenter: NotificationCenter, uiApplication: UIApplication, facebookFriendsListManager: FacebookFriendsListManager) {
@@ -99,6 +99,8 @@ class OrdersListManager: NSObject {
     // MARK: Internal
     @objc private func FacebookFriendsListStateDidChange(){
         let newFriendsList = facebookFriendsListManager.readContactList().facebookFriendsList
+        userId = fireBaseToken.object(forKey: "FireBaseToken") as? String
+        user = CoreDataController.sharedIstance.findUserForIdApp(userId)
         
         dispatchQueue.async {
             switch self.internalState {

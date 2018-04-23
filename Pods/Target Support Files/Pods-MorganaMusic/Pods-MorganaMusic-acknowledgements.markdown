@@ -30,35 +30,35 @@ All files are released under the MIT License:
 
 ## Firebase
 
-Copyright 2017 Google
+Copyright 2018 Google
 
 ## FirebaseAnalytics
 
-Copyright 2017 Google
+Copyright 2018 Google
 
 ## FirebaseAuth
 
-Copyright 2017 Google
+Copyright 2018 Google
 
 ## FirebaseCore
 
-Copyright 2017 Google
+Copyright 2018 Google
 
 ## FirebaseDatabase
 
-Copyright 2017 Google
+Copyright 2018 Google
 
 ## FirebaseInstanceID
 
-Copyright 2017 Google
+Copyright 2018 Google
 
 ## FirebaseMessaging
 
-Copyright 2017 Google
+Copyright 2018 Google
 
 ## FirebaseStorage
 
-Copyright 2017 Google
+Copyright 2018 Google
 
 ## GTMSessionFetcher
 
