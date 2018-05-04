@@ -1,6 +1,6 @@
 # MorganaMusic_iOS
 
-MorganaMusic è un'applicazione per la gestione degli acquisti di prodotti commerciali mediante l'utilizzo social degli ORDINI. Mediante l'app, l'utente potrà acquistare, per se o per gli amici, un prodotto dell'azienda Morgana Music S.r.l.s. Nel caso in cui il prodotto venga acquistato per un amico, tipicamente l'azione di "offrie" ad un amico, l'amico in questione potrà, entro una data di scadenza, rifiutare o accettare l'offerta. Nel caso in cui l'offerta venga accettata il destinatario potrà esibire un QR-code appositamente generato da esibire al commerciante così da poter consumare il prodotto. Nel caso in cui invece il destinatario rifiuti l'offerta il mittente potrà sceglier di:
+MorganaMusic è un'applicazione per la gestione degli acquisti di prodotti commerciali mediante l'utilizzo social degli ORDINI. Mediante l'app, l'utente potrà acquistare, per se o per gli amici, un prodotto dell'azienda Morgana Music S.r.l.s. Nel caso in cui il prodotto venga acquistato per un amico, tipicamente l'azione di "offrie" ad un amico, l'amico in questione potrà, entro una data di scadenza, rifiutare o accettare l'offerta. Nel caso in cui l'offerta venga accettata il destinatario potrà esibire un QR-code appositamente generato  al commerciante così da poter consumare il prodotto. Nel caso in cui invece il destinatario rifiuti l'offerta il mittente potrà sceglier di:
 
 Riscattare l'ordine (equivalente all'acquisto per se del prodotto),
 Inoltrare l'ordine, reinviare l'ordine ad altro amico,
