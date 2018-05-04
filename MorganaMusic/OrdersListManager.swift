@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Firebase
 import FBSDKLoginKit
 
 public extension NSNotification.Name {
@@ -150,6 +151,7 @@ class OrdersListManager: NSObject {
                     }
                 }
             }
+            print("[OrdersListManager]:Order request started due to Facebook Friends List updated")
             self.requestOrdersList(freshness: .fresh)
         }
     }
@@ -188,6 +190,9 @@ class OrdersListManager: NSObject {
     }
     
     @objc func applicationWillEnterForeground() {
+        guard Auth.auth().currentUser != nil else {
+            return
+        }
         dispatchQueue.async {
             print("[OrdersListManager]: Application will enter foreground: automatic refresh started")
             self.requestOrdersList(freshness: .fresh)
@@ -294,8 +299,12 @@ class OrdersListManager: NSObject {
             print("[OrdersListManager]: Request of contact list ignored in state: \(internalState)")
             
         case let .startUp(friendsList), let .error(friendsList, _, _), .success(let friendsList, _, _, _, true):
-            guard pendingRequests == 0 else {return}
+            guard pendingRequests == 0 else {
+                print("[OrdersListManager]:order request ignored due to another pending request")
+                return
+            }
             connectToFirebase(freshness: freshness, currentFriendsList: friendsList, completion: { (outcome) in
+               
                 switch self.internalState {
                 case let .stop(newFriendsList, _), let .startUp(newFriendsList), let .error(newFriendsList, _, _), let .success(newFriendsList, _, _, _, _):
                     if newFriendsList != friendsList {
@@ -372,8 +381,12 @@ class OrdersListManager: NSObject {
             }
         }
         else if case .fresh = freshness {
-            FirebaseData.sharedIstance.readOrdersSentOnFireBase(user: self.user!, friendsList: currentFriendsList, onCompletion: { (ordersSent) in
-                FirebaseData.sharedIstance.readOrderReceivedOnFireBase(user: self.user!, onCompletion: { (ordersReceived) in
+            guard let currentUser = self.user else {
+                //completion(.persistentError(OrdersListManager.ErrorCondition.generalError("errore")))
+                return
+            }
+            FirebaseData.sharedIstance.readOrdersSentOnFireBase(user: currentUser, friendsList: currentFriendsList, onCompletion: { (ordersSent)  in
+                FirebaseData.sharedIstance.readOrderReceivedOnFireBase(user: currentUser, onCompletion: { (ordersReceived) in
                     if self.pendingRequests > 0 {
                         self.pendingRequests -= 1
                         print("[OrdersListManager]: Pendig request with freshness level \(freshness), served!. Actual pending requests: \(self.pendingRequests)")

@@ -13,6 +13,7 @@ import FBSDKLoginKit
 import Firebase
 import FirebaseMessaging
 import UserNotifications
+import FirebaseAuthUI
 
 
 public extension NSNotification.Name {
@@ -90,7 +91,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //Firebase configuration
         FirebaseApp.configure()
         //Singleton initialization
-        //_ = FirebaseData.sharedIstance
+        _ = FirebaseData.sharedIstance
         _ = NetworkStatus.default
         _ = FacebookFriendsListManager.instance
         _ = LoadRemoteProducts.instance

@@ -557,6 +557,13 @@ class FirebaseData {
         self.user = user
         self.friendList = friendsList
         self.ordersSent.removeAll()
+        print("[OrdersListManager]: ",(self.user?.idApp)!)
+        print("[OrdersListManager]: ",self.dimPageScroll)
+        print("[OrdersListManager]: ordersSent/" + (self.user?.idApp)!+"/\(companyID)")
+        guard Auth.auth().currentUser != nil else {
+            onCompletion([])
+            return
+        }
         
         ref.child("ordersSent/" + (self.user?.idApp)!+"/\(companyID)")
             .queryOrderedByKey()
@@ -764,7 +771,10 @@ class FirebaseData {
     func readOrderReceivedOnFireBase(user: User, onCompletion: @escaping ([Order])->()) {
         self.user = user
         self.ordersReceived.removeAll()
-        
+        guard Auth.auth().currentUser != nil else {
+            onCompletion([])
+            return
+        }
         ref.child("ordersReceived/" + (self.user?.idApp)!+"/\(companyID)")
             .queryOrderedByKey()
             .queryLimited(toLast: self.dimPageScroll)
