@@ -14,6 +14,10 @@ import FirebaseAuth
 import FirebaseMessaging
 import FirebaseInstanceID
 
+public extension NSNotification.Name {
+    static let FbTokenDidChangeNotification = NSNotification.Name("LoginFbTokenDidChangeNotification")
+}
+
 //Facebook and Firebase Login Controller
 class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
     
@@ -79,6 +83,7 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                 let newUser = CoreDataController.sharedIstance.addNewUser(user!, user_id_fb!, email, fullName, user_name, user_lastName, user_gender, url)
                 self.addUserInCloud(user: newUser, onCompletion: {
                     self.createUserPointsStats()
+                    NotificationCenter.default.post(name: .FbTokenDidChangeNotification, object: nil)
                 })
             }
         })
@@ -211,11 +216,11 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                         let fireBaseUser = Auth.auth().currentUser
                         self.fireBaseToken.set((fireBaseUser?.uid)!, forKey: "FireBaseToken")
                         
+                        
                         if (result.token) != nil {
                             print("User logged on Facebook")
                             //save token on UserDefaults
                             self.fbToken.set(FBSDKAccessToken.current()?.tokenString, forKey: "FBToken")
-                            
                             self.fetchProfile()
                             
                             //slider first access

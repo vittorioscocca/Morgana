@@ -112,7 +112,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
     
     private func viewSettings(){
-        UpdateBadgeInfo.sharedIstance.updateBadgeInformations(nsArray: self.tabBarController?.tabBar.items as NSArray!)
+        UpdateBadgeInfo.sharedIstance.updateBadgeInformations(nsArray: self.tabBarController?.tabBar.items as NSArray?)
         self.quantità_label.text = "   Quantità prodotti: 0"
         self.totale_label.text = "   Totale: € 0,00"
         self.myTable.dataSource = self

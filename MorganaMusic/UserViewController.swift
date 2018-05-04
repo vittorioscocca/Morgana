@@ -392,8 +392,8 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
             let previewImageUrl:NSURL = NSURL(string: "https://www.facebook.com/photo.php?fbid=10212867899477309&l=69699bed07")!
             
             let inviteContent:FBSDKAppInviteContent = FBSDKAppInviteContent()
-            inviteContent.appLinkURL = appLinkUrl as URL!
-            inviteContent.appInvitePreviewImageURL = previewImageUrl as URL!
+            inviteContent.appLinkURL = appLinkUrl as URL
+            inviteContent.appInvitePreviewImageURL = previewImageUrl as URL
             
             inviteDialog.content = inviteContent
             inviteDialog.delegate = self
