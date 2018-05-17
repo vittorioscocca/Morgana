@@ -35,21 +35,28 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     var ordersSent = [Order]()
     var ordersReceived = [Order]()
-    //var pendingPayments = [Payment]()
+    
+    //infinitive scroll variable
+    private var fetchingMoreOrdersSent = false
+    private var fetchingMoreOrdersReceived = false
     
     var payPalAccessToken = String()
     var PayPalPaymentDataDictionary: NSDictionary?
     
+    
    //Alert Controller
     var controller :UIAlertController?
     
+    struct Constants {
+        static let FetchThreshold = 2 // a constant to determine when to fetch the results; anytime   difference between current displayed cell and your total results fall below this number you want to fetch the results and reload the table
+        static let FetchLimit = 50 // results to fetch in single call
+    }
     
     
     //Activity Indicator
     var activityIndicator: UIActivityIndicatorView = UIActivityIndicatorView()
     var strLabel = UILabel()
     let effectView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
-    private var willUpdate = (orderSent: true, orderReceived: true)
     
     //forward action var
     var forwardOrder :Order?
@@ -60,6 +67,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         super.viewDidLoad()
         self.myTable.dataSource = self
         self.myTable.delegate = self
+        
         
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
         navigationController?.navigationBar.shadowImage = UIImage()
@@ -119,10 +127,11 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             myTable.isUserInteractionEnabled = true
             let orderSentList = OrdersListManager.instance.readOrdersList().ordersList.ordersSentList
             let orderRiceivedList = OrdersListManager.instance.readOrdersList().ordersList.ordersReceivedList
-            willUpdate = (orderSent: true, orderReceived: true)
+            
             ordersSent = orderSentList
             ordersReceived = orderRiceivedList
             myTable.reloadData()
+            print("**// table reloaded")
         }
     }
     
@@ -284,15 +293,15 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        var cell: UITableViewCell?
+        var cell = UITableViewCell()
         
         if self.drinksList_segmentControl.selectedSegmentIndex == 0 && !self.ordersSent.isEmpty {
             var orderSent: Order?
             
             cell = tableView.dequeueReusableCell(withIdentifier: "myDrinksPurchasedCell", for: indexPath)
             guard !self.ordersSent.isEmpty else {
-                cell?.textLabel?.text = "Nessun drink inviato"
-                return cell!
+                cell.textLabel?.text = "Nessun drink inviato"
+                return cell
             }
             orderSent = self.ordersSent[indexPath.row]
             if !(orderSent?.orderReaded)! {
@@ -374,8 +383,8 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             cell = tableView.dequeueReusableCell(withIdentifier: "myDrinksRiceivedCell", for: indexPath)
             
             guard !self.ordersReceived.isEmpty else {
-                cell?.textLabel?.text = "Nessun drink ricevuto"
-                return cell!
+                cell.textLabel?.text = "Nessun drink ricevuto"
+                return cell
             }
             
             offertaRicevuta = self.ordersReceived[indexPath.row]
@@ -425,9 +434,9 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             if (offertaRicevuta!.offerState!) == "Offerta accettata" { //"Pending"
                 //cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
             } else if (offertaRicevuta!.offerState!) == "Pending" {
-                cell?.accessoryType = UITableViewCellAccessoryType.none
+                cell.accessoryType = UITableViewCellAccessoryType.none
             } else if (offertaRicevuta!.offerState!) == "Offerta consumata"{
-                cell?.accessoryType = UITableViewCellAccessoryType.none
+                cell.accessoryType = UITableViewCellAccessoryType.none
                 (cell as? OrderReceivedTableViewCell)?.cellReaded = true
             } else if (offertaRicevuta!.offerState!) == "Offerta scalata"{
                 //cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
@@ -436,7 +445,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             } 
             
         }
-        return cell!
+        return cell
     }
     
     private func stringTodateObject(date: String)->Date {
@@ -461,30 +470,109 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
     
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+//    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+//        if self.drinksList_segmentControl.selectedSegmentIndex == 0 {
+//            print("**// indexPath:\(indexPath.row), ordersSent= \(ordersSent.count)")
+//            guard !(indexPath.row == ordersSent.count - Constants.FetchThreshold - 1) else {
+//                return
+//            }
+//            if indexPath.row == ordersSent.count - Constants.FetchThreshold && indexPath.row <= Constants.FetchLimit  {
+//                guard !finishOrdersSent else {
+//                    print("**// array finito")
+//                    return
+//                }
+//                print("**// new ordersSent range request loaded")
+//                FirebaseData.sharedIstance.readOrdersSentOnFireBaseRange(user: self.user!, onCompletion: { (order) in
+//                    guard let orderRange = order else {
+//                        return
+//                    }
+//                    print("**// new order range requested, dimension: \(orderRange.count)")
+////                    guard self.ordersSent.count < orderRange.count else {
+////                        self.finishOrdersSent = true
+////                        print("**// array ugual finished == true")
+////                        print("**// orderSent dimension: \(self.ordersSent.count) order dimension: \(orderRange.count)")
+////                        return
+////                    }
+//                    self.ordersSent = orderRange
+//                    print("order sent dimension: \(self.ordersSent.count)")
+//                    self.myTable.reloadData()
+//                })
+//                finishOrdersSent = false
+//            }
+//        } else {
+//            print("**// indexPath:\(indexPath.row), ordersSent= \(ordersReceived.count)")
+//            guard !(indexPath.row == ordersReceived.count - Constants.FetchThreshold - 1) else {
+//                return
+//            }
+//            if indexPath.row == ordersReceived.count - Constants.FetchThreshold && indexPath.row  <= Constants.FetchLimit {
+//                guard !finishOrdersReceived else {
+//                    print("**// array finito")
+//                    return
+//                }
+//                print("**// new ordersSent range request loaded")
+//                FirebaseData.sharedIstance.readOrdersReceivedOnFireBaseRange(user: self.user!, onCompletion: { (order) in
+//
+//                    guard let orderReceivedRange = order else {
+//                        return
+//                    }
+//                    print("**// letto nuovo array ordini ordersSent= \(orderReceivedRange.count)")
+////                    guard self.ordersReceived.count < orderReceivedRange.count else {
+////                        self.finishOrdersReceived = true
+////                        print("**// array ugual finished == true")
+////                        print("**// orderSent dimension: \(self.ordersReceived.count) order dimension: \(orderReceivedRange.count)")
+////                        return
+////                    }
+//                    print("ordini ricevuti sta per essere aggiornato. Attuale dimension: \(self.ordersReceived.count)")
+//                    self.ordersReceived = orderReceivedRange
+//                    print("ordini ricevuti aggiornato. Attuale dimensione \(self.ordersReceived.count)")
+//                    print("order sent dimension: \(self.ordersReceived.count)")
+//                    self.myTable.reloadData()
+//                })
+//                self.finishOrdersReceived = false
+//            }
+//        }
+//    }
+    
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        
         if self.drinksList_segmentControl.selectedSegmentIndex == 0 {
-            if indexPath.row == ordersSent.count - 2 && willUpdate.orderSent {
-                FirebaseData.sharedIstance.readOrdersSentOnFireBaseRange(user: self.user!, onCompletion: { (order) in
-                    guard self.ordersSent.count < order.count else {
-                        self.willUpdate.orderSent = false
-                        return
-                    }
-                    self.ordersSent = order
-                    self.myTable.reloadData()
-                })
+             if offsetY > contentHeight - scrollView.frame.height * 4 {
+                if !fetchingMoreOrdersSent {
+                    beginFetchOrdersSent()
+                }
             }
-        } else {
-            if indexPath.row == ordersReceived.count - 2 && willUpdate.orderReceived {
-                FirebaseData.sharedIstance.readOrdersReceivedOnFireBaseRange(user: self.user!, onCompletion: { (order) in
-                    guard self.ordersReceived.count < order.count else {
-                        self.willUpdate.orderReceived = false
-                        return
-                    }
-                    self.ordersReceived = order
-                    self.myTable.reloadData()
-                })
+        } else if self.drinksList_segmentControl.selectedSegmentIndex == 1 {
+            if offsetY > contentHeight - scrollView.frame.height * 4 {
+                if !fetchingMoreOrdersReceived {
+                    beginFetchOrdersReceived()
+                }
             }
         }
+    }
+    
+    private func beginFetchOrdersSent() {
+        fetchingMoreOrdersSent = true
+        FirebaseData.sharedIstance.readOrdersSentOnFireBaseRange(user: self.user!, onCompletion: { (order) in
+            self.fetchingMoreOrdersSent = false
+            guard let orderRange = order else {return}
+            self.ordersSent = orderRange
+            print("**// order sent dimension: \(self.ordersSent.count)")
+            self.myTable.reloadData()
+        })
+    }
+    
+    private func beginFetchOrdersReceived() {
+        fetchingMoreOrdersReceived = true
+        FirebaseData.sharedIstance.readOrdersReceivedOnFireBaseRange(user: self.user!, onCompletion: { (order) in
+            self.fetchingMoreOrdersReceived = false
+            guard let orderRange = order else {return}
+            self.ordersReceived = orderRange
+            print("**// order received dimension: \(self.ordersReceived.count)")
+            self.myTable.reloadData()
+        })
     }
 
     private func scheduleRememberExpiryNotification(order: Order){
@@ -956,16 +1044,22 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     }()
     
     @objc func handleRefresh(_ refreshControl: UIRefreshControl) {
-        refreshControl.beginRefreshing()
-        myTable.isUserInteractionEnabled = false
-        willUpdate = (orderSent: true, orderReceived: true)
-        OrdersListManager.instance.refreshOrdersList()
-        productSendBadge.set(0, forKey: "paymentOfferedBadge")
-        
-        (drinksList_segmentControl.selectedSegmentIndex == 0) ? self.productSendBadge.set(0, forKey: "paymentOfferedBadge") : productSendBadge.set(0, forKey: "productOfferedBadge")
-        
-        if firebaseObserverKilled.bool(forKey: "firebaseObserverKilled") {
-            firebaseObserverKilled.set(false, forKey: "firebaseObserverKilled")
+        if CheckConnection.isConnectedToNetwork() == true {
+            refreshControl.beginRefreshing()
+            myTable.isUserInteractionEnabled = false
+            ordersSent.removeAll()
+            ordersReceived.removeAll()
+            print("**// order sent and received initializated, finish = false, refresh request")
+            OrdersListManager.instance.refreshOrdersList()
+            productSendBadge.set(0, forKey: "paymentOfferedBadge")
+            
+            (drinksList_segmentControl.selectedSegmentIndex == 0) ? self.productSendBadge.set(0, forKey: "paymentOfferedBadge") : productSendBadge.set(0, forKey: "productOfferedBadge")
+            
+            if firebaseObserverKilled.bool(forKey: "firebaseObserverKilled") {
+                firebaseObserverKilled.set(false, forKey: "firebaseObserverKilled")
+            }
+        } else {
+            refreshControl.endRefreshing()
         }
     }
     

@@ -8,23 +8,23 @@ target 'MorganaMusic' do
     
     # Pods for MorganaMusic
     pod 'PayPal-iOS-SDK'
+    pod 'Firebase'
     pod 'Firebase/Database'
     pod 'Firebase/Auth'
     pod 'Firebase/Messaging'
     pod 'Firebase/Storage'
-    pod 'Firebase/Core'
-    pod 'Firebase/RemoteConfig'
-    pod 'FirebaseUI'
     
     target 'MorganaMusicTests' do
         inherit! :search_paths
         pod 'PayPal-iOS-SDK'
-    	pod 'Firebase/Database'
-    	pod 'Firebase/Auth'
-    	pod 'Firebase/Messaging'
-    	pod 'Firebase/Storage'
-    	pod 'Firebase/Core'
-    	pod 'Firebase/RemoteConfig'
-    	pod 'FirebaseUI'
+        pod 'Firebase'
+        pod 'Firebase/Database'
+        pod 'Firebase/Auth'
+        pod 'Firebase/Messaging'
+        pod 'Firebase/Storage'
     end
 end
+
+
+
+

@@ -57,11 +57,14 @@ class FirebaseData {
     var lastOrderReceivedReadedTimestamp = UserDefaults.standard
     private let ref = Database.database().reference()
     private var paymentAutoId: String?
+    //private var ordersSentFirChildrenCount: UInt = 0
+    //private var ordersRiceivedFirChildrenCount: UInt = 0
     
     private let companyID = "mr001"
-    private let dimPageScroll: UInt = 10
+    private let DIM_PAGE_SCROLL: UInt = 10
     private var firstKnownKeyOrderSent: String?
     private var firstKnownKeyOrderReceived: String?
+    fileprivate var _refHandle: DatabaseHandle!
     
     var idOrder: [String]?
     
@@ -76,6 +79,10 @@ class FirebaseData {
         firstKnownKeyOrderSent = nil
         firstKnownKeyOrderReceived = nil
         notificationCenter = NotificationCenter.default
+    }
+    
+    deinit {
+        FireBaseAPI.removeObservers()
     }
     
     private func updatePendingProducts(order: Order,badgeValue: Int?) {
@@ -525,28 +532,40 @@ class FirebaseData {
     }
     
     //Reload for infinitive scroll
-    func readOrdersSentOnFireBaseRange(user: User, onCompletion: @escaping ([Order])->()){
+    func readOrdersSentOnFireBaseRange(user: User, onCompletion: @escaping ([Order]?)->()){
         guard let checkFirstKnowKey = firstKnownKeyOrderSent else {
+            onCompletion(nil)
             return
         }
+        
         self.user = user
         
-        ref.child("ordersSent/" + (self.user?.idApp)!+"/\(companyID)")
+        _refHandle = ref.child("ordersSent/" + (self.user?.idApp)!+"/\(companyID)")
             .queryOrderedByKey()
             .queryEnding(atValue: checkFirstKnowKey)
-            .queryLimited(toLast: self.dimPageScroll)
+            .queryLimited(toLast: self.DIM_PAGE_SCROLL)
             .observe(.value, with: { (snap) in
                 
-                guard snap.exists() else {return}
-                guard snap.value != nil else {return}
+                guard snap.exists() else {
+                    onCompletion(nil)
+                    return
+                }
+                guard snap.value != nil else {
+                    onCompletion(nil)
+                    return
+                }
                 //self.orders
                 guard let orderDictionary = (snap.value! as? NSDictionary) else {
+                    onCompletion(nil)
                     return
                 }
                 guard orderDictionary.count > 1 else {
+                    onCompletion(nil)
                     return
                 }
+                
                 self.readOrderSentDictionary(orderDictionary: orderDictionary, onCompletion: { (orderSent) in
+                    
                     onCompletion(self.deleteClimbedOrder(ordersSent: self.ordersSent))
                 })
             })
@@ -558,16 +577,19 @@ class FirebaseData {
         self.friendList = friendsList
         self.ordersSent.removeAll()
         print("[OrdersListManager]: ",(self.user?.idApp)!)
-        print("[OrdersListManager]: ",self.dimPageScroll)
+        print("[OrdersListManager]: ",self.DIM_PAGE_SCROLL)
         print("[OrdersListManager]: ordersSent/" + (self.user?.idApp)!+"/\(companyID)")
         guard Auth.auth().currentUser != nil else {
             onCompletion([])
             return
         }
+//        ref.child("ordersSent/" + (self.user?.idApp)!+"/\(companyID)").observeSingleEvent(of: .value, with: { (snap) in
+//            self.ordersSentFirChildrenCount = snap.childrenCount
+//        })
         
-        ref.child("ordersSent/" + (self.user?.idApp)!+"/\(companyID)")
+        _refHandle = ref.child("ordersSent/" + (self.user?.idApp)!+"/\(companyID)")
             .queryOrderedByKey()
-            .queryLimited(toLast: self.dimPageScroll)
+            .queryLimited(toLast: self.DIM_PAGE_SCROLL)
             .observe(.value, with: { (snap) in
                 
                 guard snap.exists() else {
@@ -741,29 +763,38 @@ class FirebaseData {
         })
     }
     //Reload for infinitive scroll
-    func readOrdersReceivedOnFireBaseRange(user: User, onCompletion: @escaping ([Order])->()){
+    func readOrdersReceivedOnFireBaseRange(user: User, onCompletion: @escaping ([Order]?)->()){
         guard let checkFirstKnowKey = firstKnownKeyOrderReceived else {
+            onCompletion(nil)
             return
         }
         self.user = user
         
-        ref.child("ordersReceived/" + (self.user?.idApp)!+"/\(companyID)")
+        _refHandle = ref.child("ordersReceived/" + (self.user?.idApp)!+"/\(companyID)")
             .queryOrderedByKey()
             .queryEnding(atValue: checkFirstKnowKey)
-            .queryLimited(toLast: self.dimPageScroll)
+            .queryLimited(toLast: self.DIM_PAGE_SCROLL)
             .observe(.value, with: { (snap) in
                 
-                guard snap.exists() else {return}
-                guard snap.value != nil else {return}
+                guard snap.exists() else {
+                    onCompletion(nil)
+                    return
+                }
+                guard snap.value != nil else {
+                    onCompletion(nil)
+                    return
+                }
                 //self.orders
                 guard let ordersDictionary = (snap.value! as? NSDictionary) else {
+                    onCompletion(nil)
                     return
                 }
                 guard ordersDictionary.count > 1 else {
+                    onCompletion(nil)
                     return
                 }
                 self.readOrderReceivedDictionary(dataOrder: ordersDictionary, onCompletion: { (orderReceived) in
-                    onCompletion(self.getClimbedOrders(ordersReceived: orderReceived))
+                    onCompletion(self.getClimbedOrders(ordersReceived: self.ordersReceived))
                 })
             })
     }
@@ -775,9 +806,9 @@ class FirebaseData {
             onCompletion([])
             return
         }
-        ref.child("ordersReceived/" + (self.user?.idApp)!+"/\(companyID)")
+        _refHandle = ref.child("ordersReceived/" + (self.user?.idApp)!+"/\(companyID)")
             .queryOrderedByKey()
-            .queryLimited(toLast: self.dimPageScroll)
+            .queryLimited(toLast: self.DIM_PAGE_SCROLL)
             .observe(.value, with: { (snap) in
                 // controllo che lo snap dei dati non sia vuoto
                 guard snap.exists() else {

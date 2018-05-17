@@ -22,7 +22,7 @@ class FireBaseAPI {
     static var dictionary: [String:Any]?
     
     static var error: String?
-   
+    
     class func saveNodeOnFirebaseWithAutoId (node: String, child: String, dictionaryToSave: [String:Any],onCompletion: @escaping (String?) -> ()) {
         
         guard CheckConnection.isConnectedToNetwork() == true else{
@@ -425,6 +425,10 @@ class FireBaseAPI {
     
     class func removeObserver (node: String){
         ref.child(node).removeAllObservers()
+    }
+    
+    class func removeObservers(){
+        ref.removeAllObservers()
     }
     
     //PAGINATION while scrolling for MyOrderView

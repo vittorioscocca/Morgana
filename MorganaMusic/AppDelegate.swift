@@ -13,8 +13,6 @@ import FBSDKLoginKit
 import Firebase
 import FirebaseMessaging
 import UserNotifications
-import FirebaseAuthUI
-
 
 public extension NSNotification.Name {
     static let didOpenApplicationFromLetOrderShortCutNotification = NSNotification.Name("AppDelegateDidOpenApplicationFromLetOrderShortCutNotification")
@@ -184,6 +182,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             NotificationCenter.default.post(name: .didOpenApplicationFromLetOrderShortCutNotification, object: nil)
             return true
         case ShortcutIdentifier.myOrder.type:
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let vc = storyboard.instantiateViewController(withIdentifier: "SWRevealController")
+            self.window?.rootViewController = vc
             NotificationCenter.default.post(name: .didOpenApplicationFromMyOrderShortCutNotification, object: nil)
             return true
         default:
@@ -540,7 +541,7 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             FirebaseData.sharedIstance.changeSchedulationBirthday(scheduledBirthdayNotification: scheduledNotification!, idApp: userIdApp!, notificationIdentifier: notificationIdentifier!)
             
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            let rootVC = storyboard.instantiateViewController(withIdentifier: "HomeViewController") as! UITabBarController
+            let rootVC = storyboard.instantiateViewController(withIdentifier: "SWRevealController") as! SWRevealViewController
             self.window!.rootViewController = rootVC
             NotificationCenter.default.post(name: .didOpenApplicationFromUserPointsShortCutNotification, object: nil)
         default:
@@ -549,8 +550,8 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         
         if let id = userInfo["identifier"] as? String  {
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            let rootVC = storyboard.instantiateViewController(withIdentifier: "HomeViewController") as! UITabBarController
-            self.window!.rootViewController = rootVC
+            let rootVC = storyboard.instantiateViewController(withIdentifier: "SWRevealController") as! SWRevealViewController
+            self.window?.rootViewController = rootVC
             
             if id == "OrderSent" || id == "Consuption" || id == "OrderAction" {
                 NotificationCenter.default.post(name: .didOpenApplicationFromMyOrderShortCutNotification, object: nil)

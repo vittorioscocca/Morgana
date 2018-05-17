@@ -88,6 +88,11 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
             self.logout()
         } else {self.viewSettings()}
         
+        NotificationCenter.default.addObserver(self,
+                                            selector: #selector(networkStatusDidChange),
+                                            name: .NetworkStatusDidChange,
+                                            object: nil)
+        
         //reset Firebase DB. only for simulator tests
         //FireBaseAPI.resetFirebaseDB()
     }
@@ -109,6 +114,12 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    @objc func networkStatusDidChange() {
+        if CheckConnection.isConnectedToNetwork() == true {
+            updateTable()
+        }
     }
     
     private func viewSettings(){

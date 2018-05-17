@@ -284,8 +284,9 @@ class OrdersListManager: NSObject {
         
         dispatchQueue.async {
             print("[OrdersListManager]: Notifying state changed")
-            self.notificationCenter.post(name: .OrdersListStateDidChange, object: self)
+            
             if oldState.friendsList != newState.friendsList {
+                self.notificationCenter.post(name: .OrdersListStateDidChange, object: self)
                 print("[OrdersListManager]: Notifying data changed")
                 self.notificationCenter.post(name: .OrdersListDataDidChange, object: self)
             }
