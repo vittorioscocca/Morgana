@@ -308,8 +308,6 @@ class PaymentManager {
         }
     }
     
-    
-    
     private func updateNumberPendingProducts(_ idAppUserDestination: String, recOrPurch: String){
         let ref = Database.database().reference()
         ref.child("users/" + idAppUserDestination).observeSingleEvent(of: .value, with: { (snap) in

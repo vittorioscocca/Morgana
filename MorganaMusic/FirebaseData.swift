@@ -565,7 +565,6 @@ class FirebaseData {
                 }
                 
                 self.readOrderSentDictionary(orderDictionary: orderDictionary, onCompletion: { (orderSent) in
-                    
                     onCompletion(self.deleteClimbedOrder(ordersSent: self.ordersSent))
                 })
             })

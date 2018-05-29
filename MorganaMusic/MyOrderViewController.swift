@@ -43,15 +43,8 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     var payPalAccessToken = String()
     var PayPalPaymentDataDictionary: NSDictionary?
     
-    
    //Alert Controller
     var controller :UIAlertController?
-    
-    struct Constants {
-        static let FetchThreshold = 2 // a constant to determine when to fetch the results; anytime   difference between current displayed cell and your total results fall below this number you want to fetch the results and reload the table
-        static let FetchLimit = 50 // results to fetch in single call
-    }
-    
     
     //Activity Indicator
     var activityIndicator: UIActivityIndicatorView = UIActivityIndicatorView()
@@ -131,7 +124,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             ordersSent = orderSentList
             ordersReceived = orderRiceivedList
             myTable.reloadData()
-            print("**// table reloaded")
+            print("**// Order list changed, table reloaded")
         }
     }
     
@@ -539,13 +532,13 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         let contentHeight = scrollView.contentSize.height
         
         if self.drinksList_segmentControl.selectedSegmentIndex == 0 {
-             if offsetY > contentHeight - scrollView.frame.height * 4 {
+             if offsetY > contentHeight - scrollView.frame.height * 2 {
                 if !fetchingMoreOrdersSent {
                     beginFetchOrdersSent()
                 }
             }
         } else if self.drinksList_segmentControl.selectedSegmentIndex == 1 {
-            if offsetY > contentHeight - scrollView.frame.height * 4 {
+            if offsetY > contentHeight - scrollView.frame.height * 2 {
                 if !fetchingMoreOrdersReceived {
                     beginFetchOrdersReceived()
                 }

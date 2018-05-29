@@ -258,6 +258,7 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
         case "ApplePay":
             break
         case "Crediti":
+            
             self.performSegue(withIdentifier: "segueToCreditsPayment", sender: nil)
             break
         default:
