@@ -33,15 +33,24 @@ class PaymentManager {
             return
         }
         
-        self.getPayPalAccessToken(){ (payPalAccessToken) in
-            guard payPalAccessToken != nil else {
-                onCompleted(false)
-                return
+        if payment.paymentType == "Credits" {
+            self.setPaymentAndOrderCompletedOnFirebase(user: user)
+            self.prepareNotification(user: user)
+            self.sendReceiptByEmail()
+            self.saveReceiptOnFireBase()
+            onCompleted(true)
+        }else {
+            self.getPayPalAccessToken(){ (payPalAccessToken) in
+                guard payPalAccessToken != nil else {
+                    onCompleted(false)
+                    return
+                }
+                self.verifyPendingPaypalPayment(user: user, access_token: payPalAccessToken, onCompleted: { (paymentVerified) in
+                    onCompleted(paymentVerified)
+                })
             }
-            self.verifyPendingPaypalPayment(user: user, access_token: payPalAccessToken, onCompleted: { (paymentVerified) in
-                onCompleted(paymentVerified)
-            })
         }
+        
     }
     
     private func getPayPalAccessToken(onCompleted: @escaping (String?)->()){

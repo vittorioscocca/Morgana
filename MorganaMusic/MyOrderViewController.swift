@@ -390,7 +390,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             (cell as! OrderReceivedTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: (offertaRicevuta?.dataCreazioneOfferta)!)
             
             if offertaRicevuta?.offerState == "Scaduta" {
-                (cell as! OrderReceivedTableViewCell).lastDate.text = "Ordine scaduta"
+                (cell as! OrderReceivedTableViewCell).lastDate.text = "Ordine scaduto"
                 (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
             } else if offertaRicevuta?.offerState == "Offerta rifiutata"{
                 (cell as! OrderReceivedTableViewCell).lastDate.text = "Ordine rifiutata"
@@ -784,21 +784,16 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
         let thisCell = tableView.cellForRow(at: indexPath)
         if  thisCell is OrderReceivedTableViewCell  {
-            let orderReceived = self.ordersReceived[indexPath.row]
+            let orderReceived = ordersReceived[indexPath.row]
             if  orderReceived.offerState == "Offerta accettata" ||  orderReceived.offerState == "Offerta scalata" {
-                if drinksList_segmentControl.titleForSegment(at: 1) != "Ricevuti" {
+                /*if drinksList_segmentControl.titleForSegment(at: 1) != "Ricevuti" {
                     OrdersListManager.instance.refreshOrdersList()
                     print("ho aggiornato gli Ordini-Ricevuti da Firebase")
-                }
+                }*/
                 performSegue(withIdentifier: "segueToOrderDetails", sender: indexPath)
                 tableView.deselectRow(at: indexPath, animated: true)
-                
-                (thisCell as? OrderReceivedTableViewCell)?.cellReaded = true
-                FireBaseAPI.updateNode(node: "ordersReceived/\((self.user?.idApp)!)/\((orderReceived.company?.companyId)!)/\( orderReceived.orderAutoId)", value: ["orderReaded" : "true"])
-                
             }else if orderReceived.offerState == "Pending" {
                 var msg = "Dettaglio:\n"
                 for i in orderReceived.prodotti! {
@@ -808,8 +803,12 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 self.generateAlert(title: "Guarda cosa ti ha offerto \((orderReceived.userSender?.fullName)!)", msg: msg, indexPath: indexPath )
             }
             resetSegmentControl1()
+            //(thisCell as? OrderReceivedTableViewCell)?.cellReaded = true
+            ordersReceived[indexPath.row].orderReaded = true
+            FireBaseAPI.updateNode(node: "ordersReceived/\((self.user?.idApp)!)/\((orderReceived.company?.companyId)!)/\( orderReceived.orderAutoId)", value: ["orderReaded" : "true"])
+            myTable.reloadData()
             
-        }else if thisCell is OrderSentTableViewCell {
+        } else if thisCell is OrderSentTableViewCell {
             let orderSent = self.ordersSent[indexPath.row]
             if (thisCell as! OrderSentTableViewCell).createDate.text == "Clicca per verificare il pagamento" {
                 startActivityIndicator("Processing...")
@@ -818,7 +817,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                     print("Pending payments resolved")
                 }
                 tableView.deselectRow(at: indexPath, animated: true)
-            }else {
+            } else {
                 if self.drinksList_segmentControl.titleForSegment(at: 0) != "Inviati" {
                     OrdersListManager.instance.refreshOrdersList()
                     print("ho aggiornato gli Ordini-Inviati da Firebase")
@@ -827,8 +826,10 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 tableView.deselectRow(at: indexPath, animated: true)
                 resetSegmentControl0()
             }
-            (thisCell as? OrderSentTableViewCell)?.cellReaded = true
+            //(thisCell as? OrderSentTableViewCell)?.cellReaded = true
+            self.ordersSent[indexPath.row].orderReaded = true
             FireBaseAPI.updateNode(node: "ordersSent/\((self.user?.idApp)!)/\((orderSent.company?.companyId)!)/\(orderSent.idOfferta!)", value: ["orderReaded" : "true"])
+            myTable.reloadData()
         }
     }
 

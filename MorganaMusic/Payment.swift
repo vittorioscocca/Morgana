@@ -11,10 +11,10 @@ import Foundation
 class Payment {
     
     var platform: String?
-    var paymentType: String? //Apple or Paypal
+    var paymentType: String? //Apple or Paypal or Credits
     var createTime: String?
     var idPayment: String?
-    var statePayment: String? //approved or saled
+    var statePayment: String? //approved or saled or terminated
     var autoId: String?
     var total : String?
     var relatedOrders: [String]

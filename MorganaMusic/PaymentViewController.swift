@@ -62,7 +62,7 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
         self.user = CoreDataController.sharedIstance.findUserForIdApp(uid)
         
         // Set up payPalConfig
-        payPalConfig.acceptCreditCards = false
+        payPalConfig.acceptCreditCards = true
         payPalConfig.merchantName = "Morgana Music S.r.l.s."
         payPalConfig.merchantPrivacyPolicyURL = URL(string: "https://www.paypal.com/webapps/mpp/ua/privacy-full")
         payPalConfig.merchantUserAgreementURL = URL(string: "https://www.paypal.com/webapps/mpp/ua/useragreement-full")
@@ -258,7 +258,6 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
         case "ApplePay":
             break
         case "Crediti":
-            
             self.performSegue(withIdentifier: "segueToCreditsPayment", sender: nil)
             break
         default:

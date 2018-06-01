@@ -41,8 +41,6 @@ class UpdateBadgeInfo {
         
         let ref = Database.database().reference()
         ref.child("users/" + (self.user?.idApp)!).observe(.value, with: { (snap) in
-            
-           
             guard snap.exists() else {return}
             guard snap.value != nil else {return}
             
@@ -70,10 +68,8 @@ class UpdateBadgeInfo {
                 // Now set the badge of the third tab
                 let val = self.productOfferedBadge.object(forKey: "productOfferedBadge") as! Int
                 if let paymentVal = self.productOfferedBadge.object(forKey: "paymentOfferedBadge") as? Int {
-                     tabItem.badgeValue = String(describing: (val + paymentVal))
+                    tabItem.badgeValue = String(describing: (val + paymentVal))
                 }
-               
-                
             } else if (self.productOfferedBadge.object(forKey: "productOfferedBadge") as? Int == 0) && self.productOfferedBadge.object(forKey: "paymentOfferedBadge") as? Int == 0{
                 tabItem.badgeValue = nil
             }

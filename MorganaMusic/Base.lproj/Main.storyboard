@@ -297,7 +297,7 @@
                                                 <action selector="urlPrecedente_pressed:" destination="yl6-rj-otg" id="3HK-Y8-OHB"/>
                                             </connections>
                                         </barButtonItem>
-                                        <textField key="titleView" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" clearButtonMode="whileEditing" id="5Ns-am-L3b">
+                                        <textField key="titleView" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" clearButtonMode="whileEditing" id="5Ns-am-L3b">
                                             <rect key="frame" x="175" y="7" width="25" height="30"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                             <nil key="textColor"/>
@@ -2452,6 +2452,7 @@
                         <outlet property="shopTotal_label" destination="9r2-iA-ynt" id="wjB-XT-AKz"/>
                         <outlet property="userCredits_label" destination="f3R-2z-9oc" id="gq4-Fv-iLB"/>
                         <segue destination="hmq-kX-MX8" kind="unwind" identifier="unwindToPaymentMethods" unwindAction="unwindToPaymentMethod:" id="TDc-Uh-jux"/>
+                        <segue destination="hmq-kX-MX8" kind="unwind" identifier="unwindToOfferFromCreditsPayment" unwindAction="unwindToOffer:" id="Hry-h5-6im"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="nik-dH-JTi" userLabel="First Responder" sceneMemberID="firstResponder"/>

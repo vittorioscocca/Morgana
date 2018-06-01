@@ -391,10 +391,11 @@ class OrdersListManager: NSObject {
                     if self.pendingRequests > 0 {
                         self.pendingRequests -= 1
                         print("[OrdersListManager]: Pendig request with freshness level \(freshness), served!. Actual pending requests: \(self.pendingRequests)")
-                        self.dispatchQueue.async {
-                            print("[OrdersListManager]: Server Contact List state did change")
-                            self.notificationCenter.post(name: .OrdersListStateDidChange, object: self)
-                        }
+                       
+                    }
+                    self.dispatchQueue.async {
+                        print("[OrdersListManager]: Server Contact List state did change")
+                        self.notificationCenter.post(name: .OrdersListStateDidChange, object: self)
                     }
                     completion(.success(ordersSent, ordersReceived))
                 })
