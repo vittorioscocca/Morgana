@@ -292,6 +292,8 @@ class FirebaseData {
         payment.total = paymentDictionaryDetails["total"] as? String
         payment.pendingUserIdApp = paymentDictionaryDetails["pendingUserIdApp"] as! String
         payment.company?.companyId = companyId
+        payment.createTime = paymentDictionaryDetails["createTime"] as? String
+        payment.paymentType = paymentDictionaryDetails["paymentType"] as? String
         
         self.idOrder?.removeAll()
         return payment
