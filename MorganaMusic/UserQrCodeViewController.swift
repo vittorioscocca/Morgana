@@ -23,19 +23,19 @@ class UserQrCodeViewController: UIViewController {
     
     private func generateQrCode(){
         if qrcodeImage == nil {
-            
             let data = self.user?.idApp?.data(using: String.Encoding.isoLatin2, allowLossyConversion: false)
-            let filter = CIFilter(name: "CIQRCodeGenerator")
-            
-            filter?.setValue(data, forKey: "inputMessage")
-            filter!.setValue("Q", forKey: "inputCorrectionLevel")
-            qrcodeImage = filter!.outputImage
-            displayQRCodeImage()
-        }
-        else {
+            if let filter = CIFilter(name: "CIQRCodeGenerator"){
+                filter.setValue(data, forKey: "inputMessage")
+                filter.setValue("Q", forKey: "inputCorrectionLevel")
+                qrcodeImage = filter.outputImage
+                displayQRCodeImage()
+            } else {
+                imgQRCode.image = nil
+                qrcodeImage = nil
+            }
+        } else {
             imgQRCode.image = nil
             qrcodeImage = nil
-            
         }
     }
     

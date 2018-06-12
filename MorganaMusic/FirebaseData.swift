@@ -589,7 +589,8 @@ class FirebaseData {
 //        })
         
         _refHandle = ref.child("ordersSent/" + (self.user?.idApp)!+"/\(companyID)")
-            .queryOrderedByKey()
+            .queryOrdered(byChild: "viewState")
+            .queryEqual(toValue: "active")
             .queryLimited(toLast: self.DIM_PAGE_SCROLL)
             .observe(.value, with: { (snap) in
                 
@@ -807,8 +808,10 @@ class FirebaseData {
             onCompletion([])
             return
         }
+        
         _refHandle = ref.child("ordersReceived/" + (self.user?.idApp)!+"/\(companyID)")
-            .queryOrderedByKey()
+            .queryOrdered(byChild: "viewState")
+            .queryEqual(toValue: "active")
             .queryLimited(toLast: self.DIM_PAGE_SCROLL)
             .observe(.value, with: { (snap) in
                 // controllo che lo snap dei dati non sia vuoto
@@ -1013,9 +1016,9 @@ class FirebaseData {
      }*/
     
     //migrates an order under another user
-    func moveFirebaseRecord(userApp: User, user: UserDestination, order:Order, onCompletion: @escaping (String?)->()){
-        let sourceNode = "ordersReceived/" + (user.idApp)!+"/"+order.ordersSentAutoId
-        let destinationNode = "ordersReceived/" + (order.userDestination?.idApp)!+"/"+order.ordersSentAutoId
+    func moveFirebaseRecord(userApp: User, user: UserDestination, company: String, order:Order, onCompletion: @escaping (String?)->()){
+        let sourceNode = "ordersReceived/" + (user.idApp)!+"/"+company+"/"+order.ordersSentAutoId
+        let destinationNode = "ordersReceived/" + (order.userDestination?.idApp)!+"/"+company+"/"+order.ordersSentAutoId
         var offerState : String {
             if order.userDestination?.idApp == userApp.idApp {
                 return "Offerta accettata"
@@ -1023,11 +1026,24 @@ class FirebaseData {
                 return "Pending"
             }
         }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
+        formatter.locale = Locale.init(identifier: "it_IT")
+        let dateOfferta: Date = formatter.date(from: order.expirationeDate!)!
+        //if the user has bought the order for itself expiration date is from 1 year
+        var date = Date()
+        if user.idApp == order.userDestination?.idApp {
+            date = Calendar.current.date(byAdding: .year, value: 1, to: dateOfferta)!
+        }else {
+            date = Calendar.current.date(byAdding: .weekday, value: 3, to: dateOfferta)!
+        }
+        
         let newValues = [
             "IdAppUserDestination": (order.userDestination?.idApp)!,
             "facebookUserDestination":(order.userDestination?.idFB)!,
             "offerState":  offerState,
-            "orderReaded": "false"
+            "orderReaded": "false",
+            "expirationData" : formatter.string(from: date)
         ]
         
         FireBaseAPI.moveFirebaseRecordApplyingChanges(sourceChild: sourceNode, destinationChild: destinationNode, newValues: newValues, onCompletion: { (error) in
@@ -1035,8 +1051,10 @@ class FirebaseData {
                 onCompletion(error)
                 return
             }
+            FireBaseAPI.updateNode(node: "ordersReceived/\((order.userDestination?.idApp)!)/\(company)", value: ["scanningQrCode":false])
             onCompletion(error)
         })
+        
         
     }
     

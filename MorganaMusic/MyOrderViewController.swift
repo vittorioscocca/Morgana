@@ -304,13 +304,12 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
             
             (cell as! OrderSentTableViewCell).friendFullName.text = orderSent?.userDestination?.fullName
-            (cell as! OrderSentTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: (orderSent?.dataCreazioneOfferta)!)
-            
             
             switch orderSent!.paymentState! {
             case "Not Valid":
                 (cell as! OrderSentTableViewCell).lastDate.text = "Problema con il pagamento"
                 (cell as! OrderSentTableViewCell).lastDate.textColor = UIColor.red
+                (cell as! OrderSentTableViewCell).createDate.text = ""
                 break
             case "Pending":
                 (cell as! OrderSentTableViewCell).lastDate.text = ""
@@ -318,40 +317,47 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 (cell as! OrderSentTableViewCell).createDate.textColor = UIColor.red
                 break
             case "Valid":
+                (cell as! OrderSentTableViewCell).createDate.textColor = UIColor.gray
                 switch orderSent!.offerState! {
                 case "Scaduta":
-                    (cell as! OrderSentTableViewCell).lastDate.text = "Offerta scaduta"
+                    (cell as! OrderSentTableViewCell).lastDate.text = "Ordine scaduto"
                     (cell as! OrderSentTableViewCell).lastDate.textColor = UIColor.red
+                    (cell as! OrderSentTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: (orderSent?.dataCreazioneOfferta)!)
                     break
                 case "Offerta rifiutata":
-                    (cell as! OrderSentTableViewCell).lastDate.text = "Offerta rifiutata"
+                    (cell as! OrderSentTableViewCell).lastDate.text = "Ordine rifiutato"
                     (cell as! OrderSentTableViewCell).lastDate.textColor = UIColor.red
+                    (cell as! OrderSentTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: (orderSent?.dataCreazioneOfferta)!)
                     break
                 case "Pending":
-                    (cell as! OrderSentTableViewCell).lastDate.text = "Offerta inviata"
+                    (cell as! OrderSentTableViewCell).lastDate.text = "Ordine inviato"
                     (cell as! OrderSentTableViewCell).lastDate.textColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
-                     (cell as! OrderSentTableViewCell).createDate.textColor = UIColor.gray
+                    (cell as! OrderSentTableViewCell).createDate.textColor = UIColor.gray
                     break
                 case "Offerta accettata":
-                    (cell as! OrderSentTableViewCell).lastDate.text = "Offerta accettata"
+                    (cell as! OrderSentTableViewCell).lastDate.text = "Ordine accettato"
                     (cell as! OrderSentTableViewCell).lastDate.textColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
+                    (cell as! OrderSentTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: (orderSent?.dataCreazioneOfferta)!)
                     break
                 case "Offerta inoltrata":
-                    (cell as! OrderSentTableViewCell).lastDate.text = "Offerta inoltrata"
+                    (cell as! OrderSentTableViewCell).lastDate.text = "Ordine inoltrato"
                     (cell as! OrderSentTableViewCell).lastDate.textColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
+                    (cell as! OrderSentTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: (orderSent?.dataCreazioneOfferta)!)
                     break
                 case "Offerta scalata":
-                    (cell as! OrderSentTableViewCell).lastDate.text = "Offerta scalata"
+                    (cell as! OrderSentTableViewCell).lastDate.text = "Ordine scalato"
                     (cell as! OrderSentTableViewCell).lastDate.textColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
+                    (cell as! OrderSentTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: (orderSent?.dataCreazioneOfferta)!)
                     break
                 case "Offerta consumata":
-                    (cell as! OrderSentTableViewCell).lastDate.isHidden = true
-                    (cell as! OrderSentTableViewCell).createDate.text = "Offerta consumata il " + stringTodate(dateString: (orderSent?.consumingDate)!)
+                    (cell as! OrderSentTableViewCell).lastDate.text = ""
+                    (cell as! OrderSentTableViewCell).createDate.text = "Ordine consumato il " + stringTodate(dateString: (orderSent?.consumingDate)!)
                     (cell as! OrderSentTableViewCell).createDate.textColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
                     break
                 default:
                     (cell as! OrderSentTableViewCell).lastDate.text = "Scade il: " + stringTodate(dateString: (orderSent?.expirationeDate)!)
                     (cell as! OrderSentTableViewCell).lastDate.textColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
+                    (cell as! OrderSentTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: (orderSent?.dataCreazioneOfferta)!)
                     break
                 }
             default:
@@ -393,14 +399,14 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 (cell as! OrderReceivedTableViewCell).lastDate.text = "Ordine scaduto"
                 (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
             } else if offertaRicevuta?.offerState == "Offerta rifiutata"{
-                (cell as! OrderReceivedTableViewCell).lastDate.text = "Ordine rifiutata"
+                (cell as! OrderReceivedTableViewCell).lastDate.text = "Ordine rifiutato"
                 (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
             } else if offertaRicevuta?.offerState == "Offerta consumata"{
-                (cell as! OrderReceivedTableViewCell).createDate.isHidden = true
-                (cell as! OrderReceivedTableViewCell).lastDate.text = "Offerta consumata il " + stringTodate(dateString: (offertaRicevuta?.consumingDate)!)
+                (cell as! OrderReceivedTableViewCell).createDate.text = ""
+                (cell as! OrderReceivedTableViewCell).lastDate.text = "Ordine consumato il " + stringTodate(dateString: (offertaRicevuta?.consumingDate)!)
                 (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
             } else if offertaRicevuta?.offerState == "Offerta scalata"{
-                (cell as! OrderReceivedTableViewCell).lastDate.text = "Offerta scalata"
+                (cell as! OrderReceivedTableViewCell).lastDate.text = "Ordine scalato"
                 (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
             } else {
                 (cell as! OrderReceivedTableViewCell).lastDate.text = "Scade il: " + stringTodate(dateString: (offertaRicevuta?.expirationeDate)!)
@@ -860,7 +866,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             
         case "segueToForwardToFriend":
             (segue.destination as! FriendsListViewController).segueFrom = "myDrinks"
-            (segue.destination as! FriendsListViewController).order = forwardOrder
+            (segue.destination as! FriendsListViewController).forwardOrder = forwardOrder
             break
             
         default:
@@ -962,7 +968,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                     self.forwardOrder?.userDestination?.idFB = self.user?.idFB
                     FireBaseAPI.updateNode(node: "ordersSent/\((self.user?.idApp)!)/\((self.forwardOrder?.company?.companyId)!)/\((self.forwardOrder?.idOfferta)!)", value: ["IdAppUserDestination" : (self.user?.idApp)!, "facebookUserDestination":(self.user?.idFB)!,"offerState":"Offerta riscattata"])
                     
-                    FirebaseData.sharedIstance.moveFirebaseRecord(userApp: self.user!,user: self.oldFriendDestination!, order: self.forwardOrder!, onCompletion: { (error) in
+                    FirebaseData.sharedIstance.moveFirebaseRecord(userApp: self.user!,user: self.oldFriendDestination!, company: (self.forwardOrder?.company?.companyId)!, order: self.forwardOrder!, onCompletion: { (error) in
                         guard error == nil else {
                             self.generateAlert(title: "Errore", msg: error!, indexPath: nil)
                             return
@@ -1099,7 +1105,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
                 self.forwardOrder?.userDestination?.idApp = idApp!
                 FireBaseAPI.updateNode(node: "ordersSent/\((self.user?.idApp)!)/\((self.forwardOrder?.company?.companyId)!)/\((self.forwardOrder?.idOfferta)!)", value: ["IdAppUserDestination" : (self.forwardOrder?.userDestination?.idApp)!, "facebookUserDestination":(self.forwardOrder?.userDestination?.idFB)!,"offerState":"Pending"])
-                FirebaseData.sharedIstance.moveFirebaseRecord(userApp: self.user!,user: self.oldFriendDestination!, order: self.forwardOrder!, onCompletion: { (error) in
+                FirebaseData.sharedIstance.moveFirebaseRecord(userApp: self.user!,user: self.oldFriendDestination!, company:(self.forwardOrder?.company?.companyId)!, order: self.forwardOrder!, onCompletion: { (error) in
                     guard error == nil else {
                         self.generateAlert(title: "Errore", msg: error!, indexPath: nil)
                         return

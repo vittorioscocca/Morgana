@@ -91,6 +91,7 @@ class OrderSentDetailsViewController: UIViewController, UITableViewDelegate, UIT
                 cell?.textLabel?.textColor = #colorLiteral(red: 0.7419371009, green: 0.1511851847, blue: 0.20955199, alpha: 1)
             }
         }
+        cell?.isUserInteractionEnabled = false
         return cell!
     }
 

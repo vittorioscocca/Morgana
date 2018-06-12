@@ -52,7 +52,7 @@ class CoreDataController {
         print(newUser.idApp!)
         print(newUser.idFB!)
         print(newUser.email!)
-        print(newUser.gender!)
+        //print(newUser.gender!)
         print(newUser.pictureUrl!)
         
         return newUser

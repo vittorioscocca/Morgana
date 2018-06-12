@@ -389,7 +389,7 @@ class FacebookFriendsListManager: NSObject {
                         var cityOfRecidence: String = ""
                         
                         for (key,value) in dictionary! {
-                            if key == "idApp" {
+                            if key == "cityOfRecidence" {
                                 cityOfRecidence = value as! String
                             }
                         }

@@ -16,6 +16,7 @@ class CreditsPaymentViewController: UIViewController {
     @IBOutlet weak var userCredits_label: UILabel!
     @IBOutlet weak var msg: UILabel!
     @IBOutlet weak var buyButton: UIButton!
+    @IBOutlet weak var userTotalShopStack: UIStackView!
     
     var shopTotal: Double?
     var userCredits: Double?
@@ -32,7 +33,10 @@ class CreditsPaymentViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        shopTotal_label.text = "€"+String(format:"%.2f", shopTotal!)
+        userTotalShopStack.layer.borderColor = UIColor.black.cgColor
+        userTotalShopStack.layer.borderWidth = 2.0
+        
+        shopTotal_label.text = "€ " + String(format:"%.2f", shopTotal!)
         readCredits()
     }
     
@@ -44,7 +48,7 @@ class CreditsPaymentViewController: UIViewController {
             guard dictionary != nil else {
                 return
             }
-            self.userCredits_label.text = String(format:"%.2f", dictionary?["credits"] as! Double)
+            self.userCredits_label.text = "€ " + String(format:"%.2f", dictionary?["credits"] as! Double)
             self.userCredits = dictionary?["credits"] as? Double
             
             if self.userCredits! < self.shopTotal! {
@@ -224,7 +228,7 @@ extension CreditsPaymentViewController {
                     print("Crediti aggiornati")
                 })
                 
-                self.alert = UIAlertController(title: "Pagamento avvenuto con successo", message: "Ora il tuo credito è \(self.userCredits! - self.shopTotal!)", preferredStyle: .alert)
+                self.alert = UIAlertController(title: "Pagamento avvenuto con successo", message: "Ora il tuo credito è " + "€ " + String(format:"%.2f", self.userCredits! - self.shopTotal!), preferredStyle: .alert)
                 let action = UIAlertAction(title: "Ok", style: UIAlertActionStyle.default, handler:{(
                     paramAction:UIAlertAction!) in
                     Cart.sharedIstance.initializeCart()

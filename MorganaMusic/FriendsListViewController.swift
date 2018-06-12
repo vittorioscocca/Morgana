@@ -22,13 +22,13 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     let fireBaseToken = UserDefaults.standard
     var userId: String?
     var friendsList: [Friend]? = []
-    var listaFiltrata = [Friend]()
+    var FilteredList = [Friend]()
     var start = 0
     var end = 0
     var page:Int?, friendsForPage:Int?, lastPageFriends:Int?
     var currentPage = 0
     var numberOfFriends = 0
-    var order: Order?
+    var forwardOrder: Order?
     var defaults = UserDefaults.standard
     var user: User?
     var controller :UIAlertController?
@@ -53,7 +53,7 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
             return controller
         })()
         self.myTable.addSubview(refreshControl1)
-        self.friendsList = FacebookFriendsListManager.instance.readContactList().facebookFriendsList
+        self.friendsList = deleteForwardFriend(friendListPass: FacebookFriendsListManager.instance.readContactList().facebookFriendsList)
         self.numAmici.title = String(self.friendsList!.count)
         
         NotificationCenter.default.addObserver(self,
@@ -98,10 +98,17 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
         if case .success = FacebookFriendsListManager.instance.state{
             refreshControl1.endRefreshing()
             myTable.isUserInteractionEnabled = true
-            self.friendsList = FacebookFriendsListManager.instance.readContactList().facebookFriendsList
-            self.numAmici.title = String(self.friendsList!.count)
+            friendsList = deleteForwardFriend(friendListPass: FacebookFriendsListManager.instance.readContactList().facebookFriendsList)
+            numAmici.title = String(self.friendsList!.count)
             myTable.reloadData()
         }
+    }
+    
+    private func deleteForwardFriend(friendListPass: [Friend]?) -> [Friend]? {
+        if let order = forwardOrder {
+            return friendListPass?.filter({$0.idFB != order.userDestination?.idFB})
+        }
+        return friendListPass
     }
     
     func generateAlert(error: Error){
@@ -120,11 +127,11 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     }
     
     func contentsFilter(text: String) {
-        listaFiltrata.removeAll(keepingCapacity: true)
+        FilteredList.removeAll(keepingCapacity: true)
         
         for x in self.friendsList! {
             if x.fullName?.localizedLowercase.range(of: text.localizedLowercase) != nil {
-                listaFiltrata.append(x)
+                FilteredList.append(x)
             }
             self.myTable.reloadData()
         }
@@ -143,7 +150,7 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
             return 0
         }
         if self.resultSearchController!.isActive {
-            return self.listaFiltrata.count
+            return self.FilteredList.count
         } else {
             return self.friendsList!.count
         }
@@ -154,7 +161,7 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
         let friend: Friend?
         // if searchBar is active, listafiltrata is source data
         if self.resultSearchController!.isActive {
-            friend = listaFiltrata[indexPath.row]
+            friend = FilteredList[indexPath.row]
         } else {
             // search bar is no active,friendsListPaginated is data source
             friend = self.friendsList?[indexPath.row]
@@ -169,12 +176,16 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
         if friend?.cityOfRecidence != nil {
             (cell as! FirendsListTableViewCell).cityOfRecidence.text = friend?.cityOfRecidence
             (cell as! FirendsListTableViewCell).cityOfRecidence.isHidden = false
+        } else {
+            (cell as! FirendsListTableViewCell).cityOfRecidence.isHidden = true
         }
         
         if self.segueFrom == "myDrinks" {
             (cell as! FirendsListTableViewCell).forwardButton.isHidden = false
             (cell as! FirendsListTableViewCell).forwardButton.tag = indexPath.row
             (cell as! FirendsListTableViewCell).forwardButton.addTarget(self, action: #selector(forwardAction(_:)), for: .touchUpInside)
+        } else {
+            (cell as! FirendsListTableViewCell).forwardButton.isHidden = true
         }
 
         CacheImage.getImage(url: friend?.pictureUrl, onCompletion: { (image) in

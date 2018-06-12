@@ -96,8 +96,4 @@ class InitialSliderViewController: UIViewController {
         self.performSegue(withIdentifier: "segueToHome", sender: nil)
     
     }
-    
-
-    
-
 }
