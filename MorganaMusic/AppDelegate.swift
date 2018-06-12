@@ -236,7 +236,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     "fullName" : user.fullName!,
                     "idFB" : user.idFB!,
                     "email" : user.email!,
-                    "gender" : user.gender!,
+                    "gender" : "male",//user.gender!,
                     "pictureUrl" : user.pictureUrl!,
                     "fireBaseIstanceIDToken" : Messaging.messaging().fcmToken!, //InstanceID.instanceID().token()!,
                     ] as [String : Any]
@@ -350,7 +350,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
         return FBSDKApplicationDelegate.sharedInstance().application(app,
                                                                      open: url,
-                                                                     sourceApplication: options[.sourceApplication] as! String,
+                                                                     sourceApplication: options[.sourceApplication] as? String,
                                                                      annotation: options[.annotation])
     }
 

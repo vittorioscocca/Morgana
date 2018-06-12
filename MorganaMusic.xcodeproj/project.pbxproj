@@ -57,6 +57,10 @@
 		2A7425431EC52A840071EA25 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A74253A1EC52A840071EA25 /* MobileCoreServices.framework */; };
 		2A7425441EC52A840071EA25 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A74253B1EC52A840071EA25 /* SafariServices.framework */; };
 		2A7425451EC52A840071EA25 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A74253C1EC52A840071EA25 /* SystemConfiguration.framework */; };
+		2A7A91FC20D062C900623C14 /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A7A91F820D062C200623C14 /* Bolts.framework */; };
+		2A7A91FD20D062C900623C14 /* FBSDKCoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A7A91F920D062C400623C14 /* FBSDKCoreKit.framework */; };
+		2A7A91FE20D062C900623C14 /* FBSDKLoginKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A7A91FA20D062C500623C14 /* FBSDKLoginKit.framework */; };
+		2A7A91FF20D062C900623C14 /* FBSDKShareKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A7A91FB20D062C900623C14 /* FBSDKShareKit.framework */; };
 		2A8576F71EC456E800D41949 /* CartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8576F61EC456E800D41949 /* CartViewController.swift */; };
 		2A86BB6E1F47432100CE336B /* OrderSentDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A86BB6D1F47432100CE336B /* OrderSentDetailsViewController.swift */; };
 		2A8CA5A51EFC230300B0DF55 /* UpdateBadgeInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8CA5A41EFC230300B0DF55 /* UpdateBadgeInfo.swift */; };
@@ -68,10 +72,6 @@
 		2AA135FA1F868298003B1507 /* AutOrderTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA135F91F868298003B1507 /* AutOrderTableViewCell.swift */; };
 		2AA4B96F1F755E9E00F4FD48 /* Company.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA4B96E1F755E9E00F4FD48 /* Company.swift */; };
 		2ABD93BB1F18DF5C00F28632 /* NotificationsCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ABD93BA1F18DF5C00F28632 /* NotificationsCenter.swift */; };
-		2AC5A6781E94E83E0081CAA0 /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2AC5A6741E94E83E0081CAA0 /* Bolts.framework */; };
-		2AC5A6791E94E83E0081CAA0 /* FBSDKCoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2AC5A6751E94E83E0081CAA0 /* FBSDKCoreKit.framework */; };
-		2AC5A67A1E94E83E0081CAA0 /* FBSDKLoginKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2AC5A6761E94E83E0081CAA0 /* FBSDKLoginKit.framework */; };
-		2AC5A67B1E94E83E0081CAA0 /* FBSDKShareKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2AC5A6771E94E83E0081CAA0 /* FBSDKShareKit.framework */; };
 		2AC63AF31E9DFFCE00A9F91E /* FirendsListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC63AF21E9DFFCE00A9F91E /* FirendsListTableViewCell.swift */; };
 		2ACE9D3D1EA6644800E93327 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2ACE9D3C1EA6644700E93327 /* GoogleService-Info.plist */; };
 		2ACF82671EF40CF000F64DAD /* QROrderGenerationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ACF82661EF40CF000F64DAD /* QROrderGenerationViewController.swift */; };
@@ -173,6 +173,10 @@
 		2A74253A1EC52A840071EA25 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		2A74253B1EC52A840071EA25 /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
 		2A74253C1EC52A840071EA25 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		2A7A91F820D062C200623C14 /* Bolts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Bolts.framework; sourceTree = "<group>"; };
+		2A7A91F920D062C400623C14 /* FBSDKCoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FBSDKCoreKit.framework; sourceTree = "<group>"; };
+		2A7A91FA20D062C500623C14 /* FBSDKLoginKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FBSDKLoginKit.framework; sourceTree = "<group>"; };
+		2A7A91FB20D062C900623C14 /* FBSDKShareKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FBSDKShareKit.framework; sourceTree = "<group>"; };
 		2A8576F61EC456E800D41949 /* CartViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CartViewController.swift; sourceTree = "<group>"; };
 		2A86BB6D1F47432100CE336B /* OrderSentDetailsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderSentDetailsViewController.swift; sourceTree = "<group>"; };
 		2A8CA5A41EFC230300B0DF55 /* UpdateBadgeInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateBadgeInfo.swift; sourceTree = "<group>"; };
@@ -185,10 +189,6 @@
 		2AA135F91F868298003B1507 /* AutOrderTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutOrderTableViewCell.swift; sourceTree = "<group>"; };
 		2AA4B96E1F755E9E00F4FD48 /* Company.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Company.swift; sourceTree = "<group>"; };
 		2ABD93BA1F18DF5C00F28632 /* NotificationsCenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationsCenter.swift; sourceTree = "<group>"; };
-		2AC5A6741E94E83E0081CAA0 /* Bolts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Bolts.framework; sourceTree = "<group>"; };
-		2AC5A6751E94E83E0081CAA0 /* FBSDKCoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FBSDKCoreKit.framework; sourceTree = "<group>"; };
-		2AC5A6761E94E83E0081CAA0 /* FBSDKLoginKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FBSDKLoginKit.framework; sourceTree = "<group>"; };
-		2AC5A6771E94E83E0081CAA0 /* FBSDKShareKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FBSDKShareKit.framework; sourceTree = "<group>"; };
 		2AC63AF21E9DFFCE00A9F91E /* FirendsListTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FirendsListTableViewCell.swift; sourceTree = "<group>"; };
 		2ACE9D3C1EA6644700E93327 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		2ACF82661EF40CF000F64DAD /* QROrderGenerationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QROrderGenerationViewController.swift; sourceTree = "<group>"; };
@@ -242,18 +242,18 @@
 			files = (
 				2A9A7ADE1FAFE2910085AA1F /* LocalAuthentication.framework in Frameworks */,
 				2A74253D1EC52A840071EA25 /* Accelerate.framework in Frameworks */,
+				2A7A91FF20D062C900623C14 /* FBSDKShareKit.framework in Frameworks */,
 				2A74253E1EC52A840071EA25 /* AudioToolbox.framework in Frameworks */,
+				2A7A91FC20D062C900623C14 /* Bolts.framework in Frameworks */,
+				2A7A91FE20D062C900623C14 /* FBSDKLoginKit.framework in Frameworks */,
 				2A74253F1EC52A840071EA25 /* AVFoundation.framework in Frameworks */,
 				2A7425401EC52A840071EA25 /* CoreLocation.framework in Frameworks */,
 				2A7425411EC52A840071EA25 /* CoreMedia.framework in Frameworks */,
 				2A7425421EC52A840071EA25 /* MessageUI.framework in Frameworks */,
+				2A7A91FD20D062C900623C14 /* FBSDKCoreKit.framework in Frameworks */,
 				2A7425431EC52A840071EA25 /* MobileCoreServices.framework in Frameworks */,
 				2A7425441EC52A840071EA25 /* SafariServices.framework in Frameworks */,
 				2A7425451EC52A840071EA25 /* SystemConfiguration.framework in Frameworks */,
-				2AC5A67B1E94E83E0081CAA0 /* FBSDKShareKit.framework in Frameworks */,
-				2AC5A6781E94E83E0081CAA0 /* Bolts.framework in Frameworks */,
-				2AC5A6791E94E83E0081CAA0 /* FBSDKCoreKit.framework in Frameworks */,
-				2AC5A67A1E94E83E0081CAA0 /* FBSDKLoginKit.framework in Frameworks */,
 				2F93099F7E4305074AC52905 /* Pods_MorganaMusic.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -321,10 +321,10 @@
 		2AC5A67C1E94EA010081CAA0 /* FacebookFramework */ = {
 			isa = PBXGroup;
 			children = (
-				2AC5A6741E94E83E0081CAA0 /* Bolts.framework */,
-				2AC5A6751E94E83E0081CAA0 /* FBSDKCoreKit.framework */,
-				2AC5A6761E94E83E0081CAA0 /* FBSDKLoginKit.framework */,
-				2AC5A6771E94E83E0081CAA0 /* FBSDKShareKit.framework */,
+				2A7A91F820D062C200623C14 /* Bolts.framework */,
+				2A7A91F920D062C400623C14 /* FBSDKCoreKit.framework */,
+				2A7A91FA20D062C500623C14 /* FBSDKLoginKit.framework */,
+				2A7A91FB20D062C900623C14 /* FBSDKShareKit.framework */,
 			);
 			name = FacebookFramework;
 			sourceTree = "<group>";

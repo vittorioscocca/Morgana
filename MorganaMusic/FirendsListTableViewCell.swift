@@ -28,6 +28,7 @@ class FirendsListTableViewCell: UITableViewCell {
         self.friendImageView.layer.masksToBounds = false
         self.friendImageView.layer.cornerRadius = friendImageView.frame.height/2
         self.friendImageView.clipsToBounds = true
+        
     }
     
     

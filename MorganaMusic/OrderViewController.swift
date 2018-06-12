@@ -108,7 +108,6 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
                                                selector: #selector(updateTable),
                                                name: .CacheImageLoadImage,
                                                object: nil)
-        UIApplication.shared.statusBarStyle = UIStatusBarStyle.lightContent
     }
     
     override func didReceiveMemoryWarning() {
@@ -262,6 +261,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
             cell = tableView.dequeueReusableCell(withIdentifier: "cellOffer", for: indexPath)
             cell?.textLabel?.text = "Morgana Music Club"
             cell?.textLabel?.font = UIFont.systemFont(ofSize: 16, weight: UIFont.Weight.light)
+            cell?.isUserInteractionEnabled = false
             
         } else {
             cell = tableView.dequeueReusableCell(withIdentifier: "cellOffer", for: indexPath)
@@ -305,7 +305,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         }else {
             if (thisCell?.textLabel?.text == "+    Aggiungi prodotto") {
                 self.performSegue(withIdentifier: "segueToOfferta", sender: nil)
-            }
+            } 
         }
         tableView.deselectRow(at: indexPath, animated: false)
     }

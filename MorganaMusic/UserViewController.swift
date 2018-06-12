@@ -60,7 +60,10 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         
         self.readImage()
         self.setCustomImage()
-        
+        readUserCreditsFromFirebase()
+    }
+    
+    private func readUserCreditsFromFirebase(){
         FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + (user?.idApp)!, onCompletion: { (error,dictionary) in
             guard error == nil else {
                 self.generateAlert()
@@ -75,10 +78,6 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
                 
             }
         })
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
     }
     
     private func readImage(){
@@ -100,120 +99,7 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         self.userImage_image.layer.cornerRadius = userImage_image.frame.height/2
         self.userImage_image.clipsToBounds = true
     }
-    
-    
-    
-    
-    func startActivityIndicator(_ title: String) {
-        
-        strLabel.removeFromSuperview()
-        activityIndicator.removeFromSuperview()
-        effectView.removeFromSuperview()
-        
-        strLabel = UILabel(frame: CGRect(x: 50, y: 0, width: 200, height: 46))
-        strLabel.text = title
-        strLabel.font = UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
-        strLabel.textColor = UIColor(white: 0.9, alpha: 0.7)
-        
-        effectView.frame = CGRect(x: view.frame.midX - strLabel.frame.width/2, y: view.frame.midY - strLabel.frame.height/2 , width: 200, height: 46)
-        effectView.layer.cornerRadius = 15
-        effectView.layer.masksToBounds = true
-        
-        //activityIndicator.center = self.view.center
-        activityIndicator.hidesWhenStopped = true
-        activityIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyle.white
-        activityIndicator.frame = CGRect(x: 0, y: 0, width: 46, height: 46)
-        activityIndicator.startAnimating()
-        
-        effectView.addSubview(activityIndicator)
-        effectView.addSubview(strLabel)
-        self.view.addSubview(effectView)
-        UIApplication.shared.beginIgnoringInteractionEvents()
-        
-    }
-    
-    func stopActivityIndicator() {
-        
-        strLabel.removeFromSuperview()
-        activityIndicator.removeFromSuperview()
-        effectView.removeFromSuperview()
-        activityIndicator.stopAnimating()
-        UIApplication.shared.endIgnoringInteractionEvents()
-    }
-    
-    
-    func getFriends(mail: String){
-        print("Update Friends List")
-        CoreDataController.sharedIstance.deleteFriends(self.uid!)
-        
-        let fbToken = UserDefaults.standard
-        fbTokenString = fbToken.object(forKey: "FBToken") as? String
-        print("access token ******* \(fbTokenString!)")
-        FBSDKGraphRequest(graphPath: "me/friends", parameters: nil, tokenString: fbTokenString, version: nil, httpMethod: "GET").start(completionHandler: {(connection,result, error) -> Void in
-            if ((error) != nil)
-            {
-                // Process error
-                print("Error: \(error!)")
-                return
-            }
-            //legge numero di amici dello user e lo passa alla variabile counts
-            let newResult = result as! NSDictionary
-            let summary = newResult["summary"] as! NSDictionary
-            let counts = summary["total_count"] as! NSNumber
-            
-            print("Totale amici letti:  \(counts)")
-            var contFriends = 0
-            
-            //fisso i parametri e con couts passo il nuero di amici da leggere
-            let parameters = ["fields" : "name, first_name, last_name, id, gender, picture.type(large)", "limit": "\(counts)"]
-            self.startActivityIndicator("Carico lista amici...")
-            
-            
-            FBSDKGraphRequest(graphPath: "me/taggable_friends", parameters: parameters, tokenString: self.fbTokenString, version: nil, httpMethod: "GET").start(completionHandler: {(connection,user, requestError)-> Void in
-                
-                if (requestError) != nil
-                {
-                    // Process error
-                    print("Error: \(requestError!)")
-                }
-                else
-                {
-                    let resultdict = user as! NSDictionary
-                    let data: NSArray = resultdict.object(forKey: "data") as! NSArray
-                    
-                    for i in 0...data.count-1 {
-                        contFriends += 1
-                        let valueDict: NSDictionary = data[i] as! NSDictionary
-                        let name = valueDict["name"] as? String
-                        let idFB = valueDict["id"] as! String
-                        let firstName = valueDict["first_name"] as! String
-                        let lastName = valueDict["last_name"] as! String
-                        //let gender = valueDict["gender"] as! String
-                        let picture = valueDict["picture"] as! NSDictionary
-                        let data = picture["data"] as? NSDictionary
-                        let url = data?["url"] as? String
-                        
-                        FirebaseData.sharedIstance.readUserIdAppFromIdFB(node: "users", child: "idFB", idFB: idFB, onCompletion: { (error,idApp) in
-                            guard error == nil else {
-                                print(error!)
-                                return
-                            }
-                            guard idApp != nil else {return}
-                            FirebaseData.sharedIstance.readUserCityOfRecidenceFromIdFB(node: "users/\(idApp!)", onCompletion: { (error, cityOfRecidence) in
-                                CoreDataController.sharedIstance.addFriendInUser(idAppUser: self.uid!, idFB: idFB, mail: mail, fullName: name, firstName: firstName, lastName: lastName, gender: nil, pictureUrl: url, cityOfRecidence: cityOfRecidence)
-                            })
-                        })
-                        
-                    }
-                    print("inserimento amici completato. Inseriti \(contFriends) amici")
-                    self.stopActivityIndicator()
-                    self.performSegue(withIdentifier: "segueToFriendsList", sender: nil)
-                    self.user = CoreDataController.sharedIstance.findUserForIdApp(self.uid)
-                }
-            })
-        })
-    }
-    
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         guard let identifier = segue.identifier else {
             return
@@ -231,55 +117,14 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         default:
             break
         }
-        
-    }
-    
-    func refreshUpdateFriendList() -> Bool{
-        //se la data di prima richiesta non esiste la crea
-        guard  defaults.object(forKey: "Data") != nil else {
-            let date = Date()
-            self.defaults.set(date, forKey: "Data")
-            print("data prima richiesta: ",defaults.object(forKey: "Data")!)
-            return true
-        }
-        
-        print("data prima richiesta: ", defaults.object(forKey: "Data")!)
-        //data corrente
-        let currentDate = Date()
-        print("Data richiesta corrente", currentDate)
-        
-        // differenza in secondi tra la data corrente e una data pregressa
-        let diffTime = (defaults.object(forKey: "Data") as! Date).timeIntervalSinceNow * -1
-        print(diffTime)
-        
-        //se la nuova richiesta è stata effettuata dopo 30 min (1800 sec) la lista degli amici si sincronizza con FB
-        if diffTime > 36000 {
-            self.defaults.set(currentDate, forKey: "Data")
-            return true
-        }
-        return false
     }
     
     @IBAction func fbFriend_clicked(_ sender: UIButton) {
-        
         guard CheckConnection.isConnectedToNetwork() == true else {
             self.generateAlert()
             return
         }
-        
-        guard user?.friends?.count != 0 else {
-            self.getFriends(mail: (self.user?.email)!)
-            let date = Date()
-            self.defaults.set(date, forKey: "Data")
-            return
-        }
-
-        guard refreshUpdateFriendList() else {
-            self.performSegue(withIdentifier: "segueToFriendsList", sender: nil)
-            return
-        }
-    
-        self.getFriends(mail: (self.user?.email)!)
+        self.performSegue(withIdentifier: "segueToFriendsList", sender: nil)
     }
     
     func generateAlert(){
@@ -410,11 +255,9 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         self.performSegue(withIdentifier: "segueToCityAndBirthday", sender: nil)
     }
     
-    
-    
     //supplementary Facebook invite funtions
-    func appInviteDialog(_ appInviteDialog: FBSDKAppInviteDialog!, didFailWithError error: Error!) {
-        print("Error tool place in appInviteDialog \(error)")
+    func appInviteDialog(_ appInviteDialog: FBSDKAppInviteDialog!, didFailWithError error: Error) {
+            print("Error tool place in appInviteDialog \(error)")
     }
     
     func appInviteDialog(_ appInviteDialog: FBSDKAppInviteDialog!, didCompleteWithResults results: [AnyHashable : Any]!) {

@@ -106,7 +106,7 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                     "fullName" : user.fullName!,
                     "idFB" : user.idFB!,
                     "email" : user.email!,
-                    "gender" : user.gender!,
+                    "gender" : "",//user.gender!,
                     "pictureUrl" : user.pictureUrl!,
                     "fireBaseIstanceIDToken" : Messaging.messaging().fcmToken!, //InstanceID.instanceID().token()!,
                     ] as [String : Any]

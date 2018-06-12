@@ -144,7 +144,7 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
             let filter = CIFilter(name: "CIQRCodeGenerator")
             
             filter?.setValue(data, forKey: "inputMessage")
-            filter!.setValue("Q", forKey: "inputCorrectionLevel")
+            filter?.setValue("Q", forKey: "inputCorrectionLevel")
             qrcodeImage = filter!.outputImage
             displayQRCodeImage()
         }
