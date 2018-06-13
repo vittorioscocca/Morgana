@@ -93,15 +93,15 @@ class MorganaMusicTests: XCTestCase {
             if Cart.sharedIstance.state == "Valid" {
                 print("Pagamento carrello valido")
                 
-                PointsManager.sharedInstance.readUserPointsStatsOnFirebase(onCompletion: { (error) in
+                PointsManager.sharedInstance.readUserPointsStatsOnFirebase(userId: (user?.idApp)!, onCompletion: { (error) in
                     guard error == nil else {
                         print(error!)
                         return
                     }
-                    let points = PointsManager.sharedInstance.addPointsForShopping(expense: Cart.sharedIstance.costoTotale)
-                    PointsManager.sharedInstance.updateNewValuesOnFirebase(onCompletion: {
+                    let points = PointsManager.sharedInstance.addPointsForShopping(userId: (user?.idApp)!, expense: Cart.sharedIstance.costoTotale)
+                    PointsManager.sharedInstance.updateNewValuesOnFirebase(actualUserId: (user?.idApp)!, onCompletion: {
                         
-                        NotitificationsCenter.localNotification(title: "Congratulazioni \((user?.firstName)!)", body: "Hai appena cumulato \(points) Punti!")
+                        NotificationsCenter.scheduledRememberExpirationLocalNotification(title: "Congratulazioni \((user?.firstName)!)", body: "Hai appena cumulato \(points) Punti!", identifier: "")
                     })
                     
                     print("Punti aggiornati")
@@ -117,25 +117,17 @@ class MorganaMusicTests: XCTestCase {
     func testFirebaseData_ReadOrderSent(){
         let fireBaseUser = Auth.auth().currentUser
         let user = CoreDataController.sharedIstance.findUserForIdApp((fireBaseUser?.uid))
-        let friendsList = CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: (fireBaseUser?.uid)!)
-        
-        FirebaseData.sharedIstance.readOrdersSentOnFireBase(user: user!, friendsList: friendsList, onCompletion: {(ordersSent) in
-            for order in ordersSent {
-                XCTAssertEqual(order.userDestination?.fullName, "Vittorio Scocca")
-                XCTAssertEqual(order.userDestination?.idApp, "i2bwMowu4tcmJ3tCV68vdiMMWpQ2")
-                XCTAssertEqual(order.userDestination?.idFB, "10212636768259173")
-                XCTAssertEqual(order.userDestination?.fireBaseIstanceIDToken, "eNGzn53t8uY:APA91bHVhMrxmfsqxy-h_HlDqAE4wgXbn6YKK5tdY5gHd2y7EOox9QlCZyhLRhKXAoLl6x72xB1yNR7x8F5_05SoRUd4d9lcmtxf5GV8zNEPwER7XphpCK_BDAXEqSOFezRYGbkalLsS")
-                XCTAssertEqual(order.userDestination?.pictureUrl, "https://goo.gl/v5FFC9")
-                XCTAssertEqual(order.prodotti![0].productName, "Birra")
-                
-            }
-            
+        CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: (fireBaseUser?.uid)!, completion: {(friendList) in
+            FirebaseData.sharedIstance.readOrdersSentOnFireBase(user: user!, friendsList: friendList, onCompletion: {(ordersSent) in
+                for order in ordersSent {
+                    XCTAssertEqual(order.userDestination?.fullName, "Vittorio Scocca")
+                    XCTAssertEqual(order.userDestination?.idApp, "i2bwMowu4tcmJ3tCV68vdiMMWpQ2")
+                    XCTAssertEqual(order.userDestination?.idFB, "10212636768259173")
+                    XCTAssertEqual(order.userDestination?.fireBaseIstanceIDToken, "eNGzn53t8uY:APA91bHVhMrxmfsqxy-h_HlDqAE4wgXbn6YKK5tdY5gHd2y7EOox9QlCZyhLRhKXAoLl6x72xB1yNR7x8F5_05SoRUd4d9lcmtxf5GV8zNEPwER7XphpCK_BDAXEqSOFezRYGbkalLsS")
+                    XCTAssertEqual(order.userDestination?.pictureUrl, "https://goo.gl/v5FFC9")
+                    XCTAssertEqual(order.prodotti![0].productName, "Birra")
+                }
+            })
         })
     }
-    
-    
-    
-    
-    
-    
 }
