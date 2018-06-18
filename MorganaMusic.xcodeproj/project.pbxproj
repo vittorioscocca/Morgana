@@ -7,9 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		106CE5A0B64ACE47467EB2DE /* Pods_MorganaMusicTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17C88BB35E78272643DA482B /* Pods_MorganaMusicTests.framework */; };
-		2A01EBB21F7C741400EB49C1 /* MorganaMusicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A01EBB11F7C741400EB49C1 /* MorganaMusicTests.swift */; };
-		2A01EBC01F7C743B00EB49C1 /* MorganaMusicUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A01EBBF1F7C743B00EB49C1 /* MorganaMusicUITests.swift */; };
 		2A051E731F9D5F1900DADF00 /* CompanyParametersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A051E721F9D5F1900DADF00 /* CompanyParametersViewController.swift */; };
 		2A0700F71EEB178100F701EC /* OrderReceivedTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0700F61EEB178100F701EC /* OrderReceivedTableViewCell.swift */; };
 		2A1863AE1F5055DB00505F20 /* FirebaseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1863AD1F5055DB00505F20 /* FirebaseData.swift */; };
@@ -98,32 +95,9 @@
 		2F93099F7E4305074AC52905 /* Pods_MorganaMusic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1F6C0F4D7B5B86B25C799B9 /* Pods_MorganaMusic.framework */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		2A01EBB41F7C741400EB49C1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 2AE35F7E1E93EF5800DF453F /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 2AE35F851E93EF5800DF453F;
-			remoteInfo = MorganaMusic;
-		};
-		2A01EBC21F7C743B00EB49C1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 2AE35F7E1E93EF5800DF453F /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 2AE35F851E93EF5800DF453F;
-			remoteInfo = MorganaMusic;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
 		17C88BB35E78272643DA482B /* Pods_MorganaMusicTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MorganaMusicTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BC7A9689B1B1B6ECD22366D /* Pods-MorganaMusic.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MorganaMusic.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MorganaMusic/Pods-MorganaMusic.debug.xcconfig"; sourceTree = "<group>"; };
-		2A01EBAF1F7C741400EB49C1 /* MorganaMusicTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MorganaMusicTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		2A01EBB11F7C741400EB49C1 /* MorganaMusicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorganaMusicTests.swift; sourceTree = "<group>"; };
-		2A01EBB31F7C741400EB49C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		2A01EBBD1F7C743B00EB49C1 /* MorganaMusicUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MorganaMusicUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		2A01EBBF1F7C743B00EB49C1 /* MorganaMusicUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorganaMusicUITests.swift; sourceTree = "<group>"; };
-		2A01EBC11F7C743B00EB49C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2A051E721F9D5F1900DADF00 /* CompanyParametersViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanyParametersViewController.swift; sourceTree = "<group>"; };
 		2A0700F61EEB178100F701EC /* OrderReceivedTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderReceivedTableViewCell.swift; sourceTree = "<group>"; };
 		2A1863AD1F5055DB00505F20 /* FirebaseData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FirebaseData.swift; sourceTree = "<group>"; };
@@ -221,21 +195,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		2A01EBAC1F7C741400EB49C1 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				106CE5A0B64ACE47467EB2DE /* Pods_MorganaMusicTests.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		2A01EBBA1F7C743B00EB49C1 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		2AE35F831E93EF5800DF453F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -261,24 +220,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		2A01EBB01F7C741400EB49C1 /* MorganaMusicTests */ = {
-			isa = PBXGroup;
-			children = (
-				2A01EBB11F7C741400EB49C1 /* MorganaMusicTests.swift */,
-				2A01EBB31F7C741400EB49C1 /* Info.plist */,
-			);
-			path = MorganaMusicTests;
-			sourceTree = "<group>";
-		};
-		2A01EBBE1F7C743B00EB49C1 /* MorganaMusicUITests */ = {
-			isa = PBXGroup;
-			children = (
-				2A01EBBF1F7C743B00EB49C1 /* MorganaMusicUITests.swift */,
-				2A01EBC11F7C743B00EB49C1 /* Info.plist */,
-			);
-			path = MorganaMusicUITests;
-			sourceTree = "<group>";
-		};
 		2A2A39B11F4198D900D59476 /* Model */ = {
 			isa = PBXGroup;
 			children = (
@@ -335,8 +276,6 @@
 				2AE35F881E93EF5800DF453F /* MorganaMusic */,
 				2AE35F871E93EF5800DF453F /* Products */,
 				65312183B46FE65E26A89277 /* Frameworks */,
-				2A01EBB01F7C741400EB49C1 /* MorganaMusicTests */,
-				2A01EBBE1F7C743B00EB49C1 /* MorganaMusicUITests */,
 				BEA642A0828ADE2C649A8096 /* Pods */,
 			);
 			sourceTree = "<group>";
@@ -345,8 +284,6 @@
 			isa = PBXGroup;
 			children = (
 				2AE35F861E93EF5800DF453F /* MorganaMusic.app */,
-				2A01EBAF1F7C741400EB49C1 /* MorganaMusicTests.xctest */,
-				2A01EBBD1F7C743B00EB49C1 /* MorganaMusicUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -476,44 +413,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		2A01EBAE1F7C741400EB49C1 /* MorganaMusicTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 2A01EBB81F7C741400EB49C1 /* Build configuration list for PBXNativeTarget "MorganaMusicTests" */;
-			buildPhases = (
-				487DB6BF8FCED6A7E2BE30BA /* [CP] Check Pods Manifest.lock */,
-				2A01EBAB1F7C741400EB49C1 /* Sources */,
-				2A01EBAC1F7C741400EB49C1 /* Frameworks */,
-				2A01EBAD1F7C741400EB49C1 /* Resources */,
-				F08E6312811023BBF41A0194 /* [CP] Embed Pods Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				2A01EBB51F7C741400EB49C1 /* PBXTargetDependency */,
-			);
-			name = MorganaMusicTests;
-			productName = MorganaMusicTests;
-			productReference = 2A01EBAF1F7C741400EB49C1 /* MorganaMusicTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		2A01EBBC1F7C743B00EB49C1 /* MorganaMusicUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 2A01EBC41F7C743B00EB49C1 /* Build configuration list for PBXNativeTarget "MorganaMusicUITests" */;
-			buildPhases = (
-				2A01EBB91F7C743B00EB49C1 /* Sources */,
-				2A01EBBA1F7C743B00EB49C1 /* Frameworks */,
-				2A01EBBB1F7C743B00EB49C1 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				2A01EBC31F7C743B00EB49C1 /* PBXTargetDependency */,
-			);
-			name = MorganaMusicUITests;
-			productName = MorganaMusicUITests;
-			productReference = 2A01EBBD1F7C743B00EB49C1 /* MorganaMusicUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 		2AE35F851E93EF5800DF453F /* MorganaMusic */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2AE35F9B1E93EF5800DF453F /* Build configuration list for PBXNativeTarget "MorganaMusic" */;
@@ -539,22 +438,10 @@
 		2AE35F7E1E93EF5800DF453F /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0900;
+				LastSwiftUpdateCheck = 1000;
 				LastUpgradeCheck = 0930;
 				ORGANIZATIONNAME = "Vittorio Scocca";
 				TargetAttributes = {
-					2A01EBAE1F7C741400EB49C1 = {
-						CreatedOnToolsVersion = 9.0;
-						DevelopmentTeam = 42U6W2K3HU;
-						ProvisioningStyle = Automatic;
-						TestTargetID = 2AE35F851E93EF5800DF453F;
-					};
-					2A01EBBC1F7C743B00EB49C1 = {
-						CreatedOnToolsVersion = 9.0;
-						DevelopmentTeam = 42U6W2K3HU;
-						ProvisioningStyle = Automatic;
-						TestTargetID = 2AE35F851E93EF5800DF453F;
-					};
 					2AE35F851E93EF5800DF453F = {
 						CreatedOnToolsVersion = 8.3;
 						DevelopmentTeam = FP3LS7BNMG;
@@ -582,27 +469,11 @@
 			projectRoot = "";
 			targets = (
 				2AE35F851E93EF5800DF453F /* MorganaMusic */,
-				2A01EBAE1F7C741400EB49C1 /* MorganaMusicTests */,
-				2A01EBBC1F7C743B00EB49C1 /* MorganaMusicUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		2A01EBAD1F7C741400EB49C1 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		2A01EBBB1F7C743B00EB49C1 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		2AE35F841E93EF5800DF453F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -635,24 +506,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		487DB6BF8FCED6A7E2BE30BA /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-MorganaMusicTests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
 		49DC1D64E5F39BA39F03BB0F /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -679,51 +532,9 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MorganaMusic/Pods-MorganaMusic-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		F08E6312811023BBF41A0194 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-MorganaMusicTests/Pods-MorganaMusicTests-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/GTMSessionFetcher/GTMSessionFetcher.framework",
-				"${BUILT_PRODUCTS_DIR}/GoogleToolboxForMac/GoogleToolboxForMac.framework",
-				"${BUILT_PRODUCTS_DIR}/Protobuf/Protobuf.framework",
-				"${BUILT_PRODUCTS_DIR}/leveldb-library/leveldb.framework",
-				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GTMSessionFetcher.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleToolboxForMac.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Protobuf.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/leveldb.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MorganaMusicTests/Pods-MorganaMusicTests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		2A01EBAB1F7C741400EB49C1 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				2A01EBB21F7C741400EB49C1 /* MorganaMusicTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		2A01EBB91F7C743B00EB49C1 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				2A01EBC01F7C743B00EB49C1 /* MorganaMusicUITests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		2AE35F821E93EF5800DF453F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -800,19 +611,6 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
-/* Begin PBXTargetDependency section */
-		2A01EBB51F7C741400EB49C1 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 2AE35F851E93EF5800DF453F /* MorganaMusic */;
-			targetProxy = 2A01EBB41F7C741400EB49C1 /* PBXContainerItemProxy */;
-		};
-		2A01EBC31F7C743B00EB49C1 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 2AE35F851E93EF5800DF453F /* MorganaMusic */;
-			targetProxy = 2A01EBC21F7C743B00EB49C1 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
 /* Begin PBXVariantGroup section */
 		2AE35F8D1E93EF5800DF453F /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
@@ -833,96 +631,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		2A01EBB61F7C741400EB49C1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = DDF466CBEB22E7C436C101FD /* Pods-MorganaMusicTests.debug.xcconfig */;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 42U6W2K3HU;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = MorganaMusicTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "Vittorio-HungryBit.it.MorganaMusicTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_INSTALL_OBJC_HEADER = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "/Users/vittorioscocca/Library/Mobile Documents/com~apple~CloudDocs/Xcode/Progetti Personali Xcode/MorganaMusic/MorganaMusic/MorganaMusic-Bridging-Header.h";
-				SWIFT_PRECOMPILE_BRIDGING_HEADER = YES;
-				SWIFT_VERSION = 4.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MorganaMusic.app/MorganaMusic";
-			};
-			name = Debug;
-		};
-		2A01EBB71F7C741400EB49C1 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = D6B6F496D51FEF506284036D /* Pods-MorganaMusicTests.release.xcconfig */;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 42U6W2K3HU;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = MorganaMusicTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "Vittorio-HungryBit.it.MorganaMusicTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_INSTALL_OBJC_HEADER = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "/Users/vittorioscocca/Library/Mobile Documents/com~apple~CloudDocs/Xcode/Progetti Personali Xcode/MorganaMusic/MorganaMusic/MorganaMusic-Bridging-Header.h";
-				SWIFT_PRECOMPILE_BRIDGING_HEADER = YES;
-				SWIFT_VERSION = 4.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MorganaMusic.app/MorganaMusic";
-			};
-			name = Release;
-		};
-		2A01EBC51F7C743B00EB49C1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 42U6W2K3HU;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = MorganaMusicUITests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "Vittorio-HungryBit.it.MorganaMusicUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = MorganaMusic;
-			};
-			name = Debug;
-		};
-		2A01EBC61F7C743B00EB49C1 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 42U6W2K3HU;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = MorganaMusicUITests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "Vittorio-HungryBit.it.MorganaMusicUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = MorganaMusic;
-			};
-			name = Release;
-		};
 		2AE35F991E93EF5800DF453F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1096,24 +804,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		2A01EBB81F7C741400EB49C1 /* Build configuration list for PBXNativeTarget "MorganaMusicTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				2A01EBB61F7C741400EB49C1 /* Debug */,
-				2A01EBB71F7C741400EB49C1 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		2A01EBC41F7C743B00EB49C1 /* Build configuration list for PBXNativeTarget "MorganaMusicUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				2A01EBC51F7C743B00EB49C1 /* Debug */,
-				2A01EBC61F7C743B00EB49C1 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		2AE35F811E93EF5800DF453F /* Build configuration list for PBXProject "MorganaMusic" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

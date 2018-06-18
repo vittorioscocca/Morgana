@@ -120,10 +120,12 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             myTable.isUserInteractionEnabled = true
             let orderSentList = OrdersListManager.instance.readOrdersList().ordersList.ordersSentList
             let orderRiceivedList = OrdersListManager.instance.readOrdersList().ordersList.ordersReceivedList
-            
             ordersSent = orderSentList
             ordersReceived = orderRiceivedList
-            myTable.reloadData()
+            DispatchQueue.main.async(execute: { () -> Void in
+                self.myTable.reloadData()
+            })
+            
             print("**// Order list changed, table reloaded")
         }
     }
@@ -133,16 +135,16 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     private func setSegmentcontrol() {
-        self.drinksList_segmentControl.selectedSegmentIndex = 0
+        drinksList_segmentControl.selectedSegmentIndex = 0
         //self.drinksList_segmentControl.removeBorders()
         let segAttributes: NSDictionary = [
             NSAttributedStringKey.foregroundColor: UIColor.white,
             NSAttributedStringKey.font: UIFont.systemFont(ofSize: 17)
             ]
-        self.drinksList_segmentControl.setTitleTextAttributes(segAttributes as? [AnyHashable : Any], for: UIControlState.selected)
-        self.drinksList_segmentControl.setTitleTextAttributes(segAttributes as? [AnyHashable : Any], for: UIControlState.normal)
+        drinksList_segmentControl.setTitleTextAttributes(segAttributes as? [AnyHashable : Any], for: UIControlState.selected)
+        drinksList_segmentControl.setTitleTextAttributes(segAttributes as? [AnyHashable : Any], for: UIControlState.normal)
         let underlineWidth = self.view.frame.width / CGFloat(self.drinksList_segmentControl.numberOfSegments)
-        self.drinksList_segmentControl.addUnderlineForSelectedSegment(underlineWidth: underlineWidth)
+        drinksList_segmentControl.addUnderlineForSelectedSegment(underlineWidth: underlineWidth)
     }
     
     private func generateStandardAlert(){
@@ -169,32 +171,33 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             guard snap.value != nil else {return}
             
             let datiUtente = snap.value! as! NSDictionary
-            
-            for (chiave,valore) in datiUtente {
-                switch chiave as! String {
-                case "numberOfPendingReceivedProducts":
-                    self.productSendBadge.set(valore as! Int, forKey: "productOfferedBadge")
-                    break
-                case "numberOfPendingPurchasedProducts":
-                    self.productSendBadge.set(valore as! Int, forKey: "paymentOfferedBadge")
-                    break
-                default:
-                    break
+            DispatchQueue.main.async(execute: {
+                for (chiave,valore) in datiUtente {
+                    switch chiave as! String {
+                    case "numberOfPendingReceivedProducts":
+                        self.productSendBadge.set(valore as! Int, forKey: "productOfferedBadge")
+                        break
+                    case "numberOfPendingPurchasedProducts":
+                        self.productSendBadge.set(valore as! Int, forKey: "paymentOfferedBadge")
+                        break
+                    default:
+                        break
+                    }
                 }
-            }
-            //update segment control
-            if self.productSendBadge.object(forKey: "productOfferedBadge") as? Int != 0 {
-                let val = self.productSendBadge.object(forKey: "productOfferedBadge") as? Int
-                self.drinksList_segmentControl.setTitle("Ricevuti  " + String(describing: val!), forSegmentAt: 1)
-            } else {
-                self.drinksList_segmentControl.setTitle("Ricevuti", forSegmentAt: 1)
-            }
-            if self.productSendBadge.object(forKey: "paymentOfferedBadge") as? Int != 0 {
-                let val = self.productSendBadge.object(forKey: "paymentOfferedBadge") as? Int
-                self.drinksList_segmentControl.setTitle("Inviati  " + String(describing: val!), forSegmentAt: 0)
-            } else {
-                self.drinksList_segmentControl.setTitle("Inviati", forSegmentAt: 0)
-            }
+                //update segment control
+                if self.productSendBadge.object(forKey: "productOfferedBadge") as? Int != 0 {
+                    let val = self.productSendBadge.object(forKey: "productOfferedBadge") as? Int
+                    self.drinksList_segmentControl.setTitle("Ricevuti  " + String(describing: val!), forSegmentAt: 1)
+                } else {
+                    self.drinksList_segmentControl.setTitle("Ricevuti", forSegmentAt: 1)
+                }
+                if self.productSendBadge.object(forKey: "paymentOfferedBadge") as? Int != 0 {
+                    let val = self.productSendBadge.object(forKey: "paymentOfferedBadge") as? Int
+                    self.drinksList_segmentControl.setTitle("Inviati  " + String(describing: val!), forSegmentAt: 0)
+                } else {
+                    self.drinksList_segmentControl.setTitle("Inviati", forSegmentAt: 0)
+                }
+            })
         })
     }
     
@@ -247,21 +250,22 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
             PaymentManager.sharedIstance.resolvePendingPayPalPayment(user: self.user!,payment: payment, onCompleted: { (paymentVerified) in
                 guard paymentVerified  else {
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async(execute: {
                         // ritorno sul main thread ed aggiorno la view
                         self.stopActivityIndicator()
-                    }
+                    })
                     
                     print("state payement is not approved")
                     self.generateAlert(title: "Pagamento non avvenuto", msg: "Il tuo pagamento di € " + payment.total! + " non è andato a buon fine",indexPath: nil)
                     return
                 }
-                DispatchQueue.main.async {
+                DispatchQueue.main.async(execute: {
                     // ritorno sul main thread ed aggiorno la view
                     self.stopActivityIndicator()
-                }
+                    self.generateAlert(title: "Pagamento avvenuto", msg: "Il tuo pagamento di € " + payment.total! + " è avvenuto correttamente",indexPath: nil)
+                })
                 self.setPaymentCompletedInLocal(payment)
-                self.generateAlert(title: "Pagamento avvenuto", msg: "Il tuo pagamento di € " + payment.total! + " è avvenuto correttamente",indexPath: nil)
+                
             })
          onCompletion()
         })
@@ -555,22 +559,26 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     private func beginFetchOrdersSent() {
         fetchingMoreOrdersSent = true
         FirebaseData.sharedIstance.readOrdersSentOnFireBaseRange(user: self.user!, onCompletion: { (order) in
-            self.fetchingMoreOrdersSent = false
-            guard let orderRange = order else {return}
-            self.ordersSent = orderRange
-            print("**// order sent dimension: \(self.ordersSent.count)")
-            self.myTable.reloadData()
+            DispatchQueue.main.async(execute: {
+                self.fetchingMoreOrdersSent = false
+                guard let orderRange = order else {return}
+                self.ordersSent = orderRange
+                print("**// order sent dimension: \(self.ordersSent.count)")
+                self.myTable.reloadData()
+            })
         })
     }
     
     private func beginFetchOrdersReceived() {
         fetchingMoreOrdersReceived = true
         FirebaseData.sharedIstance.readOrdersReceivedOnFireBaseRange(user: self.user!, onCompletion: { (order) in
-            self.fetchingMoreOrdersReceived = false
-            guard let orderRange = order else {return}
-            self.ordersReceived = orderRange
-            print("**// order received dimension: \(self.ordersReceived.count)")
-            self.myTable.reloadData()
+            DispatchQueue.main.async(execute: {
+                self.fetchingMoreOrdersReceived = false
+                guard let orderRange = order else {return}
+                self.ordersReceived = orderRange
+                print("**// order received dimension: \(self.ordersReceived.count)")
+                self.myTable.reloadData()
+            })
         })
     }
 
@@ -653,7 +661,6 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                     self.performSegue(withIdentifier: "segueToOrderDetails", sender: indexPath)
                     tableView.deselectRow(at: indexPath, animated: true)
                     self.resetSegmentControl1()
-                    
                     self.myTable.reloadData()
                 }
                 acceptOrderAction.backgroundColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)

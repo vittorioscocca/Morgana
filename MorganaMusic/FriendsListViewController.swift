@@ -99,8 +99,10 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
             refreshControl1.endRefreshing()
             myTable.isUserInteractionEnabled = true
             friendsList = deleteForwardFriend(friendListPass: FacebookFriendsListManager.instance.readContactList().facebookFriendsList)
-            numAmici.title = String(self.friendsList!.count)
-            myTable.reloadData()
+            DispatchQueue.main.async(execute: { () -> Void in
+                self.numAmici.title = String(self.friendsList!.count)
+                self.myTable.reloadData()
+            })
         }
     }
     
@@ -278,6 +280,3 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     }
     
 }
-
-    
-

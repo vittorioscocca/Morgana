@@ -47,9 +47,12 @@ class MenuTableViewController: UITableViewController {
             let uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
             let user = CoreDataController.sharedIstance.findUserForIdApp(uid)
             if user != nil {
-                FireBaseAPI.removeObserver(node: "users/" + (user?.idApp)!)
-                FireBaseAPI.removeObserver(node: "ordersSent/" + (user?.idApp)!)
-                FireBaseAPI.removeObserver(node: "ordersReceived/" + (user?.idApp)!)
+                guard let idApp = user?.idApp else {
+                    return
+                }
+                FireBaseAPI.removeObserver(node: "users/" + idApp)
+                FireBaseAPI.removeObserver(node: "ordersSent/" + idApp)
+                FireBaseAPI.removeObserver(node: "ordersReceived/" + idApp)
                 firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
                 print("Firebase Observer Killed")
             }
@@ -85,7 +88,7 @@ class MenuTableViewController: UITableViewController {
         //passo il controllo alla view di login, LoginViewController
         let loginPage = storyboard?.instantiateViewController(withIdentifier: "LoginViewController")
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        appDelegate.window!.rootViewController = loginPage
+        appDelegate.window?.rootViewController = loginPage
     }
     /*
     private func loadUserFromFirebase (){
@@ -104,14 +107,14 @@ class MenuTableViewController: UITableViewController {
     }*/
     
     private func readMenu(){
-        guard self.user?.idApp != nil else {
+        guard let idApp = self.user?.idApp else {
             return
         }
-        FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + (user?.idApp)!, onCompletion: { (error,dictionary) in
+        FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + idApp, onCompletion: { (error,dictionary) in
             guard error == nil else {return}
-            guard dictionary != nil else {return}
+            guard let dic = dictionary else {return}
             
-            if dictionary?["companyCode"] as! String != "0" {
+            if dic["companyCode"] as? String != "0" {
                 self.actualMenu = self.menuCompany
                 self.myTable.reloadData()
             }

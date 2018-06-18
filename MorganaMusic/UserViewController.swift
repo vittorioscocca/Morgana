@@ -72,11 +72,13 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
             guard dictionary != nil else {
                 return
             }
-            self.userCredits_label.text = "€ " + String(format:"%.2f", dictionary?["credits"] as! Double)
-            if dictionary?["companyCode"] as! String != "0" {
-                self.companyCode = dictionary?["companyCode"] as? String
-                
-            }
+            DispatchQueue.main.async(execute: {
+                self.userCredits_label.text = "€ " + String(format:"%.2f", dictionary?["credits"] as! Double)
+                if dictionary?["companyCode"] as! String != "0" {
+                    self.companyCode = dictionary?["companyCode"] as? String
+                    
+                }
+            })
         })
     }
     

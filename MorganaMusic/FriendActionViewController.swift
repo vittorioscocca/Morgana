@@ -65,7 +65,9 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
                 print("immagine utente non reperibile")
                 return
             }
-            self.imageFriend_Picture.image = image
+            DispatchQueue.main.async(execute: {
+                self.imageFriend_Picture.image = image
+            })
         })
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(remoteProductsListDidChange),
@@ -96,7 +98,10 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
             self.productsList = LoadRemoteProducts.instance.products!
             self.offersDctionary = LoadRemoteProducts.instance.offers!
             self.pickerView.reloadAllComponents()
-            self.updateLabels(row: 0)
+            
+            DispatchQueue.main.async(execute: {
+                self.updateLabels(row: 0)
+            })
         }
     }
     
@@ -130,11 +135,12 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
     // Catpure the picker view selection
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         if LoadRemoteProducts.instance.isNotNull() && LoadRemoteProducts.instance.isNotEmpty() {
-            updateLabels(row: row)
+            DispatchQueue.main.async(execute: {
+                self.updateLabels(row: row)
+            })
         }
         
     }
-    
     
     /*
     @IBAction func newRequest(_ sender: UIButton) {

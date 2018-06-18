@@ -23,7 +23,10 @@ class FireBaseAPI {
     
     static var error: String?
     
-    class func saveNodeOnFirebaseWithAutoId (node: String, child: String, dictionaryToSave: [String:Any],onCompletion: @escaping (String?) -> ()) {
+    typealias typeSaveReturn = (String?)->()
+    typealias typeReadReturn = (String?,[String:Any]?)->()
+    
+    class func saveNodeOnFirebaseWithAutoId (node: String, child: String, dictionaryToSave: [String:Any],onCompletion: @escaping typeSaveReturn) {
         
         guard CheckConnection.isConnectedToNetwork() == true else{
             error = "Connessione Internet Assente"
@@ -36,7 +39,7 @@ class FireBaseAPI {
         onCompletion(error)
     }
     
-    class func saveNodeOnFirebaseWithPassedAutoId(node: String, child: String, passedAutoId: String, dictionaryToSave: [String:Any],onCompletion: @escaping (String?) -> ()) {
+    class func saveNodeOnFirebaseWithPassedAutoId(node: String, child: String, passedAutoId: String, dictionaryToSave: [String:Any],onCompletion: @escaping typeSaveReturn) {
         
         guard CheckConnection.isConnectedToNetwork() == true else{
             error = "Connessione Internet Assente"
@@ -49,7 +52,7 @@ class FireBaseAPI {
         onCompletion(error)
     }
     
-    class func saveNodeOnFirebaseWithoutAutoId (node: String, child: String, dictionaryToSave: [String:Any],onCompletion: @escaping (String?) -> ()) {
+    class func saveNodeOnFirebaseWithoutAutoId (node: String, child: String, dictionaryToSave: [String:Any],onCompletion: @escaping typeSaveReturn) {
         
         guard CheckConnection.isConnectedToNetwork() == true else{
             error = "Connessione Internet Assente"
@@ -61,7 +64,7 @@ class FireBaseAPI {
         onCompletion(error)
     }
     
-    class func saveNodeOnFirebase(node: String, dictionaryToSave: [String:Any],onCompletion: @escaping (String?) -> ()) {
+    class func saveNodeOnFirebase(node: String, dictionaryToSave: [String:Any],onCompletion: @escaping typeSaveReturn) {
         
         guard CheckConnection.isConnectedToNetwork() == true else{
             error = "Connessione Internet Assente"
@@ -73,12 +76,8 @@ class FireBaseAPI {
         onCompletion(error)
     }
     
-    
-    
-    
     //read node withOut AutoId
-    class func readNodeOnFirebaseWithOutAutoId(node: String, onCompletion: @escaping (String?,[String:Any]?) -> ()){
-        
+    class func readNodeOnFirebaseWithOutAutoId(node: String, onCompletion: @escaping typeReadReturn){
         guard CheckConnection.isConnectedToNetwork() == true else {
             error = "Connessione Internet Assente"
             onCompletion(error,nil)
@@ -92,20 +91,13 @@ class FireBaseAPI {
                 onCompletion(error,nil)
                 return
             }
-            
-            
             // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
             let nodeDictionary = snap_value as! NSDictionary
             dictionary = [:]
-            
-            // leggo i dati dell'ordine o offerte
-            
             for (chiave,valore) in nodeDictionary {
                 dictionary?[chiave as! String] = valore
             }
-            
             onCompletion(error,dictionary)
-            
         })
     }
     
@@ -114,7 +106,7 @@ class FireBaseAPI {
     }
     
     //read node withOut AutoId
-    class func readNodeOnFirebaseWithOutAutoIdHandler(node: String, beginHandler: @escaping ()->(),completionHandler: @escaping (String?,[String:Any]?) -> ()){
+    class func readNodeOnFirebaseWithOutAutoIdHandler(node: String, beginHandler: @escaping ()->(),completionHandler: @escaping typeReadReturn){
         
         beginHandler()
         guard CheckConnection.isConnectedToNetwork() == true else {
@@ -133,21 +125,15 @@ class FireBaseAPI {
             // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
             let nodeDictionary = snap_value as! NSDictionary
             dictionary = [:]
-            
-            // leggo i dati dell'ordine o offerte
-            
             for (chiave,valore) in nodeDictionary {
                 dictionary?[chiave as! String] = valore
             }
-            
             completionHandler(error,dictionary)
-            
         })
     }
     
     //read node
-    class func readNodeOnFirebaseHandler(node: String, beginHandler: @escaping ()->(),onCompletion: @escaping (String?,[String:Any]?) -> ()){
-        
+    class func readNodeOnFirebaseHandler(node: String, beginHandler: @escaping ()->(),onCompletion: @escaping typeReadReturn){
         beginHandler()
         guard CheckConnection.isConnectedToNetwork() == true else {
             error = "Connessione Internet Assente"
@@ -173,17 +159,13 @@ class FireBaseAPI {
                 for (chiave,valore) in (childDictionary as! NSDictionary) {
                     dictionary?[chiave as! String] = valore
                 }
-                
                 onCompletion(error,dictionary)
             }
-            
         })
     }
 
-    
     //read node
-    class func readNodeOnFirebase(node: String, onCompletion: @escaping (String?,[String:Any]?) -> ()){
-        
+    class func readNodeOnFirebase(node: String, onCompletion: @escaping typeReadReturn){
         guard CheckConnection.isConnectedToNetwork() == true else {
             error = "Connessione Internet Assente"
             onCompletion(error,dictionary)
@@ -196,26 +178,20 @@ class FireBaseAPI {
                 onCompletion(error,dictionary)
                 return
             }
-            
-            // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
             let nodeDictionary = snap_value as! NSDictionary
             dictionary = [:]
-            
-            // leggo i dati dell'ordine o offerte
             for (autoId, childDictionary) in nodeDictionary{
                 dictionary?["autoId"] = autoId
                 for (chiave,valore) in (childDictionary as! NSDictionary) {
                     dictionary?[chiave as! String] = valore
                 }
-                
                 onCompletion(error,dictionary)
             }
-            
         })
     }
     
     //read node with query Limited
-    class func readNodeOnFirebaseQueryLimited (node: String, queryLimit: Int, onCompletion: @escaping (String?,[String:Any]?) -> ()){
+    class func readNodeOnFirebaseQueryLimited (node: String, queryLimit: Int, onCompletion: @escaping typeReadReturn){
         
         guard CheckConnection.isConnectedToNetwork() == true else {
             error = "Connessione Internet Assente"
@@ -273,7 +249,7 @@ class FireBaseAPI {
         
     }
     
-    class func readNodeForValueEqualTo(node: String, child: String, value: String?, onCompletion: @escaping (String?,[String:Any]?) -> ()){
+    class func readNodeForValueEqualTo(node: String, child: String, value: String?, onCompletion: @escaping typeReadReturn){
         guard CheckConnection.isConnectedToNetwork() == true else {
             error = "Connessione Internet Assente"
             onCompletion(error,nil)
@@ -304,7 +280,7 @@ class FireBaseAPI {
         })
     }
     
-    class func readFromTo(node: String,  atValue: String, limit: UInt, child: String, onCompletion: @escaping (String?,[String:Any]?) -> ()){
+    class func readFromTo(node: String,  atValue: String, limit: UInt, child: String, onCompletion: @escaping typeReadReturn){
         let query = ref.child(node).queryOrdered(byChild: child).queryEnding(atValue: atValue).queryLimited(toLast: limit)
         
         query.observeSingleEvent(of: .value, with: { snap in
@@ -331,7 +307,7 @@ class FireBaseAPI {
         ref.child(node).updateChildValues(value)
     }
     
-    class func updateNode (node: String, value: [String:Any],onCompletion: @escaping (String?)->()){
+    class func updateNode (node: String, value: [String:Any],onCompletion: @escaping typeSaveReturn){
         guard CheckConnection.isConnectedToNetwork() == true else{
             error = "Connessione Internet Assente"
             onCompletion(error)
@@ -381,8 +357,7 @@ class FireBaseAPI {
         
     }
     
-    
-    class func moveFirebaseRecord(sourceChild: String, destinationChild: String, onCompletion: @escaping (String?)->()){
+    class func moveFirebaseRecord(sourceChild: String, destinationChild: String, onCompletion: @escaping typeSaveReturn){
         guard CheckConnection.isConnectedToNetwork() == true else{
             error = "Connessione Internet Assente"
             onCompletion(error)
@@ -396,7 +371,7 @@ class FireBaseAPI {
         })
     }
     
-    class func moveFirebaseRecordApplyingChanges(sourceChild: String, destinationChild: String, newValues: [String:Any],onCompletion: @escaping (String?)->()){
+    class func moveFirebaseRecordApplyingChanges(sourceChild: String, destinationChild: String, newValues: [String:Any],onCompletion: @escaping typeSaveReturn){
         guard CheckConnection.isConnectedToNetwork() == true else{
             error = "Connessione Internet Assente"
             onCompletion(error)
@@ -408,18 +383,13 @@ class FireBaseAPI {
                 onCompletion(error)
                 return
             }
-            
-            // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
             let nodeDictionary = snap_value as! NSMutableDictionary
-            
             for (chiave,valore) in newValues {
                 nodeDictionary[chiave] = valore
             }
-
             ref.child(destinationChild).setValue(nodeDictionary)
             ref.child(sourceChild).removeValue()
             onCompletion(error)
-            
         })
     }
     

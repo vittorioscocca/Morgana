@@ -175,17 +175,22 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
                         }
                         let points = PointsManager.sharedInstance.addPointsForShopping(userId:(self.user?.idApp)!,expense: Cart.sharedIstance.costoTotale)
                         PointsManager.sharedInstance.updateNewValuesOnFirebase(actualUserId: (self.user?.idApp)!,onCompletion: {
-                            
-                            NotificationsCenter.pointsNotification(title: "Congratulazioni \((self.user?.firstName)!)", body: "Hai appena cumulato \(points) Punti!")
+                            DispatchQueue.main.async(execute: {
+                                NotificationsCenter.pointsNotification(title: "Congratulazioni \((self.user?.firstName)!)", body: "Hai appena cumulato \(points) Punti!")
+                            })
                         })
                         
                         print("Punti aggiornati")
                         Cart.sharedIstance.initializeCart()
-                        self.performSegue(withIdentifier: "unwindToOfferFromPayment", sender: nil)
+                        DispatchQueue.main.async(execute: {
+                            self.performSegue(withIdentifier: "unwindToOfferFromPayment", sender: nil)
+                        })
                     })
                 } else {
                    print("Pagamento carrello non valido, riprova")
-                    self.generateAlert(title: "Attenzione", message: "Il pagamento non è stato validato, riprova su 'I miei Drinks' sezione 'Ricevuti'")
+                    DispatchQueue.main.async(execute: {
+                        self.generateAlert(title: "Attenzione", message: "Il pagamento non è stato validato, riprova su 'I miei Drinks' sezione 'Ricevuti'")
+                    }) 
                 }
             })
         })
