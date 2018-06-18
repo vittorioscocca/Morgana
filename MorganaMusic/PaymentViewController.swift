@@ -7,7 +7,6 @@
 //
 
 
-
 import UIKit
 import FirebaseDatabase
 import FirebaseAuth
@@ -175,17 +174,22 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
                         }
                         let points = PointsManager.sharedInstance.addPointsForShopping(userId:(self.user?.idApp)!,expense: Cart.sharedIstance.costoTotale)
                         PointsManager.sharedInstance.updateNewValuesOnFirebase(actualUserId: (self.user?.idApp)!,onCompletion: {
-                            
-                            NotificationsCenter.pointsNotification(title: "Congratulazioni \((self.user?.firstName)!)", body: "Hai appena cumulato \(points) Punti!")
+                            DispatchQueue.main.async(execute: {
+                                NotificationsCenter.pointsNotification(title: "Congratulazioni \((self.user?.firstName)!)", body: "Hai appena cumulato \(points) Punti!")
+                            })
                         })
                         
                         print("Punti aggiornati")
                         Cart.sharedIstance.initializeCart()
-                        self.performSegue(withIdentifier: "unwindToOfferFromPayment", sender: nil)
+                        DispatchQueue.main.async(execute: {
+                            self.performSegue(withIdentifier: "unwindToOfferFromPayment", sender: nil)
+                        })
                     })
                 } else {
-                   print("Pagamento carrello non valido, riprova")
-                    self.generateAlert(title: "Attenzione", message: "Il pagamento non è stato validato, riprova su 'I miei Drinks' sezione 'Ricevuti'")
+                    print("Pagamento carrello non valido, riprova")
+                    DispatchQueue.main.async(execute: {
+                        self.generateAlert(title: "Attenzione", message: "Il pagamento non è stato validato, riprova su 'I miei Drinks' sezione 'Ricevuti'")
+                    })
                 }
             })
         })
@@ -283,7 +287,7 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     private func completeCartInformation(){
         for j in Cart.sharedIstance.carrello {
-                //Get idApp
+            //Get idApp
             FirebaseData.sharedIstance.readUserIdAppFromIdFB(node: "users", child: "idFB", idFB: (j.userDestination?.idFB)!, onCompletion: { (error,idApp) in
                 guard error == nil else {
                     print(error!)
@@ -301,21 +305,21 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     //complete caurosel with Firebase Token
     private func completeCartWithFirebaseToken(idApp: String){
-            FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/"+idApp, onCompletion: { (error,dictionary) in
-                guard error == nil else {
-                    self.generateAlert(title: "Attenzione connessione Internet assente", message: "Accertati che la tua connessione WiFi o cellulare sia attiva")
-                    return
-                }
-                guard dictionary != nil else {return}
-                if (dictionary?["autoId"] as? String) != "04fLLHPLYYboLfy8enAkogDcdI02"{
-                    //in seguito da eliminare escludo l'utente vittorio del simulatore
-                    for order in Cart.sharedIstance.carrello {
-                        if order.userDestination?.idApp == idApp {
-                            order.userDestination?.fireBaseIstanceIDToken = dictionary?["fireBaseIstanceIDToken"] as? String
-                        }
+        FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/"+idApp, onCompletion: { (error,dictionary) in
+            guard error == nil else {
+                self.generateAlert(title: "Attenzione connessione Internet assente", message: "Accertati che la tua connessione WiFi o cellulare sia attiva")
+                return
+            }
+            guard dictionary != nil else {return}
+            if (dictionary?["autoId"] as? String) != "04fLLHPLYYboLfy8enAkogDcdI02"{
+                //in seguito da eliminare escludo l'utente vittorio del simulatore
+                for order in Cart.sharedIstance.carrello {
+                    if order.userDestination?.idApp == idApp {
+                        order.userDestination?.fireBaseIstanceIDToken = dictionary?["fireBaseIstanceIDToken"] as? String
                     }
                 }
-            })
+            }
+        })
     }
     
     @IBAction func unwindToPaymentMethod(_ sender: UIStoryboardSegue) {
@@ -355,8 +359,8 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
         effectView.contentView.addSubview(activityIndicator)
         effectView.contentView.addSubview(strLabel)
         /*
-        effectView.addSubview(activityIndicator)
-        effectView.addSubview(strLabel)*/
+         effectView.addSubview(activityIndicator)
+         effectView.addSubview(strLabel)*/
         
         self.view.addSubview(effectView)
         UIApplication.shared.beginIgnoringInteractionEvents()

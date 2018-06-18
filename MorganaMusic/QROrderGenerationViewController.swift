@@ -5,11 +5,10 @@
 //  Created by Vittorio Scocca on 16/06/17.
 //  Copyright © 2017 Vittorio Scocca. All rights reserved.
 //
-
 import UIKit
 
 class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-
+    
     @IBOutlet weak var fullName_label: UILabel!
     @IBOutlet weak var age_label: UILabel!
     @IBOutlet weak var gender_label: UILabel!
@@ -48,11 +47,11 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
             self.dataScadenza_label.textColor = .red
             return
         }
-       
+        
         generateQrCode()
     }
-
-
+    
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -141,12 +140,15 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
             let information = (self.user?.idApp)! + "//" + (self.offertaRicevuta?.orderAutoId)! + "||*" + (self.offertaRicevuta?.expirationeDate)! + "*" + (self.offertaRicevuta?.company?.companyId)!
             
             let data = information.data(using: String.Encoding.isoLatin2, allowLossyConversion: false)
-            let filter = CIFilter(name: "CIQRCodeGenerator")
-            
-            filter?.setValue(data, forKey: "inputMessage")
-            filter?.setValue("Q", forKey: "inputCorrectionLevel")
-            qrcodeImage = filter!.outputImage
-            displayQRCodeImage()
+            if let filter = CIFilter(name: "CIQRCodeGenerator") {
+                filter.setValue(data, forKey: "inputMessage")
+                filter.setValue("Q", forKey: "inputCorrectionLevel")
+                qrcodeImage = filter.outputImage
+                displayQRCodeImage()
+            } else {
+                imgQRCode.image = nil
+                qrcodeImage = nil
+            }
         }
         else {
             imgQRCode.image = nil

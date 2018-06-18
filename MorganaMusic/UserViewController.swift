@@ -5,7 +5,6 @@
 //  Created by Vittorio Scocca on 04/04/17.
 //  Copyright © 2017 Vittorio Scocca. All rights reserved.
 //
-
 import FBSDKCoreKit
 import FBSDKLoginKit
 import FBSDKShareKit
@@ -14,7 +13,7 @@ import FirebaseDatabase
 import FirebaseAuth
 
 class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
-
+    
     
     @IBOutlet weak var userImage_image: UIImageView!
     @IBOutlet weak var userFullName: UILabel!
@@ -72,11 +71,13 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
             guard dictionary != nil else {
                 return
             }
-            self.userCredits_label.text = "€ " + String(format:"%.2f", dictionary?["credits"] as! Double)
-            if dictionary?["companyCode"] as! String != "0" {
-                self.companyCode = dictionary?["companyCode"] as? String
-                
-            }
+            DispatchQueue.main.async(execute: {
+                self.userCredits_label.text = "€ " + String(format:"%.2f", dictionary?["credits"] as! Double)
+                if dictionary?["companyCode"] as! String != "0" {
+                    self.companyCode = dictionary?["companyCode"] as? String
+                    
+                }
+            })
         })
     }
     
@@ -99,7 +100,7 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         self.userImage_image.layer.cornerRadius = userImage_image.frame.height/2
         self.userImage_image.clipsToBounds = true
     }
-
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         guard let identifier = segue.identifier else {
             return
@@ -248,7 +249,7 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
     
     @IBAction func segueToUserQrCode_clicked(_ sender: UIButton) {
         self.performSegue(withIdentifier: "segueToUserQrCode", sender: nil)
-    
+        
     }
     
     @IBAction func segueToUserCityAndBirthday(_ sender: UIButton) {
@@ -257,7 +258,7 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
     
     //supplementary Facebook invite funtions
     func appInviteDialog(_ appInviteDialog: FBSDKAppInviteDialog!, didFailWithError error: Error) {
-            print("Error tool place in appInviteDialog \(error)")
+        print("Error tool place in appInviteDialog \(error)")
     }
     
     func appInviteDialog(_ appInviteDialog: FBSDKAppInviteDialog!, didCompleteWithResults results: [AnyHashable : Any]!) {

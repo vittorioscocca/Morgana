@@ -356,7 +356,7 @@ class FacebookFriendsListManager: NSObject {
                 let dati: NSArray = newResult.object(forKey: "data") as! NSArray
                 
                 guard dati.count != 0 else {
-                    completion(.persistentError(.generalError(error!)))
+                    //completion(.persistentError(.generalError(error)))
                     return
                 }
                 var fbList = [Friend]()

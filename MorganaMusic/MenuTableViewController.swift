@@ -5,13 +5,12 @@
 //  Created by Vittorio Scocca on 19/10/17.
 //  Copyright © 2017 Vittorio Scocca. All rights reserved.
 //
-
 import UIKit
 import FirebaseAuth
 import FBSDKLoginKit
 
 class MenuTableViewController: UITableViewController {
-
+    
     @IBOutlet var myTable: UITableView!
     
     
@@ -47,9 +46,12 @@ class MenuTableViewController: UITableViewController {
             let uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
             let user = CoreDataController.sharedIstance.findUserForIdApp(uid)
             if user != nil {
-                FireBaseAPI.removeObserver(node: "users/" + (user?.idApp)!)
-                FireBaseAPI.removeObserver(node: "ordersSent/" + (user?.idApp)!)
-                FireBaseAPI.removeObserver(node: "ordersReceived/" + (user?.idApp)!)
+                guard let idApp = user?.idApp else {
+                    return
+                }
+                FireBaseAPI.removeObserver(node: "users/" + idApp)
+                FireBaseAPI.removeObserver(node: "ordersSent/" + idApp)
+                FireBaseAPI.removeObserver(node: "ordersReceived/" + idApp)
                 firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
                 print("Firebase Observer Killed")
             }
@@ -85,46 +87,45 @@ class MenuTableViewController: UITableViewController {
         //passo il controllo alla view di login, LoginViewController
         let loginPage = storyboard?.instantiateViewController(withIdentifier: "LoginViewController")
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        appDelegate.window!.rootViewController = loginPage
+        appDelegate.window?.rootViewController = loginPage
     }
     /*
-    private func loadUserFromFirebase (){
-        let fireBaseUser = Auth.auth().currentUser
-        self.fireBaseToken.set((fireBaseUser?.uid)!, forKey: "FireBaseToken")
-        self.uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
-        
-        FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/\(self.uid!)", onCompletion: { (error,dictionary) in
-            self.user = CoreDataController.sharedIstance.addNewUser(self.uid!, dictionary!["idFB"] as! String, dictionary?["email"] as? String, dictionary?["fullName"] as? String, dictionary?["name"] as? String, dictionary?["surname"] as? String, dictionary?["gender"] as? String, dictionary?["pictureUrl"] as? String)
-    
-            if dictionary?["companyCode"] as! String != "0" {
-                self.actualMenu = self.menuCompany
-                self.myTable.reloadData()
-            }
-        })
-    }*/
+     private func loadUserFromFirebase (){
+     let fireBaseUser = Auth.auth().currentUser
+     self.fireBaseToken.set((fireBaseUser?.uid)!, forKey: "FireBaseToken")
+     self.uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
+     
+     FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/\(self.uid!)", onCompletion: { (error,dictionary) in
+     self.user = CoreDataController.sharedIstance.addNewUser(self.uid!, dictionary!["idFB"] as! String, dictionary?["email"] as? String, dictionary?["fullName"] as? String, dictionary?["name"] as? String, dictionary?["surname"] as? String, dictionary?["gender"] as? String, dictionary?["pictureUrl"] as? String)
+     
+     if dictionary?["companyCode"] as! String != "0" {
+     self.actualMenu = self.menuCompany
+     self.myTable.reloadData()
+     }
+     })
+     }*/
     
     private func readMenu(){
-        guard self.user?.idApp != nil else {
+        guard let idApp = self.user?.idApp else {
             return
         }
-        FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + (user?.idApp)!, onCompletion: { (error,dictionary) in
+        FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + idApp, onCompletion: { (error,dictionary) in
             guard error == nil else {return}
-            guard dictionary != nil else {return}
+            guard let dic = dictionary else {return}
             
-            if dictionary?["companyCode"] as! String != "0" {
+            if dic["companyCode"] as? String != "0" {
                 self.actualMenu = self.menuCompany
                 self.myTable.reloadData()
             }
         })
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
+    
     // MARK: - Table view data source
-
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         return 2
@@ -148,7 +149,7 @@ class MenuTableViewController: UITableViewController {
             return 45.0
         }
     }
-
+    
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         //let cell = tableView.dequeueReusableCell(withIdentifier: "menuRow", for: indexPath)
@@ -203,7 +204,7 @@ class MenuTableViewController: UITableViewController {
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
-
-   
-
+    
+    
+    
 }

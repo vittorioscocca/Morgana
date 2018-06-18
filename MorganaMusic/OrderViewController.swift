@@ -189,9 +189,11 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
     
     private func readCompanies(){
         FirebaseData.sharedIstance.readCompaniesOnFireBase { (companies) in
-            self.companies = companies
-            //self.myTable.reloadData()
-            Cart.sharedIstance.company = self.companies?[0]
+            DispatchQueue.main.async(execute: {
+                self.companies = companies
+                //self.myTable.reloadData()
+                Cart.sharedIstance.company = self.companies?[0]
+            })
         }
     }
     

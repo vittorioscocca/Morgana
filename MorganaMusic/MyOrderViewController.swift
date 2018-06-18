@@ -5,7 +5,6 @@
 //  Created by Vittorio Scocca on 19/05/17.
 //  Copyright © 2017 Vittorio Scocca. All rights reserved.
 //
-
 import UIKit
 import FirebaseDatabase
 import FirebaseAuth
@@ -15,7 +14,7 @@ import FirebaseInstanceID
 import UserNotifications
 
 class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-
+    
     @IBOutlet weak var myTable: UITableView!
     @IBOutlet weak var drinksList_segmentControl: UISegmentedControl!
     @IBOutlet var successView: UIView!
@@ -43,7 +42,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     var payPalAccessToken = String()
     var PayPalPaymentDataDictionary: NSDictionary?
     
-   //Alert Controller
+    //Alert Controller
     var controller :UIAlertController?
     
     //Activity Indicator
@@ -120,10 +119,12 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             myTable.isUserInteractionEnabled = true
             let orderSentList = OrdersListManager.instance.readOrdersList().ordersList.ordersSentList
             let orderRiceivedList = OrdersListManager.instance.readOrdersList().ordersList.ordersReceivedList
-            
             ordersSent = orderSentList
             ordersReceived = orderRiceivedList
-            myTable.reloadData()
+            DispatchQueue.main.async(execute: { () -> Void in
+                self.myTable.reloadData()
+            })
+            
             print("**// Order list changed, table reloaded")
         }
     }
@@ -133,16 +134,16 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     private func setSegmentcontrol() {
-        self.drinksList_segmentControl.selectedSegmentIndex = 0
+        drinksList_segmentControl.selectedSegmentIndex = 0
         //self.drinksList_segmentControl.removeBorders()
         let segAttributes: NSDictionary = [
             NSAttributedStringKey.foregroundColor: UIColor.white,
             NSAttributedStringKey.font: UIFont.systemFont(ofSize: 17)
-            ]
-        self.drinksList_segmentControl.setTitleTextAttributes(segAttributes as? [AnyHashable : Any], for: UIControlState.selected)
-        self.drinksList_segmentControl.setTitleTextAttributes(segAttributes as? [AnyHashable : Any], for: UIControlState.normal)
+        ]
+        drinksList_segmentControl.setTitleTextAttributes(segAttributes as? [AnyHashable : Any], for: UIControlState.selected)
+        drinksList_segmentControl.setTitleTextAttributes(segAttributes as? [AnyHashable : Any], for: UIControlState.normal)
         let underlineWidth = self.view.frame.width / CGFloat(self.drinksList_segmentControl.numberOfSegments)
-        self.drinksList_segmentControl.addUnderlineForSelectedSegment(underlineWidth: underlineWidth)
+        drinksList_segmentControl.addUnderlineForSelectedSegment(underlineWidth: underlineWidth)
     }
     
     private func generateStandardAlert(){
@@ -169,32 +170,33 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             guard snap.value != nil else {return}
             
             let datiUtente = snap.value! as! NSDictionary
-            
-            for (chiave,valore) in datiUtente {
-                switch chiave as! String {
-                case "numberOfPendingReceivedProducts":
-                    self.productSendBadge.set(valore as! Int, forKey: "productOfferedBadge")
-                    break
-                case "numberOfPendingPurchasedProducts":
-                    self.productSendBadge.set(valore as! Int, forKey: "paymentOfferedBadge")
-                    break
-                default:
-                    break
+            DispatchQueue.main.async(execute: {
+                for (chiave,valore) in datiUtente {
+                    switch chiave as! String {
+                    case "numberOfPendingReceivedProducts":
+                        self.productSendBadge.set(valore as! Int, forKey: "productOfferedBadge")
+                        break
+                    case "numberOfPendingPurchasedProducts":
+                        self.productSendBadge.set(valore as! Int, forKey: "paymentOfferedBadge")
+                        break
+                    default:
+                        break
+                    }
                 }
-            }
-            //update segment control
-            if self.productSendBadge.object(forKey: "productOfferedBadge") as? Int != 0 {
-                let val = self.productSendBadge.object(forKey: "productOfferedBadge") as? Int
-                self.drinksList_segmentControl.setTitle("Ricevuti  " + String(describing: val!), forSegmentAt: 1)
-            } else {
-                self.drinksList_segmentControl.setTitle("Ricevuti", forSegmentAt: 1)
-            }
-            if self.productSendBadge.object(forKey: "paymentOfferedBadge") as? Int != 0 {
-                let val = self.productSendBadge.object(forKey: "paymentOfferedBadge") as? Int
-                self.drinksList_segmentControl.setTitle("Inviati  " + String(describing: val!), forSegmentAt: 0)
-            } else {
-                self.drinksList_segmentControl.setTitle("Inviati", forSegmentAt: 0)
-            }
+                //update segment control
+                if self.productSendBadge.object(forKey: "productOfferedBadge") as? Int != 0 {
+                    let val = self.productSendBadge.object(forKey: "productOfferedBadge") as? Int
+                    self.drinksList_segmentControl.setTitle("Ricevuti  " + String(describing: val!), forSegmentAt: 1)
+                } else {
+                    self.drinksList_segmentControl.setTitle("Ricevuti", forSegmentAt: 1)
+                }
+                if self.productSendBadge.object(forKey: "paymentOfferedBadge") as? Int != 0 {
+                    let val = self.productSendBadge.object(forKey: "paymentOfferedBadge") as? Int
+                    self.drinksList_segmentControl.setTitle("Inviati  " + String(describing: val!), forSegmentAt: 0)
+                } else {
+                    self.drinksList_segmentControl.setTitle("Inviati", forSegmentAt: 0)
+                }
+            })
         })
     }
     
@@ -211,7 +213,6 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     private func readAndSolvePendingPayPalPayment(order: Order, paymentId: String,onCompletion: @escaping () -> ()){
         let ref = Database.database().reference()
         //self.pendingPayments.removeAll()
-
         ref.child("pendingPayments/\((self.user?.idApp)!)/\((order.company?.companyId)!)/\(paymentId)").observeSingleEvent(of:.value, with: { (snap) in
             
             guard snap.exists() else {return}
@@ -247,23 +248,24 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
             PaymentManager.sharedIstance.resolvePendingPayPalPayment(user: self.user!,payment: payment, onCompleted: { (paymentVerified) in
                 guard paymentVerified  else {
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async(execute: {
                         // ritorno sul main thread ed aggiorno la view
                         self.stopActivityIndicator()
-                    }
+                    })
                     
                     print("state payement is not approved")
                     self.generateAlert(title: "Pagamento non avvenuto", msg: "Il tuo pagamento di € " + payment.total! + " non è andato a buon fine",indexPath: nil)
                     return
                 }
-                DispatchQueue.main.async {
+                DispatchQueue.main.async(execute: {
                     // ritorno sul main thread ed aggiorno la view
                     self.stopActivityIndicator()
-                }
+                    self.generateAlert(title: "Pagamento avvenuto", msg: "Il tuo pagamento di € " + payment.total! + " è avvenuto correttamente",indexPath: nil)
+                })
                 self.setPaymentCompletedInLocal(payment)
-                self.generateAlert(title: "Pagamento avvenuto", msg: "Il tuo pagamento di € " + payment.total! + " è avvenuto correttamente",indexPath: nil)
+                
             })
-         onCompletion()
+            onCompletion()
         })
     }
     
@@ -441,7 +443,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 //cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
                 (cell as? OrderReceivedTableViewCell)?.cellReaded = false
                 
-            } 
+            }
             
         }
         return cell
@@ -469,68 +471,68 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
     
-//    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-//        if self.drinksList_segmentControl.selectedSegmentIndex == 0 {
-//            print("**// indexPath:\(indexPath.row), ordersSent= \(ordersSent.count)")
-//            guard !(indexPath.row == ordersSent.count - Constants.FetchThreshold - 1) else {
-//                return
-//            }
-//            if indexPath.row == ordersSent.count - Constants.FetchThreshold && indexPath.row <= Constants.FetchLimit  {
-//                guard !finishOrdersSent else {
-//                    print("**// array finito")
-//                    return
-//                }
-//                print("**// new ordersSent range request loaded")
-//                FirebaseData.sharedIstance.readOrdersSentOnFireBaseRange(user: self.user!, onCompletion: { (order) in
-//                    guard let orderRange = order else {
-//                        return
-//                    }
-//                    print("**// new order range requested, dimension: \(orderRange.count)")
-////                    guard self.ordersSent.count < orderRange.count else {
-////                        self.finishOrdersSent = true
-////                        print("**// array ugual finished == true")
-////                        print("**// orderSent dimension: \(self.ordersSent.count) order dimension: \(orderRange.count)")
-////                        return
-////                    }
-//                    self.ordersSent = orderRange
-//                    print("order sent dimension: \(self.ordersSent.count)")
-//                    self.myTable.reloadData()
-//                })
-//                finishOrdersSent = false
-//            }
-//        } else {
-//            print("**// indexPath:\(indexPath.row), ordersSent= \(ordersReceived.count)")
-//            guard !(indexPath.row == ordersReceived.count - Constants.FetchThreshold - 1) else {
-//                return
-//            }
-//            if indexPath.row == ordersReceived.count - Constants.FetchThreshold && indexPath.row  <= Constants.FetchLimit {
-//                guard !finishOrdersReceived else {
-//                    print("**// array finito")
-//                    return
-//                }
-//                print("**// new ordersSent range request loaded")
-//                FirebaseData.sharedIstance.readOrdersReceivedOnFireBaseRange(user: self.user!, onCompletion: { (order) in
-//
-//                    guard let orderReceivedRange = order else {
-//                        return
-//                    }
-//                    print("**// letto nuovo array ordini ordersSent= \(orderReceivedRange.count)")
-////                    guard self.ordersReceived.count < orderReceivedRange.count else {
-////                        self.finishOrdersReceived = true
-////                        print("**// array ugual finished == true")
-////                        print("**// orderSent dimension: \(self.ordersReceived.count) order dimension: \(orderReceivedRange.count)")
-////                        return
-////                    }
-//                    print("ordini ricevuti sta per essere aggiornato. Attuale dimension: \(self.ordersReceived.count)")
-//                    self.ordersReceived = orderReceivedRange
-//                    print("ordini ricevuti aggiornato. Attuale dimensione \(self.ordersReceived.count)")
-//                    print("order sent dimension: \(self.ordersReceived.count)")
-//                    self.myTable.reloadData()
-//                })
-//                self.finishOrdersReceived = false
-//            }
-//        }
-//    }
+    //    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+    //        if self.drinksList_segmentControl.selectedSegmentIndex == 0 {
+    //            print("**// indexPath:\(indexPath.row), ordersSent= \(ordersSent.count)")
+    //            guard !(indexPath.row == ordersSent.count - Constants.FetchThreshold - 1) else {
+    //                return
+    //            }
+    //            if indexPath.row == ordersSent.count - Constants.FetchThreshold && indexPath.row <= Constants.FetchLimit  {
+    //                guard !finishOrdersSent else {
+    //                    print("**// array finito")
+    //                    return
+    //                }
+    //                print("**// new ordersSent range request loaded")
+    //                FirebaseData.sharedIstance.readOrdersSentOnFireBaseRange(user: self.user!, onCompletion: { (order) in
+    //                    guard let orderRange = order else {
+    //                        return
+    //                    }
+    //                    print("**// new order range requested, dimension: \(orderRange.count)")
+    ////                    guard self.ordersSent.count < orderRange.count else {
+    ////                        self.finishOrdersSent = true
+    ////                        print("**// array ugual finished == true")
+    ////                        print("**// orderSent dimension: \(self.ordersSent.count) order dimension: \(orderRange.count)")
+    ////                        return
+    ////                    }
+    //                    self.ordersSent = orderRange
+    //                    print("order sent dimension: \(self.ordersSent.count)")
+    //                    self.myTable.reloadData()
+    //                })
+    //                finishOrdersSent = false
+    //            }
+    //        } else {
+    //            print("**// indexPath:\(indexPath.row), ordersSent= \(ordersReceived.count)")
+    //            guard !(indexPath.row == ordersReceived.count - Constants.FetchThreshold - 1) else {
+    //                return
+    //            }
+    //            if indexPath.row == ordersReceived.count - Constants.FetchThreshold && indexPath.row  <= Constants.FetchLimit {
+    //                guard !finishOrdersReceived else {
+    //                    print("**// array finito")
+    //                    return
+    //                }
+    //                print("**// new ordersSent range request loaded")
+    //                FirebaseData.sharedIstance.readOrdersReceivedOnFireBaseRange(user: self.user!, onCompletion: { (order) in
+    //
+    //                    guard let orderReceivedRange = order else {
+    //                        return
+    //                    }
+    //                    print("**// letto nuovo array ordini ordersSent= \(orderReceivedRange.count)")
+    ////                    guard self.ordersReceived.count < orderReceivedRange.count else {
+    ////                        self.finishOrdersReceived = true
+    ////                        print("**// array ugual finished == true")
+    ////                        print("**// orderSent dimension: \(self.ordersReceived.count) order dimension: \(orderReceivedRange.count)")
+    ////                        return
+    ////                    }
+    //                    print("ordini ricevuti sta per essere aggiornato. Attuale dimension: \(self.ordersReceived.count)")
+    //                    self.ordersReceived = orderReceivedRange
+    //                    print("ordini ricevuti aggiornato. Attuale dimensione \(self.ordersReceived.count)")
+    //                    print("order sent dimension: \(self.ordersReceived.count)")
+    //                    self.myTable.reloadData()
+    //                })
+    //                self.finishOrdersReceived = false
+    //            }
+    //        }
+    //    }
     
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -538,7 +540,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         let contentHeight = scrollView.contentSize.height
         
         if self.drinksList_segmentControl.selectedSegmentIndex == 0 {
-             if offsetY > contentHeight - scrollView.frame.height * 2 {
+            if offsetY > contentHeight - scrollView.frame.height * 2 {
                 if !fetchingMoreOrdersSent {
                     beginFetchOrdersSent()
                 }
@@ -555,25 +557,29 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     private func beginFetchOrdersSent() {
         fetchingMoreOrdersSent = true
         FirebaseData.sharedIstance.readOrdersSentOnFireBaseRange(user: self.user!, onCompletion: { (order) in
-            self.fetchingMoreOrdersSent = false
-            guard let orderRange = order else {return}
-            self.ordersSent = orderRange
-            print("**// order sent dimension: \(self.ordersSent.count)")
-            self.myTable.reloadData()
+            DispatchQueue.main.async(execute: {
+                self.fetchingMoreOrdersSent = false
+                guard let orderRange = order else {return}
+                self.ordersSent = orderRange
+                print("**// order sent dimension: \(self.ordersSent.count)")
+                self.myTable.reloadData()
+            })
         })
     }
     
     private func beginFetchOrdersReceived() {
         fetchingMoreOrdersReceived = true
         FirebaseData.sharedIstance.readOrdersReceivedOnFireBaseRange(user: self.user!, onCompletion: { (order) in
-            self.fetchingMoreOrdersReceived = false
-            guard let orderRange = order else {return}
-            self.ordersReceived = orderRange
-            print("**// order received dimension: \(self.ordersReceived.count)")
-            self.myTable.reloadData()
+            DispatchQueue.main.async(execute: {
+                self.fetchingMoreOrdersReceived = false
+                guard let orderRange = order else {return}
+                self.ordersReceived = orderRange
+                print("**// order received dimension: \(self.ordersReceived.count)")
+                self.myTable.reloadData()
+            })
         })
     }
-
+    
     private func scheduleRememberExpiryNotification(order: Order){
         let ref = Database.database().reference()
         ref.child("sessions").setValue(ServerValue.timestamp())
@@ -608,21 +614,21 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     /*
-    DISABLE FULL SWIPE
+     DISABLE FULL SWIPE
      
-    @available(iOS 11.0, *)
-    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let refuseOrderAction = UIContextualAction(style: .destructive, title: "Rifiuta") { (action, sourceView, completionHandler) in
-            completionHandler(true)
-        }
-        let acceptOrderAction = UIContextualAction(style: .normal, title: "Accetta") { (action, sourceView, completionHandler) in
-            completionHandler(true)
-        }
-        
-        let swipeAction = UISwipeActionsConfiguration(actions: [refuseOrderAction,acceptOrderAction])
-        swipeAction.performsFirstActionWithFullSwipe = false // This is the line which disables full swipe
-        return swipeAction
-    }*/
+     @available(iOS 11.0, *)
+     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+     let refuseOrderAction = UIContextualAction(style: .destructive, title: "Rifiuta") { (action, sourceView, completionHandler) in
+     completionHandler(true)
+     }
+     let acceptOrderAction = UIContextualAction(style: .normal, title: "Accetta") { (action, sourceView, completionHandler) in
+     completionHandler(true)
+     }
+     
+     let swipeAction = UISwipeActionsConfiguration(actions: [refuseOrderAction,acceptOrderAction])
+     swipeAction.performsFirstActionWithFullSwipe = false // This is the line which disables full swipe
+     return swipeAction
+     }*/
     
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
         
@@ -643,7 +649,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 
                 //Action accept order
                 let acceptOrderAction = UITableViewRowAction(style: .normal, title: "Accetta") { (action, index) in
-                    (thisCell as? OrderReceivedTableViewCell)?.cellReaded = true 
+                    (thisCell as? OrderReceivedTableViewCell)?.cellReaded = true
                     FirebaseData.sharedIstance.user = self.user
                     FirebaseData.sharedIstance.acceptOrder(state: "Offerta accettata", userFullName: (self.user?.fullName)!, userIdApp: (self.user?.idApp)!, comapanyId: (self.ordersReceived[indexPath.row].company?.companyId)!, userSenderIdApp: (self.ordersReceived[indexPath.row].userSender?.idApp)!, idOrder: self.ordersReceived[indexPath.row].idOfferta!, autoIdOrder: self.ordersReceived[indexPath.row].orderAutoId)
                     self.scheduleExpiryNotification(order: self.ordersReceived[indexPath.row])
@@ -653,26 +659,25 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                     self.performSegue(withIdentifier: "segueToOrderDetails", sender: indexPath)
                     tableView.deselectRow(at: indexPath, animated: true)
                     self.resetSegmentControl1()
-                    
                     self.myTable.reloadData()
                 }
                 acceptOrderAction.backgroundColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
                 
                 //Action forward order
                 /*
-                let forwardOrderAction = UITableViewRowAction(style: .default, title: "Inoltra ") { (action, index) in
-                    (thisCell as? OrderReceivedTableViewCell)?.cellReaded = true
-                    self.updateStateOnFirebase(order: self.ordersReceived[indexPath.row],state: "Offerta inoltrata")
-                    self.ordersReceived[indexPath.row].forwardOffer()
-                    tableView.setEditing(false, animated: true)
-                    tableView.deselectRow(at: indexPath, animated: true)
-                    let msg = "Il tuo amico " + (self.user?.fullName)!  + " ha inoltrato il tuo ordine"
-                    NotificationsCenter.sendNotification(userIdApp: (self.ordersReceived[indexPath.row].userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
-                    FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase((self.ordersReceived[indexPath.row].userSender?.idApp)!, recOrPurch: "purchased")
-                    self.myTable.reloadData()
-                    self.resetSegmentControl1()
-                }
-                forwardOrderAction.backgroundColor = #colorLiteral(red: 0.6000000238, green: 0.6000000238, blue: 0.6000000238, alpha: 1)*/
+                 let forwardOrderAction = UITableViewRowAction(style: .default, title: "Inoltra ") { (action, index) in
+                 (thisCell as? OrderReceivedTableViewCell)?.cellReaded = true
+                 self.updateStateOnFirebase(order: self.ordersReceived[indexPath.row],state: "Offerta inoltrata")
+                 self.ordersReceived[indexPath.row].forwardOffer()
+                 tableView.setEditing(false, animated: true)
+                 tableView.deselectRow(at: indexPath, animated: true)
+                 let msg = "Il tuo amico " + (self.user?.fullName)!  + " ha inoltrato il tuo ordine"
+                 NotificationsCenter.sendNotification(userIdApp: (self.ordersReceived[indexPath.row].userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
+                 FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase((self.ordersReceived[indexPath.row].userSender?.idApp)!, recOrPurch: "purchased")
+                 self.myTable.reloadData()
+                 self.resetSegmentControl1()
+                 }
+                 forwardOrderAction.backgroundColor = #colorLiteral(red: 0.6000000238, green: 0.6000000238, blue: 0.6000000238, alpha: 1)*/
                 
                 return [refuseOrderAction, acceptOrderAction]
             case "Scaduta" :
@@ -764,7 +769,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     @IBAction func segmentControl_clicked(_ sender: UISegmentedControl) {
-       
+        
         if sender.selectedSegmentIndex == 0 {
             print("segment control clicked pari a 0")
             //da impelemtare la notifica per i pagamenti inviati appena vatto il pagamento il quale si trova ancora nello stato pending
@@ -795,9 +800,9 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             let orderReceived = ordersReceived[indexPath.row]
             if  orderReceived.offerState == "Offerta accettata" ||  orderReceived.offerState == "Offerta scalata" {
                 /*if drinksList_segmentControl.titleForSegment(at: 1) != "Ricevuti" {
-                    OrdersListManager.instance.refreshOrdersList()
-                    print("ho aggiornato gli Ordini-Ricevuti da Firebase")
-                }*/
+                 OrdersListManager.instance.refreshOrdersList()
+                 print("ho aggiornato gli Ordini-Ricevuti da Firebase")
+                 }*/
                 performSegue(withIdentifier: "segueToOrderDetails", sender: indexPath)
                 tableView.deselectRow(at: indexPath, animated: true)
             }else if orderReceived.offerState == "Pending" {
@@ -838,7 +843,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             myTable.reloadData()
         }
     }
-
+    
     func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
         let thisCell = tableView.cellForRow(at: indexPath) as? OrderReceivedTableViewCell
         thisCell?.cellReaded = false
@@ -914,8 +919,8 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         let action: UIAlertAction?
         let actionAnnulla: UIAlertAction?
         switch msg {
-            case let x where (x.range(of:"'Aggiungi'") != nil):
-                action = UIAlertAction(title: "Aggiungi ai tuoi crediti", style: UIAlertActionStyle.default, handler:
+        case let x where (x.range(of:"'Aggiungi'") != nil):
+            action = UIAlertAction(title: "Aggiungi ai tuoi crediti", style: UIAlertActionStyle.default, handler:
                 {(paramAction:UIAlertAction!) in
                     print("Il messaggio di chiusura è stato premuto")
                     if let range = msg.range(of: "€ ") {
@@ -935,77 +940,77 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                         self.ordersSent.remove(at: (indexPath?.row)!)
                     }
                     self.myTable.reloadData()
-                })
-                actionAnnulla = UIAlertAction(title: "Annulla", style: UIAlertActionStyle.default, handler:
+            })
+            actionAnnulla = UIAlertAction(title: "Annulla", style: UIAlertActionStyle.default, handler:
                 {(paramAction:UIAlertAction!) in
                     print("Il messaggio di chiusura è stato premuto")
-                })
-                break
-            case let x where (x.range(of:"'Rifiuta'") != nil):
-                action = UIAlertAction(title: "Rifiuta", style: UIAlertActionStyle.default, handler: {(paramAction:UIAlertAction!) in
-                    print("'Rifiuta' è stato cliccato")
-                    FirebaseData.sharedIstance.user = self.user
-                    FirebaseData.sharedIstance.refuseOrder(state: "Offerta rifiutata", userFullName: (self.user?.fullName)!, userIdApp: (self.user?.idApp)!, comapanyId: (self.ordersReceived[(indexPath?.row)!].company?.companyId)!, userSenderIdApp: (self.ordersReceived[(indexPath?.row)!].userSender?.idApp)!, idOrder: self.ordersReceived[(indexPath?.row)!].idOfferta!, autoIdOrder: self.ordersReceived[(indexPath?.row)!].orderAutoId)
-                    self.ordersReceived[(indexPath?.row)!].refuseOffer()
-                    //FirebaseData.sharedIstance.deleteOrderReceveidOnFirebase(order: self.ordersReceived[(indexPath?.row)!])
-                    
-                    self.ordersReceived.remove(at: (indexPath?.row)!)
-                    self.myTable.deleteRows(at: [indexPath!], with: .fade)
-                    
+            })
+            break
+        case let x where (x.range(of:"'Rifiuta'") != nil):
+            action = UIAlertAction(title: "Rifiuta", style: UIAlertActionStyle.default, handler: {(paramAction:UIAlertAction!) in
+                print("'Rifiuta' è stato cliccato")
+                FirebaseData.sharedIstance.user = self.user
+                FirebaseData.sharedIstance.refuseOrder(state: "Offerta rifiutata", userFullName: (self.user?.fullName)!, userIdApp: (self.user?.idApp)!, comapanyId: (self.ordersReceived[(indexPath?.row)!].company?.companyId)!, userSenderIdApp: (self.ordersReceived[(indexPath?.row)!].userSender?.idApp)!, idOrder: self.ordersReceived[(indexPath?.row)!].idOfferta!, autoIdOrder: self.ordersReceived[(indexPath?.row)!].orderAutoId)
+                self.ordersReceived[(indexPath?.row)!].refuseOffer()
+                //FirebaseData.sharedIstance.deleteOrderReceveidOnFirebase(order: self.ordersReceived[(indexPath?.row)!])
+                
+                self.ordersReceived.remove(at: (indexPath?.row)!)
+                self.myTable.deleteRows(at: [indexPath!], with: .fade)
+                
             })
             actionAnnulla = UIAlertAction(title: "Annulla", style: UIAlertActionStyle.default, handler:
                 {(paramAction:UIAlertAction!) in
                     print("'Annulla' è stato cliccato")
             })
             break
-            case let x where (x.range(of:"'Riscatta'") != nil):
-                action = UIAlertAction(title: "Riscatta", style: UIAlertActionStyle.default, handler:{(paramAction:UIAlertAction!) in
-                    print("Riscatta è stato premuto")
-                    //update order state
-                    self.forwardOrder = self.ordersSent[(indexPath?.row)!]
-                    self.oldFriendDestination = UserDestination(nil, self.forwardOrder?.userDestination?.idFB, nil, self.forwardOrder?.userDestination?.idApp, nil)
-                    self.forwardOrder?.userDestination?.idApp = self.user?.idApp
-                    self.forwardOrder?.userDestination?.idFB = self.user?.idFB
-                    FireBaseAPI.updateNode(node: "ordersSent/\((self.user?.idApp)!)/\((self.forwardOrder?.company?.companyId)!)/\((self.forwardOrder?.idOfferta)!)", value: ["IdAppUserDestination" : (self.user?.idApp)!, "facebookUserDestination":(self.user?.idFB)!,"offerState":"Offerta riscattata"])
-                    
-                    FirebaseData.sharedIstance.moveFirebaseRecord(userApp: self.user!,user: self.oldFriendDestination!, company: (self.forwardOrder?.company?.companyId)!, order: self.forwardOrder!, onCompletion: { (error) in
-                        guard error == nil else {
-                            self.generateAlert(title: "Errore", msg: error!, indexPath: nil)
-                            return
-                        }
-                        self.showSuccess()
-                        self.ordersSent.remove(at: (indexPath?.row)!)
-                        self.myTable.deleteRows(at: [indexPath!], with: .fade)
-                        FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase((self.user?.idApp)!, recOrPurch: "received")
-                    })
-                    
+        case let x where (x.range(of:"'Riscatta'") != nil):
+            action = UIAlertAction(title: "Riscatta", style: UIAlertActionStyle.default, handler:{(paramAction:UIAlertAction!) in
+                print("Riscatta è stato premuto")
+                //update order state
+                self.forwardOrder = self.ordersSent[(indexPath?.row)!]
+                self.oldFriendDestination = UserDestination(nil, self.forwardOrder?.userDestination?.idFB, nil, self.forwardOrder?.userDestination?.idApp, nil)
+                self.forwardOrder?.userDestination?.idApp = self.user?.idApp
+                self.forwardOrder?.userDestination?.idFB = self.user?.idFB
+                FireBaseAPI.updateNode(node: "ordersSent/\((self.user?.idApp)!)/\((self.forwardOrder?.company?.companyId)!)/\((self.forwardOrder?.idOfferta)!)", value: ["IdAppUserDestination" : (self.user?.idApp)!, "facebookUserDestination":(self.user?.idFB)!,"offerState":"Offerta riscattata"])
+                
+                FirebaseData.sharedIstance.moveFirebaseRecord(userApp: self.user!,user: self.oldFriendDestination!, company: (self.forwardOrder?.company?.companyId)!, order: self.forwardOrder!, onCompletion: { (error) in
+                    guard error == nil else {
+                        self.generateAlert(title: "Errore", msg: error!, indexPath: nil)
+                        return
+                    }
+                    self.showSuccess()
+                    self.ordersSent.remove(at: (indexPath?.row)!)
+                    self.myTable.deleteRows(at: [indexPath!], with: .fade)
+                    FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase((self.user?.idApp)!, recOrPurch: "received")
                 })
-                actionAnnulla = UIAlertAction(title: "Annulla", style: UIAlertActionStyle.default, handler:
+                
+            })
+            actionAnnulla = UIAlertAction(title: "Annulla", style: UIAlertActionStyle.default, handler:
                 {(paramAction:UIAlertAction!) in
                     print("Il messaggio di chiusura è stato premuto")
-                })
-                break
-            case let x where (x.range(of:"'Dettaglio'") != nil):
-                action = UIAlertAction(title: "Ok", style: UIAlertActionStyle.default, handler:
-                    {(paramAction:UIAlertAction!) in
-                        print("Il messaggio di chiusura è stato premuto")
-                })
-                actionAnnulla = UIAlertAction()
-                break
-            case let x where (x.range(of:"'Inoltra'") != nil):
-                action = UIAlertAction(title: "Inoltra", style: UIAlertActionStyle.default, handler:
-                    {(paramAction:UIAlertAction!) in
-                        print("Inoltra è stato premuto")
-                        self.forwardOrder = self.ordersSent[(indexPath?.row)!]
-                        self.oldFriendDestination = UserDestination(nil, self.forwardOrder?.userDestination?.idFB, nil, self.forwardOrder?.userDestination?.idApp, nil)
-                        self.performSegue(withIdentifier: "segueToForwardToFriend", sender: nil)
-                        
-                })
-                actionAnnulla = UIAlertAction(title: "Annulla", style: UIAlertActionStyle.default, handler:
-                    {(paramAction:UIAlertAction!) in
-                        print("Annulla è stato premuto")
-                })
-                break
+            })
+            break
+        case let x where (x.range(of:"'Dettaglio'") != nil):
+            action = UIAlertAction(title: "Ok", style: UIAlertActionStyle.default, handler:
+                {(paramAction:UIAlertAction!) in
+                    print("Il messaggio di chiusura è stato premuto")
+            })
+            actionAnnulla = UIAlertAction()
+            break
+        case let x where (x.range(of:"'Inoltra'") != nil):
+            action = UIAlertAction(title: "Inoltra", style: UIAlertActionStyle.default, handler:
+                {(paramAction:UIAlertAction!) in
+                    print("Inoltra è stato premuto")
+                    self.forwardOrder = self.ordersSent[(indexPath?.row)!]
+                    self.oldFriendDestination = UserDestination(nil, self.forwardOrder?.userDestination?.idFB, nil, self.forwardOrder?.userDestination?.idApp, nil)
+                    self.performSegue(withIdentifier: "segueToForwardToFriend", sender: nil)
+                    
+            })
+            actionAnnulla = UIAlertAction(title: "Annulla", style: UIAlertActionStyle.default, handler:
+                {(paramAction:UIAlertAction!) in
+                    print("Annulla è stato premuto")
+            })
+            break
         case let x where (x.range(of:"non è andato a buon fine") != nil):
             action = UIAlertAction(title: "Riprova", style: UIAlertActionStyle.default, handler:
                 {(paramAction:UIAlertAction!) in
@@ -1020,17 +1025,17 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                     print("Annulla è stato premuto")
             })
             break
-            default:
-                action = UIAlertAction(title: "Ok", style: UIAlertActionStyle.default, handler:
+        default:
+            action = UIAlertAction(title: "Ok", style: UIAlertActionStyle.default, handler:
                 {(paramAction:UIAlertAction!) in
                     print("ok è stato premuto")
                     self.myTable.reloadData()
-                })
-                actionAnnulla = UIAlertAction(title: "Annulla", style: UIAlertActionStyle.default, handler:
+            })
+            actionAnnulla = UIAlertAction(title: "Annulla", style: UIAlertActionStyle.default, handler:
                 {(paramAction:UIAlertAction!) in
                     print("Il messaggio di chiusura è stato premuto")
-                })
-                break
+            })
+            break
         }
         controller!.addAction(action!)
         controller!.addAction(actionAnnulla!)

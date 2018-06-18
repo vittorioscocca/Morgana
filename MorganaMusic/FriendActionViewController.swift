@@ -5,14 +5,13 @@
 //  Created by Vittorio Scocca on 11/04/17.
 //  Copyright © 2017 Vittorio Scocca. All rights reserved.
 //
-
 import UIKit
 import FirebaseDatabase
 import FirebaseAuth
 
 //This is the controller for Friend order View. It's possibole choose Morgana products, saved on Firebase
 class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource  {
-
+    
     
     @IBOutlet weak var imageFriend_Picture: UIImageView!
     @IBOutlet weak var fullNameFrienf_label: UILabel!
@@ -21,7 +20,7 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
     @IBOutlet weak var price1_label: UILabel!
     @IBOutlet weak var quantità: UILabel!
     @IBOutlet weak var num_quantità: UIStepper!
-   
+    
     enum ErrorMessages: String {
         case erroreTitle = "Attenzione"
         case enterOneProduct_message = "Inserisci almeno un prodotto"
@@ -65,7 +64,9 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
                 print("immagine utente non reperibile")
                 return
             }
-            self.imageFriend_Picture.image = image
+            DispatchQueue.main.async(execute: {
+                self.imageFriend_Picture.image = image
+            })
         })
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(remoteProductsListDidChange),
@@ -96,7 +97,10 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
             self.productsList = LoadRemoteProducts.instance.products!
             self.offersDctionary = LoadRemoteProducts.instance.offers!
             self.pickerView.reloadAllComponents()
-            self.updateLabels(row: 0)
+            
+            DispatchQueue.main.async(execute: {
+                self.updateLabels(row: 0)
+            })
         }
     }
     
@@ -130,21 +134,22 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
     // Catpure the picker view selection
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         if LoadRemoteProducts.instance.isNotNull() && LoadRemoteProducts.instance.isNotEmpty() {
-            updateLabels(row: row)
+            DispatchQueue.main.async(execute: {
+                self.updateLabels(row: row)
+            })
         }
         
     }
     
-    
     /*
-    @IBAction func newRequest(_ sender: UIButton) {
-        if self.selection.product != "" {
-            self.product1_label.text = self.selection.product
-            let priceString = String(format:"%.2f", self.selection.price!)
-            self.price1_label.text = priceString + " €"
-            //self.memorizza(self.scelta.product!)
-        }
-    }*/
+     @IBAction func newRequest(_ sender: UIButton) {
+     if self.selection.product != "" {
+     self.product1_label.text = self.selection.product
+     let priceString = String(format:"%.2f", self.selection.price!)
+     self.price1_label.text = priceString + " €"
+     //self.memorizza(self.scelta.product!)
+     }
+     }*/
     
     @IBAction func stepperValueChange(_ sender: UIStepper) {
         self.quantità.text = String(Int(sender.value))

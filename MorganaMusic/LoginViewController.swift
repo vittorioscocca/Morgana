@@ -6,7 +6,6 @@
 //  Copyright © 2017 Vittorio Scocca. All rights reserved.
 //
 
-
 import UIKit
 import FBSDKLoginKit
 import FirebaseDatabase
@@ -80,11 +79,15 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                 let url = data?["url"] as? String
                 
                 let user = self.fireBaseToken.object(forKey: "FireBaseToken") as? String
-                let newUser = CoreDataController.sharedIstance.addNewUser(user!, user_id_fb!, email, fullName, user_name, user_lastName, user_gender, url)
-                self.addUserInCloud(user: newUser, onCompletion: {
-                    self.createUserPointsStats()
-                    NotificationCenter.default.post(name: .FbTokenDidChangeNotification, object: nil)
-                })
+                DispatchQueue.global(qos: .background).async { () -> Void in
+                    let newUser = CoreDataController.sharedIstance.addNewUser(user!, user_id_fb!, email, fullName, user_name, user_lastName, user_gender, url)
+                    self.addUserInCloud(user: newUser, onCompletion: {
+                        self.createUserPointsStats()
+                        DispatchQueue.main.async(execute: { () -> Void in
+                            NotificationCenter.default.post(name: .FbTokenDidChangeNotification, object: nil)
+                        })
+                    })
+                }
             }
         })
     }
@@ -222,11 +225,12 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                             //save token on UserDefaults
                             self.fbToken.set(FBSDKAccessToken.current()?.tokenString, forKey: "FBToken")
                             self.fetchProfile()
-                            
-                            //slider first access
-                            let userPage = self.storyboard?.instantiateViewController(withIdentifier: "SliderViewController")
-                            let appDelegate = UIApplication.shared.delegate as! AppDelegate
-                            appDelegate.window!.rootViewController = userPage
+                            DispatchQueue.main.async(execute: { () -> Void in
+                                //slider first access
+                                let userPage = self.storyboard?.instantiateViewController(withIdentifier: "SliderViewController")
+                                let appDelegate = UIApplication.shared.delegate as! AppDelegate
+                                appDelegate.window!.rootViewController = userPage
+                            })
                         }
                     }
                 }
