@@ -23,7 +23,7 @@ public extension NSNotification.Name {
 
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate  {
 
     var lastViewControllerOnQuick = UserDefaults.standard
     
@@ -508,23 +508,6 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         
         let action = response.actionIdentifier
         
-        CacheImage.getImage(url: userInfo["media-url"] as? String, onCompletion: { (image) in
-            let content = UNMutableNotificationContent()
-            if let attachment = self.createAttachment(identifier: "userImage", image: image, options: nil) {
-                content.attachments.append(attachment)
-            }
-            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1,
-                                                            repeats: false)
-            let request = UNNotificationRequest(identifier: "missedCallNotificationIdentifier",
-                                                content: content, trigger: trigger)
-            center.add(request, withCompletionHandler: { (error) in
-                print("Unable to deliver missed call notification \(String(describing: error))")
-            })
-            
-        })
-        
-        
-        
         switch action {
         case "delete.action":
             print(response.notification.request.identifier)
@@ -593,48 +576,6 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         
         completionHandler()
     }
-    
-    private func createAttachment(identifier: String, image: UIImage?, options: [AnyHashable : Any]?) -> UNNotificationAttachment? {
-        do {
-            if let userImage = image {
-                if let roundedImage = maskRoundedImage(image: userImage) {
-                    if let newImageData =  UIImagePNGRepresentation(roundedImage) {
-                        let docDir = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-                        let imageURL = docDir.appendingPathComponent("\(UUID().uuidString).png")
-                        try newImageData.write(to: imageURL)
-                        return try UNNotificationAttachment.init(identifier: identifier, url: imageURL, options: options)
-                    }
-                }
-            }
-        } catch {
-            print("Unable to create image attachment for missed call notification \(error.localizedDescription)")
-        }
-        return nil
-    }
-    
-    private func maskRoundedImage(image: UIImage) -> UIImage? {
-        let imageView: UIImageView = UIImageView(image: image)
-        
-        imageView.layer.masksToBounds = true
-        imageView.layer.cornerRadius = imageView.frame.size.width / 2
-        
-        UIGraphicsBeginImageContext(imageView.bounds.size)
-        
-        defer {
-            UIGraphicsEndImageContext()
-        }
-        guard let context = UIGraphicsGetCurrentContext() else {
-            return nil
-        }
-        
-        imageView.layer.render(in:context )
-         
-        guard let roundedImage = UIGraphicsGetImageFromCurrentImageContext() else {
-            return nil
-        }
-        return roundedImage
-    }
-
 }
 
 extension AppDelegate : MessagingDelegate {
@@ -648,3 +589,23 @@ extension AppDelegate : MessagingDelegate {
     
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
