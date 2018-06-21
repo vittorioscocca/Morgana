@@ -22,11 +22,11 @@ class ManageCredits {
                 onCompletion(error)
                 return
             }
-            guard dictionary != nil else {
+            guard let dic = dictionary else {
                 onCompletion(error)
                 return
             }
-            credits = (dictionary?["credits"] as? Double)! + Double(newCredit)!
+            credits = (dic["credits"] as? Double)! + Double(newCredit)!
             FireBaseAPI.updateNode(node: "users/"+userId, value: ["credits":credits])
             onCompletion(error)
         })

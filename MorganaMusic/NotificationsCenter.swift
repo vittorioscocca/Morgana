@@ -47,8 +47,8 @@ class NotificationsCenter{
             userDestinationBadgeValue = userDestinationBadgeValue + 1
             
           
-            guard (dictionary?["fireBaseIstanceIDToken"] as? String) != nil else {return}
-            fireBaseIstanceIDToken = dictionary?["fireBaseIstanceIDToken"] as! String
+            guard let token = (dictionary?["fireBaseIstanceIDToken"] as? String) else { return }
+            fireBaseIstanceIDToken = token
             
             if let url = NSURL(string: "https://fcm.googleapis.com/fcm/send"){
                 let request = NSMutableURLRequest(url: url as URL)
@@ -70,8 +70,8 @@ class NotificationsCenter{
                 request.httpBody = httpData
                 let session = URLSession.shared
                 session.dataTask(with: request as URLRequest, completionHandler: { (returnData, response, error) -> Void in
-                    let strData = NSString(data: returnData!, encoding: String.Encoding.utf8.rawValue)
-                    print("NOTIFICA INVIATA \(strData!)")
+                    guard let strData = NSString(data: returnData!, encoding: String.Encoding.utf8.rawValue) else { return }
+                    print("NOTIFICA INVIATA \(strData)")
                 }).resume() //Remember this one or nothing will happen :-)
             }
             
@@ -99,8 +99,8 @@ class NotificationsCenter{
             userDestinationBadgeValue = userDestinationBadgeValue + 1
             
             
-            guard (dictionary?["fireBaseIstanceIDToken"] as? String) != nil else {return}
-            fireBaseIstanceIDToken = dictionary?["fireBaseIstanceIDToken"] as! String
+            guard let token = (dictionary?["fireBaseIstanceIDToken"] as? String) else { return }
+            fireBaseIstanceIDToken = token
             
             if let url = NSURL(string: "https://fcm.googleapis.com/fcm/send"){
                 let request = NSMutableURLRequest(url: url as URL)
@@ -122,8 +122,8 @@ class NotificationsCenter{
                 request.httpBody = httpData
                 let session = URLSession.shared
                 session.dataTask(with: request as URLRequest, completionHandler: { (returnData, response, error) -> Void in
-                    let strData = NSString(data: returnData!, encoding: String.Encoding.utf8.rawValue)
-                    print("NOTIFICA INVIATA \(strData!)")
+                    guard let strData = NSString(data: returnData!, encoding: String.Encoding.utf8.rawValue) else { return }
+                    print("NOTIFICA INVIATA \(strData)")
                 }).resume() //Remember this one or nothing will happen :-)
             }
             
@@ -174,8 +174,8 @@ class NotificationsCenter{
                 request.httpBody = httpData
                 let session = URLSession.shared
                 session.dataTask(with: request as URLRequest, completionHandler: { (returnData, response, error) -> Void in
-                    let strData = NSString(data: returnData!, encoding: String.Encoding.utf8.rawValue)
-                    print("NOTIFICA INVIATA \(strData!)")
+                    guard let strData = NSString(data: returnData!, encoding: String.Encoding.utf8.rawValue) else { return}
+                    print("NOTIFICA INVIATA \(strData)")
                 }).resume() //Remember this one or nothing will happen :-)
             }
             
@@ -202,7 +202,6 @@ class NotificationsCenter{
             userDestinationBadgeValue = dictionary?[valuePendingProduct] as! Int
             userDestinationBadgeValue = userDestinationBadgeValue + 1
             
-            
             guard (dictionary?["fireBaseIstanceIDToken"] as? String) != nil else {return}
             fireBaseIstanceIDToken = dictionary?["fireBaseIstanceIDToken"] as! String
             
@@ -213,7 +212,7 @@ class NotificationsCenter{
                 
                 request.setValue(authorizationKey, forHTTPHeaderField: "Authorization")//This is where you add your HTTP headers like Content-Type, Accept and so on
                 request.timeoutInterval = 200000.0
-                let params = ["to" : fireBaseIstanceIDToken, "data" : ["identifier" : "OrderSent","userFullName": userFullName, "userIdApp": userDestinationIdApp, "userSenderIdApp": userSenderIdApp, "idOrder": idOrder, "autoIdOrder": autoIdOrder, "companyId": companyId], "notification" :["title" : "", "body": msg, "click_action":"OrderSent", "sound" : "default", "badge" : String(userDestinationBadgeValue)], "priority" : "high" ] as [String : Any]
+                let params = ["to" : fireBaseIstanceIDToken, "data" : ["identifier" : "OrderSent","media-url" : (dictionary?["pictureUrl"])!, "userFullName": userFullName, "userIdApp": userDestinationIdApp, "userSenderIdApp": userSenderIdApp, "idOrder": idOrder, "autoIdOrder": autoIdOrder, "companyId": companyId], "notification" :["title" : "", "body": msg, "click_action":"OrderSent", "sound" : "default", "badge" : String(userDestinationBadgeValue)], "priority" : "high"] as [String : Any]
                 var httpData :Data = Data()
                 do {
                     httpData = try JSONSerialization.data(withJSONObject: params, options: .prettyPrinted)
@@ -226,8 +225,8 @@ class NotificationsCenter{
                 request.httpBody = httpData
                 let session = URLSession.shared
                 session.dataTask(with: request as URLRequest, completionHandler: { (returnData, response, error) -> Void in
-                    let strData = NSString(data: returnData!, encoding: String.Encoding.utf8.rawValue)
-                    print("NOTIFICA INVIATA \(strData!)")
+                    guard let strData = NSString(data: returnData!, encoding: String.Encoding.utf8.rawValue) else { return }
+                    print("NOTIFICA INVIATA \(strData)")
                 }).resume() //Remember this one or nothing will happen :-)
             }
             

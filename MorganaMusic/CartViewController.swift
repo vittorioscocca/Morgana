@@ -101,7 +101,12 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
 
             Cart.sharedIstance.carrello.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .left)
-            self.myTable.reloadData()
+            if Cart.sharedIstance.carrello.isEmpty {
+                unwind()
+            } else {
+                self.myTable.reloadData()
+            }
+            
             break
         default:
             break
@@ -124,11 +129,15 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
         (segue.destination as! CartOrderDetailsViewController).orderSent = orderSent
     }
     
-    @IBAction func unwindToOffer(_ sender: UIBarButtonItem) {
+    private func unwind(){
         self.performSegue(withIdentifier: "unwindToOfferFromCartWithoutData", sender: nil)
         self.dismiss(animated: true) { () -> Void in
             print("VC Dismesso")
         }
+    }
+    
+    @IBAction func unwindToOffer(_ sender: UIBarButtonItem) {
+        unwind()
     }
     
     private func generateAlert(title: String, msg: String){

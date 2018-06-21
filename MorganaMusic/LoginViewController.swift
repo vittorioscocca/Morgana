@@ -60,7 +60,7 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
         
         FBSDKGraphRequest(graphPath: "me", parameters: parameters).start(completionHandler: { (connection, result, error) -> Void in
             
-            if ((error) != nil)
+            if (error != nil)
             {
                 // Process error
                 print("Error: \(error!)")
@@ -73,14 +73,16 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                 let user_name = result?["first_name"] as? String
                 let user_lastName = result?["last_name"] as? String
                 let user_gender = result?["gender"] as? String
-                let user_id_fb = result?["id"]  as? String
+                guard let user_id_fb = result?["id"]  as? String else { return }
                 let picture = result?["picture"] as? NSDictionary
                 let data = picture?["data"] as? NSDictionary
                 let url = data?["url"] as? String
                 
-                let user = self.fireBaseToken.object(forKey: "FireBaseToken") as? String
+                guard let user = self.fireBaseToken.object(forKey: "FireBaseToken") as? String else { return }
+                
+                
                 DispatchQueue.global(qos: .background).async { () -> Void in
-                    let newUser = CoreDataController.sharedIstance.addNewUser(user!, user_id_fb!, email, fullName, user_name, user_lastName, user_gender, url)
+                    let newUser = CoreDataController.sharedIstance.addNewUser(user, user_id_fb, email, fullName, user_name, user_lastName, user_gender, url)
                     self.addUserInCloud(user: newUser, onCompletion: {
                         self.createUserPointsStats()
                         DispatchQueue.main.async(execute: { () -> Void in
@@ -94,38 +96,46 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
     
     //update user info on Firebase
     private func addUserInCloud(user: User, onCompletion: @escaping ()->()){
-        let userFireBase = Auth.auth().currentUser
+        guard let userFireBase = Auth.auth().currentUser else { return }
         let ref = Database.database().reference()
+        guard let firstName = user.firstName,
+            let lastName = user.lastName,
+            let fullName = user.fullName,
+            let idFB = user.idFB,
+            let email = user.email,
+            let pictureUrl = user.pictureUrl,
+            let fcmToken = Messaging.messaging().fcmToken
+            else { return }
         
         
-        ref.child("users/"+(userFireBase?.uid)!).observeSingleEvent(of: .value, with: { (snap) in
+        ref.child("users/" + userFireBase.uid).observeSingleEvent(of: .value, with: { (snap) in
             //if user exist on firbase exit, else save user data on firebase(only one time)
             guard !snap.exists() else {
                 print("exist: user already exist on Firebase")
                 //Firebase Token can changed, so if there is such problem with a login/logout we have the new Token
                 let dataUser = [
-                    "name" : user.firstName!,
-                    "surname" : user.lastName!,
-                    "fullName" : user.fullName!,
-                    "idFB" : user.idFB!,
-                    "email" : user.email!,
+                    "name" : firstName,
+                    "surname" : lastName,
+                    "fullName" : fullName,
+                    "idFB" : idFB,
+                    "email" : email,
                     "gender" : "",//user.gender!,
-                    "pictureUrl" : user.pictureUrl!,
-                    "fireBaseIstanceIDToken" : Messaging.messaging().fcmToken!, //InstanceID.instanceID().token()!,
+                    "pictureUrl" : pictureUrl,
+                    "fireBaseIstanceIDToken" : fcmToken, //InstanceID.instanceID().token()!,
                     ] as [String : Any]
-                ref.child("users/"+(userFireBase?.uid)!).updateChildValues(dataUser)
+                ref.child("users/" + userFireBase.uid).updateChildValues(dataUser)
                 onCompletion()
                 return
             }
             //create user data on Firebase
             let dataUser = [
-                "name" : user.firstName!,
-                "surname" : user.lastName!,
-                "fullName" : user.fullName!,
-                "idFB" : user.idFB!,
-                "email" : user.email!,
-                "gender" : user.gender!,
-                "pictureUrl" : user.pictureUrl!,
+                "name" : firstName,
+                "surname" : lastName,
+                "fullName" : fullName,
+                "idFB" : idFB,
+                "email" : email,
+                "gender" : "", //gender,
+                "pictureUrl" : pictureUrl,
                 "numberOfPendingPurchasedProducts": 0,
                 "numberOfPendingReceivedProducts" : 0,
                 "accountState" : "Active",
@@ -135,17 +145,18 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                 "birthday": "",
                 "cityOfRecidence":""
                 ] as [String : Any]
-            ref.child("users").child((userFireBase?.uid)!).setValue(dataUser)
+            ref.child("users").child(userFireBase.uid).setValue(dataUser)
             onCompletion()
             
         })
     }
     
     private func createUserPointsStats(){
-        let userFireBase = Auth.auth().currentUser
+        guard let userFireBase = Auth.auth().currentUser else { return }
         let ref = Database.database().reference()
         
-        ref.child("usersPointsStats/"+(userFireBase?.uid)!).observeSingleEvent(of: .value, with: { (snap) in
+        
+        ref.child("usersPointsStats/" + userFireBase.uid).observeSingleEvent(of: .value, with: { (snap) in
             guard !snap.exists() else {
                 print("exist: userPoints already exist on Firebase")
                 return
@@ -167,12 +178,12 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                 "lastDateShopping": 0
                 ] as [String : Any]
             
-            FireBaseAPI.saveNodeOnFirebaseWithoutAutoId(node: "usersPointsStats", child: (userFireBase?.uid)!, dictionaryToSave: dataUserPointsStats, onCompletion: { (error) in
+            FireBaseAPI.saveNodeOnFirebaseWithoutAutoId(node: "usersPointsStats", child: userFireBase.uid, dictionaryToSave: dataUserPointsStats, onCompletion: { (error) in
                 guard error == nil else {
                     print(error!)
                     return
                 }
-                ref.child("usersPointsStats/"+(userFireBase?.uid)!+"/"+"lastDateShopping").setValue(ServerValue.timestamp())
+                ref.child("usersPointsStats/" + userFireBase.uid + "/" + "lastDateShopping").setValue(ServerValue.timestamp())
                 print("userPointsSats salvate su Firebase")
             })
             
@@ -216,8 +227,9 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                         }
                         print("Success! User id is ready")
                         
-                        let fireBaseUser = Auth.auth().currentUser
-                        self.fireBaseToken.set((fireBaseUser?.uid)!, forKey: "FireBaseToken")
+                        guard let fireBaseUser = Auth.auth().currentUser else { return }
+                        
+                        self.fireBaseToken.set(fireBaseUser.uid, forKey: "FireBaseToken")
                         
                         
                         if (result.token) != nil {

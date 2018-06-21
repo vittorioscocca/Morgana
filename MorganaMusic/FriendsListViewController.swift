@@ -52,9 +52,10 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
 
             return controller
         })()
-        self.myTable.addSubview(refreshControl1)
-        self.friendsList = deleteForwardFriend(friendListPass: FacebookFriendsListManager.instance.readContactList().facebookFriendsList)
-        self.numAmici.title = String(self.friendsList!.count)
+        myTable.addSubview(refreshControl1)
+        friendsList = deleteForwardFriend(friendListPass: FacebookFriendsListManager.instance.readContactList().facebookFriendsList)
+        guard let fbFriendsList = friendsList else { return }
+        self.numAmici.title = String(fbFriendsList.count)
         
         NotificationCenter.default.addObserver(self,
                                        selector: #selector(FacebookFriendsListStateDidChange),
@@ -99,7 +100,8 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
             refreshControl1.endRefreshing()
             myTable.isUserInteractionEnabled = true
             friendsList = deleteForwardFriend(friendListPass: FacebookFriendsListManager.instance.readContactList().facebookFriendsList)
-            numAmici.title = String(self.friendsList!.count)
+            guard let fbFriendsList = friendsList else { return }
+            numAmici.title = String(fbFriendsList.count)
             myTable.reloadData()
         }
     }
@@ -128,8 +130,8 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     
     func contentsFilter(text: String) {
         FilteredList.removeAll(keepingCapacity: true)
-        
-        for x in self.friendsList! {
+        guard let fbFriendsList = friendsList else { return }
+        for x in fbFriendsList {
             if x.fullName?.localizedLowercase.range(of: text.localizedLowercase) != nil {
                 FilteredList.append(x)
             }
@@ -146,13 +148,14 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        guard self.resultSearchController != nil else {
+        guard let result = resultSearchController else {
             return 0
         }
-        if self.resultSearchController!.isActive {
-            return self.FilteredList.count
+        if result.isActive {
+            return FilteredList.count
         } else {
-            return self.friendsList!.count
+            guard let list = friendsList else { return 0 }
+            return list.count
         }
     }
     

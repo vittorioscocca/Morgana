@@ -156,15 +156,16 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
     }
     
     @IBAction func sendOrder_clicked(_ sender: UIButton) {
-        guard self.selection.product != "" else {
+        guard selection.product != "" else {
             self.generateAlert(title: ErrorMessages.erroreTitle.rawValue, message: ErrorMessages.enterOneProduct_message.rawValue)
             return
         }
-        guard self.quantità.text != "0" else {
+        guard quantità.text != "0" else {
             self.generateAlert(title: ErrorMessages.erroreTitle.rawValue, message: ErrorMessages.enterQuantity_message.rawValue)
             return
         }
-        let prod = Product(productName: self.selection.product, price: self.selection.price!, quantity: Int(self.quantità.text!))
+        guard let price = selection.price else { return }
+        let prod = Product(productName: self.selection.product, price: price, quantity: Int(quantità.text!))
         Order.sharedIstance.addProduct(product: prod)
         
         performSegue(withIdentifier: "unwindToOffersFromOffriDrink", sender: nil)

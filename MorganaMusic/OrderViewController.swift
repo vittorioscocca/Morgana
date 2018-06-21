@@ -146,13 +146,13 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
             let fireBaseToken = UserDefaults.standard
             let uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
             let user = CoreDataController.sharedIstance.findUserForIdApp(uid)
-            if user != nil {
-                FireBaseAPI.removeObserver(node: "users/" + (user?.idApp)!)
-                FireBaseAPI.removeObserver(node: "ordersSent/" + (user?.idApp)!)
-                FireBaseAPI.removeObserver(node: "ordersReceived/" + (user?.idApp)!)
-                firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
-                print("Firebase Observer Killed")
-            }
+            guard let userIdApp = user?.idApp else { return }
+            FireBaseAPI.removeObserver(node: "users/" + userIdApp)
+            FireBaseAPI.removeObserver(node: "ordersSent/" + userIdApp)
+            FireBaseAPI.removeObserver(node: "ordersReceived/" + userIdApp)
+            firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
+            print("Firebase Observer Killed")
+            
         } else {print("no observer killed")}
     }
     
@@ -268,21 +268,23 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         } else {
             cell = tableView.dequeueReusableCell(withIdentifier: "cellOffer", for: indexPath)
             
-            let elemento = Order.sharedIstance.prodotti?[indexPath.row]
-            if indexPath.row < (Order.sharedIstance.prodotti?.count)!  {
-                if elemento?.quantity != 0 {
-                    cell?.textLabel?.text = "(\(elemento!.quantity!))  " + (elemento?.productName)! + " € " + String(format:"%.2f", elemento!.price!)
+            guard let products = Order.sharedIstance.prodotti else  { return cell! }
+            let elemento = products[indexPath.row]
+            guard let quantity = elemento.quantity, let productName = elemento.productName, let price = elemento.price else { return cell!}
+            if indexPath.row < products.count  {
+                if quantity != 0 {
+                    cell?.textLabel?.text = "(\(quantity))  " + productName + " € " + String(format:"%.2f", price)
                     
                     self.quantità_label.text = "   Quantità prodotti: " + "\(Order.sharedIstance.prodottiTotali)"
                     self.totale_label.text = "   Totale: € " + String(format:"%.2f", Order.sharedIstance.costoTotale)
                 }else {
-                    cell?.textLabel?.text = elemento?.productName
+                    cell?.textLabel?.text = elemento.productName
                 }
                 cell?.accessoryType = UITableViewCellAccessoryType.none
                 cell?.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
                 cell?.textLabel?.textColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
                 cell?.textLabel?.font = UIFont.systemFont(ofSize: 16, weight: UIFont.Weight.light)
-                if indexPath.row == ((Order.sharedIstance.prodotti?.count)! - 1){
+                if indexPath.row == (products.count - 1){
                     cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
                     cell?.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
                     cell?.textLabel?.textColor = #colorLiteral(red: 0.7419371009, green: 0.1511851847, blue: 0.20955199, alpha: 1)

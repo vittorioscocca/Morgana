@@ -546,19 +546,21 @@
 					2A01EBAE1F7C741400EB49C1 = {
 						CreatedOnToolsVersion = 9.0;
 						DevelopmentTeam = 42U6W2K3HU;
+						LastSwiftMigration = 1000;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 2AE35F851E93EF5800DF453F;
 					};
 					2A01EBBC1F7C743B00EB49C1 = {
 						CreatedOnToolsVersion = 9.0;
 						DevelopmentTeam = 42U6W2K3HU;
+						LastSwiftMigration = 1000;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 2AE35F851E93EF5800DF453F;
 					};
 					2AE35F851E93EF5800DF453F = {
 						CreatedOnToolsVersion = 8.3;
 						DevelopmentTeam = FP3LS7BNMG;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1000;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Push = {

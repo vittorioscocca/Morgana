@@ -215,7 +215,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 let url = data?["url"] as? String
                 let fireBaseToken = UserDefaults.standard
                 let user = fireBaseToken.object(forKey: "FireBaseToken") as? String
-                let newUser = CoreDataController.sharedIstance.addNewUser(user!, user_id_fb!, email, fullName, user_name, user_lastName, user_gender, url)
+                guard let us = user, let idFB = user_id_fb else { return }
+                let newUser = CoreDataController.sharedIstance.addNewUser(us, idFB, email, fullName, user_name, user_lastName, user_gender, url)
                 self.updateUserInCloud(user: newUser)
             }
         })
@@ -223,25 +224,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     //update user info on Firebase
     private func updateUserInCloud(user: User){
-        let userFireBase = Auth.auth().currentUser
+        guard let userFireBase = Auth.auth().currentUser else { return }
         let ref = Database.database().reference()
-    
-        ref.child("users/"+(userFireBase?.uid)!).observeSingleEvent(of: .value, with: { (snap) in
+     
+        ref.child("users/" + userFireBase.uid).observeSingleEvent(of: .value, with: { (snap) in
             //if user exist on firbase exit, else save user data on firebase(only one time)
             if snap.exists() {
                 //create user data on Firebase
+                guard let firstName = user.firstName,
+                    let lastName = user.lastName,
+                    let fullName = user.fullName,
+                    let idFB = user.idFB,
+                    let email = user.email,
+                    let pictureUrl = user.pictureUrl,
+                    let fcmToken = Messaging.messaging().fcmToken
+                else {
+                    return
+                }
                 let dataUser = [
-                    "name" : user.firstName!,
-                    "surname" : user.lastName!,
-                    "fullName" : user.fullName!,
-                    "idFB" : user.idFB!,
-                    "email" : user.email!,
+                    "name" : firstName,
+                    "surname" : lastName,
+                    "fullName" : fullName,
+                    "idFB" : idFB,
+                    "email" : email,
                     "gender" : "male",//user.gender!,
-                    "pictureUrl" : user.pictureUrl!,
-                    "fireBaseIstanceIDToken" : Messaging.messaging().fcmToken!, //InstanceID.instanceID().token()!,
+                    "pictureUrl" : pictureUrl,
+                    "fireBaseIstanceIDToken" : fcmToken, //InstanceID.instanceID().token()!,
                     ] as [String : Any]
                 //Firebase Token can changed, so if there is such problem with a login/logout we have the new Token
-                ref.child("users/"+(userFireBase?.uid)!).updateChildValues(dataUser)
+                ref.child("users/" + userFireBase.uid).updateChildValues(dataUser)
             }
         })
     }
@@ -306,10 +317,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             let fireBaseToken = UserDefaults.standard
             let uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
             let user = CoreDataController.sharedIstance.findUserForIdApp(uid)
+            guard let userIdApp = user?.idApp else {
+                return
+            }
             
-            FireBaseAPI.removeObserver(node: "users/" + (user?.idApp)!)
-            FireBaseAPI.removeObserver(node: "ordersSent/" + (user?.idApp)!)
-            FireBaseAPI.removeObserver(node: "ordersReceived/" + (user?.idApp)!)
+            FireBaseAPI.removeObserver(node: "users/" + userIdApp)
+            FireBaseAPI.removeObserver(node: "ordersSent/" + userIdApp)
+            FireBaseAPI.removeObserver(node: "ordersReceived/" + userIdApp)
             firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
             print("Firebase Observer Killed")
         } else {print("no observer killed")}
@@ -494,6 +508,23 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         
         let action = response.actionIdentifier
         
+        CacheImage.getImage(url: userInfo["media-url"] as? String, onCompletion: { (image) in
+            let content = UNMutableNotificationContent()
+            if let attachment = self.createAttachment(identifier: "userImage", image: image, options: nil) {
+                content.attachments.append(attachment)
+            }
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1,
+                                                            repeats: false)
+            let request = UNNotificationRequest(identifier: "missedCallNotificationIdentifier",
+                                                content: content, trigger: trigger)
+            center.add(request, withCompletionHandler: { (error) in
+                print("Unable to deliver missed call notification \(String(describing: error))")
+            })
+            
+        })
+        
+        
+        
         switch action {
         case "delete.action":
             print(response.notification.request.identifier)
@@ -559,8 +590,51 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
                 NotificationCenter.default.post(name: .didOpenApplicationFromUserPointsShortCutNotification, object: nil)
             }
         }
+        
         completionHandler()
     }
+    
+    private func createAttachment(identifier: String, image: UIImage?, options: [AnyHashable : Any]?) -> UNNotificationAttachment? {
+        do {
+            if let userImage = image {
+                if let roundedImage = maskRoundedImage(image: userImage) {
+                    if let newImageData =  UIImagePNGRepresentation(roundedImage) {
+                        let docDir = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+                        let imageURL = docDir.appendingPathComponent("\(UUID().uuidString).png")
+                        try newImageData.write(to: imageURL)
+                        return try UNNotificationAttachment.init(identifier: identifier, url: imageURL, options: options)
+                    }
+                }
+            }
+        } catch {
+            print("Unable to create image attachment for missed call notification \(error.localizedDescription)")
+        }
+        return nil
+    }
+    
+    private func maskRoundedImage(image: UIImage) -> UIImage? {
+        let imageView: UIImageView = UIImageView(image: image)
+        
+        imageView.layer.masksToBounds = true
+        imageView.layer.cornerRadius = imageView.frame.size.width / 2
+        
+        UIGraphicsBeginImageContext(imageView.bounds.size)
+        
+        defer {
+            UIGraphicsEndImageContext()
+        }
+        guard let context = UIGraphicsGetCurrentContext() else {
+            return nil
+        }
+        
+        imageView.layer.render(in:context )
+         
+        guard let roundedImage = UIGraphicsGetImageFromCurrentImageContext() else {
+            return nil
+        }
+        return roundedImage
+    }
+
 }
 
 extension AppDelegate : MessagingDelegate {

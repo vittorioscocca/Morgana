@@ -81,14 +81,14 @@ class LoadRemoteProducts {
                 self.offersDctionary = nil
                 return
             }
-            guard dictionary != nil else {
+            guard let productsDictionary = dictionary else {
                 return
             }
             
             self.productsList = [String]()
             self.offersDctionary = [String : Double]()
             
-            for (prodotto, costo) in dictionary! {
+            for (prodotto, costo) in productsDictionary {
                 if prodotto != "autoId" {
                     let prodottoConCosto = prodotto
                     self.productsList!.append(prodottoConCosto)
