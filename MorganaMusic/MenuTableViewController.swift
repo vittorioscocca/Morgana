@@ -159,13 +159,13 @@ class MenuTableViewController: UITableViewController {
             (cell as! UserProfileMenuRowTableViewCell).fullName_label.text = self.user?.fullName
             
             CacheImage.getImage(url: self.user?.pictureUrl, onCompletion: { (image) in
-                guard image != nil else {
+                guard let img = image else {
                     print("immagine utente non reperibile")
                     return
                 }
                 DispatchQueue.main.async(execute: {
                     if let cellToUpdate = tableView.cellForRow(at: indexPath) {
-                        (cellToUpdate as! UserProfileMenuRowTableViewCell).friendImageView.image = image
+                        (cellToUpdate as! UserProfileMenuRowTableViewCell).friendImageView.image = img
                     }
                 })
             })

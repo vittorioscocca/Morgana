@@ -313,8 +313,9 @@ class FacebookFriendsListManager: NSObject {
     private var pendingRequests = 0
     
     private func connectToFacebook(freshness: ContactListFreshness, completion: @escaping (RequestOutcome) -> ()) {
+        guard let userIdApp = user?.idApp else { return }
         if  case .localCache = freshness{
-            CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: (self.user?.idApp)!, completion: { (list) in
+            CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: userIdApp, completion: { (list) in
                 if let fbFriendsList = list {
                     completion(.success(fbFriendsList))
                 }else {
@@ -323,7 +324,7 @@ class FacebookFriendsListManager: NSObject {
             })
         }
         else if case .fresh = freshness {
-            CoreDataController.sharedIstance.deleteFriends((self.user?.idApp)!)
+            CoreDataController.sharedIstance.deleteFriends(userIdApp)
             let parameters_friend = ["fields" : "name, first_name, last_name, id, email, gender, picture.type(large)"]
             
             FBSDKGraphRequest(graphPath: "me/friends", parameters: parameters_friend, tokenString: fbTokenString, version: nil, httpMethod: "GET").start(completionHandler: {(connection,result,error) -> Void in
@@ -335,13 +336,13 @@ class FacebookFriendsListManager: NSObject {
                     self.notificationCenter.post(name: .FacebookFriendsListStateDidChange, object: self)
                 }
                 
-                if ((error) != nil) {
+                if (error != nil) {
                     print("[FBFriendsListManager]: Error: \(error!)")
                     completion(.persistentError(.generalError(error!)))
                 }
                 guard result != nil else {
-                    print("[FBFriendsListManager]: Error: \(error!)")
-                    completion(.persistentError(.generalError(error!)))
+                    print("[FBFriendsListManager]: Error: no data from Facebook")
+                    //completion(.persistentError(.generalError(error!)))
                     return
                 }
                 //numbers of total friends
@@ -378,7 +379,7 @@ class FacebookFriendsListManager: NSObject {
                     FirebaseData.sharedIstance.readNodeFromIdFB(node: "users", child: "idFB", idFB: idFB, onCompletion: { (error,dictionary) in
                         guard error == nil else {
                             print(error!)
-                            //completion(.transitoryError(Error))
+                            completion(.transitoryError(error! as! Error))
                             return
                         }
                         guard dictionary != nil else {
@@ -394,10 +395,10 @@ class FacebookFriendsListManager: NSObject {
                             }
                         }
                         
-                        CoreDataController.sharedIstance.addFriendInUser(idAppUser: (self.user?.idApp)!, idFB: idFB, mail: self.user?.email, fullName: name, firstName: firstName, lastName: lastName, gender: nil, pictureUrl: url, cityOfRecidence: cityOfRecidence)
+                        CoreDataController.sharedIstance.addFriendInUser(idAppUser: userIdApp, idFB: idFB, mail: self.user?.email, fullName: name, firstName: firstName, lastName: lastName, gender: nil, pictureUrl: url, cityOfRecidence: cityOfRecidence)
                         
-                        let entityFriend = NSEntityDescription.entity(forEntityName: "Friend", in: self.context)
-                        let newFriend = Friend(entity: entityFriend!, insertInto: self.context)
+                        guard let entityFriend = NSEntityDescription.entity(forEntityName: "Friend", in: self.context) else { return }
+                        let newFriend = Friend(entity: entityFriend, insertInto: self.context)
                         
                         newFriend.user = self.user
                         

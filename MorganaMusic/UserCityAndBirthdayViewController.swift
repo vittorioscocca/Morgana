@@ -34,6 +34,7 @@ class UserCityAndBirthdayViewController: UIViewController, UITextFieldDelegate,U
         self.myDatePicker.datePickerMode = UIDatePickerMode.date
         self.cityName.delegate = TextFieldController.singleton
         self.cityName.tag = 0
+        
         FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/\((self.user?.idApp)!)", onCompletion: { (error,dictionary) in
             if dictionary!["cityOfRecidence"] as? String != nil {
                 self.cityName.text = dictionary!["cityOfRecidence"] as? String
@@ -186,6 +187,7 @@ class UserCityAndBirthdayViewController: UIViewController, UITextFieldDelegate,U
        
         FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "merchantPointsParameters/mr001", onCompletion: { (error, dictionary) in
             let notificationDate = self.calculateNotificationDate(date: birthdayDate, comparationDate: comparationDate, schedulationType: schedulationType)
+            
             FireBaseAPI.saveNodeOnFirebase(node: "merchantOrder/mr001/\((self.user?.idApp)!)/birthday/\(notificationIdentifier)", dictionaryToSave: ["birthdayScheduledNotification":notificationDate,"schedulationType":"schedulationSettings"], onCompletion:{_ in
                 self.scheduledBirthdayNotification.text = "Ti offriremo una consumazione il: \(notificationDate)"
                 NotificationsCenter.scheduledBirthdayOrder(title: "Buon compleanno", userIdApp: (self.user?.idApp)! ,credits : (dictionary?["birthdayCredits"] as? Double)!, body: "Eccoti \((dictionary?["birthdayCredits"] as? Double)!) crediti per acquistare quello che vuoi al Morgana! Salute!", identifier: notificationIdentifier, scheduledNotification: self.stringTodateObject(date: notificationDate)!)

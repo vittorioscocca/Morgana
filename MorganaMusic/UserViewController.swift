@@ -50,8 +50,8 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         }
         if CheckConnection.isConnectedToNetwork() == true {
             
-            self.uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
-            self.user = CoreDataController.sharedIstance.findUserForIdApp(uid)
+            uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
+            user = CoreDataController.sharedIstance.findUserForIdApp(uid)
             guard user != nil else { return }
             self.userFullName.text = self.user?.fullName
             self.userEmail_text.text = self.user?.email
@@ -63,18 +63,19 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
     }
     
     private func readUserCreditsFromFirebase(){
-        FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + (user?.idApp)!, onCompletion: { (error,dictionary) in
+        guard let userIdApp = user?.idApp else { return }
+        FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + userIdApp, onCompletion: { (error,dictionary) in
             guard error == nil else {
                 self.generateAlert()
                 return
             }
-            guard dictionary != nil else {
+            guard let userDictionary = dictionary else {
                 return
             }
             DispatchQueue.main.async(execute: {
-                self.userCredits_label.text = "€ " + String(format:"%.2f", dictionary?["credits"] as! Double)
-                if dictionary?["companyCode"] as! String != "0" {
-                    self.companyCode = dictionary?["companyCode"] as? String
+                self.userCredits_label.text = "€ " + String(format:"%.2f", userDictionary["credits"] as! Double)
+                if userDictionary["companyCode"] as! String != "0" {
+                    self.companyCode = userDictionary["companyCode"] as? String
                     
                 }
             })
@@ -83,12 +84,12 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
     
     private func readImage(){
         CacheImage.getImage(url: self.user?.pictureUrl, onCompletion: { (image) in
-            guard image != nil else {
+            guard let img = image else {
                 print("Attenzione URL immagine Mittente non presente")
                 return
             }
             DispatchQueue.main.async(execute: {
-                self.userImage_image.image = image
+                self.userImage_image.image = img
             })
         })
     }
@@ -151,9 +152,10 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
             let uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
             let user = CoreDataController.sharedIstance.findUserForIdApp(uid)
             if user != nil {
-                FireBaseAPI.removeObserver(node: "users/" + (user?.idApp)!)
-                FireBaseAPI.removeObserver(node: "ordersSent/" + (user?.idApp)!)
-                FireBaseAPI.removeObserver(node: "ordersReceived/" + (user?.idApp)!)
+                guard let userIdApp = user?.idApp else { return }
+                FireBaseAPI.removeObserver(node: "users/" + userIdApp)
+                FireBaseAPI.removeObserver(node: "ordersSent/" + userIdApp)
+                FireBaseAPI.removeObserver(node: "ordersReceived/" + userIdApp)
                 firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
                 print("Firebase Observer Killed")
             }

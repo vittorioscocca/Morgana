@@ -23,7 +23,7 @@ public extension NSNotification.Name {
 
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate  {
 
     var lastViewControllerOnQuick = UserDefaults.standard
     
@@ -98,13 +98,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         //Firebase push notification
         if #available(iOS 10.0, *) {
+            // For iOS 10 display notification (sent via APNS)
+            UNUserNotificationCenter.current().delegate = self
             let authOptions : UNAuthorizationOptions = [.alert, .badge, .sound]
             UNUserNotificationCenter.current().requestAuthorization(
                 options: authOptions,
                 completionHandler: {(granted, error) in
                     if (granted) {
                         DispatchQueue.main.async(execute: {
-                            //UIApplication.shared.registerForRemoteNotifications()
+                            UIApplication.shared.registerForRemoteNotifications()
                             //application.registerForRemoteNotifications()
                         })
                     } else{
@@ -215,7 +217,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 let url = data?["url"] as? String
                 let fireBaseToken = UserDefaults.standard
                 let user = fireBaseToken.object(forKey: "FireBaseToken") as? String
-                let newUser = CoreDataController.sharedIstance.addNewUser(user!, user_id_fb!, email, fullName, user_name, user_lastName, user_gender, url)
+                guard let us = user, let idFB = user_id_fb else { return }
+                let newUser = CoreDataController.sharedIstance.addNewUser(us, idFB, email, fullName, user_name, user_lastName, user_gender, url)
                 self.updateUserInCloud(user: newUser)
             }
         })
@@ -223,25 +226,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     //update user info on Firebase
     private func updateUserInCloud(user: User){
-        let userFireBase = Auth.auth().currentUser
+        guard let userFireBase = Auth.auth().currentUser else { return }
         let ref = Database.database().reference()
-    
-        ref.child("users/"+(userFireBase?.uid)!).observeSingleEvent(of: .value, with: { (snap) in
+     
+        ref.child("users/" + userFireBase.uid).observeSingleEvent(of: .value, with: { (snap) in
             //if user exist on firbase exit, else save user data on firebase(only one time)
             if snap.exists() {
                 //create user data on Firebase
+                guard let firstName = user.firstName,
+                    let lastName = user.lastName,
+                    let fullName = user.fullName,
+                    let idFB = user.idFB,
+                    let email = user.email,
+                    let pictureUrl = user.pictureUrl,
+                    let fcmToken = Messaging.messaging().fcmToken
+                else {
+                    return
+                }
                 let dataUser = [
-                    "name" : user.firstName!,
-                    "surname" : user.lastName!,
-                    "fullName" : user.fullName!,
-                    "idFB" : user.idFB!,
-                    "email" : user.email!,
+                    "name" : firstName,
+                    "surname" : lastName,
+                    "fullName" : fullName,
+                    "idFB" : idFB,
+                    "email" : email,
                     "gender" : "male",//user.gender!,
-                    "pictureUrl" : user.pictureUrl!,
-                    "fireBaseIstanceIDToken" : Messaging.messaging().fcmToken!, //InstanceID.instanceID().token()!,
+                    "pictureUrl" : pictureUrl,
+                    "fireBaseIstanceIDToken" : fcmToken, //InstanceID.instanceID().token()!,
                     ] as [String : Any]
                 //Firebase Token can changed, so if there is such problem with a login/logout we have the new Token
-                ref.child("users/"+(userFireBase?.uid)!).updateChildValues(dataUser)
+                ref.child("users/" + userFireBase.uid).updateChildValues(dataUser)
             }
         })
     }
@@ -306,10 +319,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             let fireBaseToken = UserDefaults.standard
             let uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
             let user = CoreDataController.sharedIstance.findUserForIdApp(uid)
+            guard let userIdApp = user?.idApp else {
+                return
+            }
             
-            FireBaseAPI.removeObserver(node: "users/" + (user?.idApp)!)
-            FireBaseAPI.removeObserver(node: "ordersSent/" + (user?.idApp)!)
-            FireBaseAPI.removeObserver(node: "ordersReceived/" + (user?.idApp)!)
+            FireBaseAPI.removeObserver(node: "users/" + userIdApp)
+            FireBaseAPI.removeObserver(node: "ordersSent/" + userIdApp)
+            FireBaseAPI.removeObserver(node: "ordersReceived/" + userIdApp)
             firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
             print("Firebase Observer Killed")
         } else {print("no observer killed")}
@@ -559,6 +575,7 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
                 NotificationCenter.default.post(name: .didOpenApplicationFromUserPointsShortCutNotification, object: nil)
             }
         }
+        
         completionHandler()
     }
 }
@@ -574,3 +591,23 @@ extension AppDelegate : MessagingDelegate {
     
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

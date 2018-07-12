@@ -471,4 +471,3 @@ class OrdersListManager: NSObject {
                           ordersReceivedList: internalState.ordersList.ordersReceivedList)
     }
 }
-

@@ -34,8 +34,10 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
         self.calculateAge()
         if (user?.gender == "male") {
             self.gender_label.text = "sesso: uomo"
-        }else {
+        }else if (user?.gender == "female"){
             self.gender_label.text = "sesso: donna"
+        } else {
+            self.gender_label.text = ""
         }
         
         self.readImage()
@@ -66,15 +68,20 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
     }
     
     private func calculateAge(){
-        guard self.user?.birthday != nil else {
+        guard let userBirthday = self.user?.birthday else {
             self.age_label.text = "Età non disponibile"
             return
         }
-        let birthday = stringTodateObject(date:(self.user?.birthday)!)
+        
+        guard let birthday = stringTodateObject(date:(userBirthday)) else  {
+            self.age_label.text = "Età non disponibile"
+            return
+        }
+        
         let now = Date()
         let calendar = Calendar.current
-        let ageComponents = calendar.dateComponents([.year], from: birthday!, to: now)
-        let age = ageComponents.year!
+        let ageComponents = calendar.dateComponents([.year], from: birthday, to: now)
+        guard let age = ageComponents.year else { return }
         
         self.age_label.text = String(age) + " anni"
     }
@@ -115,10 +122,11 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
             print("la data di scadenza non è disponibile in questa view")
             return false
         }
-        self.dataScadenza_label.text = "Scade il: " + stringTodate(dateString: self.dataScadenza! )
+        guard let expirationDay = self.dataScadenza else { return false }
+        self.dataScadenza_label.text = "Scade il: " + stringTodate(dateString: expirationDay )
         let currentDate = Date()
-        let expirationDay = dateFormatter.date(from: self.dataScadenza!)
-        return currentDate >= expirationDay!
+        guard let formattedExpirationDay = dateFormatter.date(from: expirationDay) else { return false }
+        return currentDate >= formattedExpirationDay
         
     }
     
@@ -128,16 +136,20 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
         dateFormatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
         dateFormatter.locale = Locale.init(identifier: "it_IT")
         
-        let dateObj = dateFormatter.date(from: dateString)
+        guard let dateObj = dateFormatter.date(from: dateString) else { return ""}
         
         dateFormatter.dateFormat = "dd/MM/yyyy"
-        return dateFormatter.string(from: dateObj!)
+        return dateFormatter.string(from: dateObj)
     }
     
     private func generateQrCode(){
         if qrcodeImage == nil {
-            
-            let information = (self.user?.idApp)! + "//" + (self.offertaRicevuta?.orderAutoId)! + "||*" + (self.offertaRicevuta?.expirationeDate)! + "*" + (self.offertaRicevuta?.company?.companyId)!
+            guard let userIdApp = user?.idApp,
+                let orderAutId = offertaRicevuta?.orderAutoId,
+                let expirationeDate = offertaRicevuta?.expirationeDate,
+                let companyId = offertaRicevuta?.company?.companyId
+            else { return }
+            let information = userIdApp + "//" + orderAutId + "||*" + expirationeDate + "*" + companyId
             
             let data = information.data(using: String.Encoding.isoLatin2, allowLossyConversion: false)
             if let filter = CIFilter(name: "CIQRCodeGenerator") {
@@ -181,7 +193,8 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 0 {
-            return (self.offertaRicevuta?.prodotti?.count)!
+            guard let products = offertaRicevuta?.prodotti else { return 0}
+            return products.count
         }else {
             return 1
         }
@@ -191,14 +204,14 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
         let cell = tableView.dequeueReusableCell(withIdentifier: "orderCell", for: indexPath)
         
         if (sectionTitle[indexPath.section] == sectionTitle[0]) {
-            let product = self.offertaRicevuta?.prodotti?[indexPath.row]
-            
-            cell.textLabel?.text = "(\(product!.quantity!))  " + (product?.productName)! + " € " + String(format:"%.2f", product!.price!)
+            guard let product = self.offertaRicevuta?.prodotti?[indexPath.row] else {return cell }
+            guard let quantity = product.quantity,
+                let productName = product.productName,
+                let price = product.price
+            else { return cell }
+            cell.textLabel?.text = "(\(quantity))  " + productName + " € " + String(format:"%.2f", price)
             cell.textLabel?.textColor = #colorLiteral(red: 0.7411764706, green: 0.1529411765, blue: 0.2078431373, alpha: 1)
             
-            print(product!.productName!)
-            print("costo ",product!.price!)
-            print("quantità ",product!.quantity!)
         } else {
             cell.textLabel?.text = "Prodotti: \(self.offertaRicevuta!.prodottiTotali) \t\t Totale: € " +  String(format:"%.2f",offertaRicevuta!.costoTotale)
             cell.textLabel?.textColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)

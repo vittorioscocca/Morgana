@@ -203,14 +203,17 @@ extension CreditsPaymentViewController {
         
         Cart.sharedIstance.paymentMethod = payment
         Cart.sharedIstance.pendingPayPalOffer()
+        guard let userIdApp = user?.idApp,
+            let currentUser = user else { return }
         
         for order in Cart.sharedIstance.carrello{
             order.dataCreazioneOfferta = paycreatetime
-            order.calcolaDataScadenzaOfferta(selfOrder: (self.user?.idApp! == order.userDestination?.idApp!))
+            guard let userDestinationIdApp = order.userDestination?.idApp else { return }
+            order.calcolaDataScadenzaOfferta(selfOrder: (userIdApp == userDestinationIdApp))
             order.pendingOffer()
         }
         
-        FirebaseData.sharedIstance.saveCartOnFirebase(user: self.user!, badgeValue: self.productOfferedBadge.object(forKey: "paymentOfferedBadge") as? Int, onCompletion: {
+        FirebaseData.sharedIstance.saveCartOnFirebase(user: currentUser, badgeValue: self.productOfferedBadge.object(forKey: "paymentOfferedBadge") as? Int, onCompletion: {
             print("ordine salvato su firebase")
             DispatchQueue.main.async {
                 // ritorno sul main thread ed aggiorno la view
@@ -220,7 +223,7 @@ extension CreditsPaymentViewController {
             if Cart.sharedIstance.state == "Valid" {
                 print("Pagamento carrello valido")
                 
-                FireBaseAPI.updateNode(node: "users/" + (self.user?.idApp)!, value: ["credits": self.userCredits! - self.shopTotal! ], onCompletion: { (error) in
+                FireBaseAPI.updateNode(node: "users/" + userIdApp, value: ["credits": self.userCredits! - self.shopTotal! ], onCompletion: { (error) in
                     guard error == nil else {
                         print("Errore di connessione")
                         return

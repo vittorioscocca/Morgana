@@ -39,8 +39,10 @@ class UpdateBadgeInfo {
             return
         }
         
+        guard let userIdApp = user?.idApp else { return }
+        
         let ref = Database.database().reference()
-        ref.child("users/" + (self.user?.idApp)!).observe(.value, with: { (snap) in
+        ref.child("users/" + userIdApp).observe(.value, with: { (snap) in
             guard snap.exists() else {return}
             guard snap.value != nil else {return}
             

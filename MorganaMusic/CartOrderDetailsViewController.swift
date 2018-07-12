@@ -45,7 +45,8 @@ class CartOrderDetailsViewController: UIViewController, UITableViewDelegate, UIT
         if section == 0 {
             return 1
         }else {
-            return (orderSent?.prodottiTotali)!
+            guard let products = orderSent?.prodottiTotali else { return 1}
+            return products
         }
     }
     
@@ -78,11 +79,14 @@ class CartOrderDetailsViewController: UIViewController, UITableViewDelegate, UIT
             })
         } else {
             cell = tableView.dequeueReusableCell(withIdentifier: "cartOrderDetailsCell", for: indexPath)
-            
-            if  indexPath.row <= (orderSent?.prodotti?.count)! - 2  {
-                let product = orderSent?.prodotti?[indexPath.row]
-                
-                cell?.textLabel?.text = "(\((product?.quantity)!))  " + (product?.productName)! + " € " + String(format:"%.2f", (product?.price!)!)
+            guard let productsCount = orderSent?.prodotti?.count,
+            let products = orderSent?.prodotti else { return cell!}
+            if  indexPath.row <= productsCount - 2  {
+                let product = products[indexPath.row]
+                guard let quantity = product.quantity,
+                    let productName = product.productName,
+                    let price  = product.price else { return cell! }
+                cell?.textLabel?.text = "(\(quantity))  " + productName + " € " + String(format:"%.2f", price)
                 cell?.textLabel?.textColor = #colorLiteral(red: 0.7419371009, green: 0.1511851847, blue: 0.20955199, alpha: 1)
             }
         }

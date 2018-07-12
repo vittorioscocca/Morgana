@@ -28,7 +28,7 @@ class PointsManager {
     private var weeklyShopping: Double?
     
     //merchant Points Parameters
-    private var changeCreditToPoint: Double? //cambip da Crediti a Punti, attualmente 1P = 0,02€
+    private var changeCreditToPoint: Double? //cambio da Crediti a Punti, attualmente 1P = 0,02€
     private var standardConsumptions: Double? //gettone per le consumazioni standard, attualmente 0.02€ 1 Punto
     private var firstShoppingDiscount: Double?  //prima percentuale di sconto sugli acquisti, attualmente 0,1€ = 5 Punti
     private var secondShoppingDiscount: Double?  //seconda percentuale di sconto sugli acquisti, attualmente 0,2€ = 10 Punti
@@ -129,17 +129,21 @@ class PointsManager {
     }
     
     func addPointsForShopping(userId: String,expense: Double)->Int{
-        
         if personalDiscount == 0 {
             personalDiscount = firstShoppingDiscount
         }
-        let newPoints = Int(expense * personalDiscount! / changeCreditToPoint!)
         
-        currentFreeMoney! += (expense * personalDiscount!)
+        guard let discount = personalDiscount,
+            let weekThreshold = weeklyThreshold,
+            let weekShopping = weeklyShopping
+        else { return 0 }
+        let newPoints = Int(expense * discount / changeCreditToPoint!)
+        
+        currentFreeMoney! += (expense * discount)
         balanceCurrentPoints += newPoints
         totalPoints! += newPoints
         
-        if weeklyShopping! > weeklyThreshold! {
+        if weekShopping > weekThreshold {
             totalExtraDiscountShopping! += expense
         }else {
             totalStandardShopping! += expense
@@ -147,11 +151,11 @@ class PointsManager {
         self.totalShopping! += expense
         
         if isAWeeklyShopping(userId: userId) {
-            weeklyShopping! +=  expense
+            weeklyShopping = weekShopping + expense
         }else {
             weeklyShopping = expense
         }
-        if weeklyShopping! > weeklyThreshold! {
+        if weekShopping > weekThreshold {
             personalDiscount = secondShoppingDiscount
         }
         return newPoints

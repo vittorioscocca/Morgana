@@ -52,7 +52,8 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
         let ref = Database.database().reference()
         ref.child("sessions").setValue(ServerValue.timestamp())
         ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
-            self.actualDate = self.timeIntervalToDate(timeInterval: snap.value! as! TimeInterval)
+            guard let snapValue = snap.value else { return }
+            self.actualDate = self.timeIntervalToDate(timeInterval: snapValue as! TimeInterval)
         })
         setCustomImage()
         self.readAndValidateOrder()
@@ -60,23 +61,30 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
     
     private func readAndValidateOrder() {
         
-        FirebaseData.sharedIstance.readSingleOrder(userId: userDestinationID!, companyId: comapanyId!, orderId: orderId!, onCompletion: { (order) in
-            guard !order.isEmpty else {
+        guard let idUserDestination = userDestinationID,
+            let idCompany = comapanyId,
+            let idOrder = orderId
+            else { return }
+        
+        FirebaseData.sharedIstance.readSingleOrder(userId: idUserDestination, companyId: idCompany, orderId: idOrder, onCompletion: { (orders) in
+            guard !orders.isEmpty else {
                 print("errore di lettura su Ordine")
                 return
             }
-            
+            let order = orders[0]
+            guard let products = order.prodotti else { return }
             var newProduct = [Product]()
-            for product in order[0].prodotti! {
+           
+            for product in products {
                 if product.productName?.range(of:"_climbed") != nil && product.quantity != 0 {
                     product.productName = product.productName?.replacingOccurrences(of: "_climbed", with: "", options: .regularExpression)
                     newProduct.append(product)
                 }
             }
             if newProduct.count != 0 {
-                order[0].prodotti = newProduct
+                order.prodotti = newProduct
             }
-            self.orderReaded = order[0]
+            self.orderReaded = order
             self.readUserDetails()
             self.validateOrder()
             self.myTable.reloadData()
@@ -85,7 +93,8 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
     }
     
     private func readUserDetails(){
-        FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + (self.userDestinationID!), onCompletion: { (error,dictionary) in
+        guard let idUserDestination = userDestinationID else { return }
+        FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + idUserDestination, onCompletion: { (error,dictionary) in
             guard error == nil else {
                 print("Errore di connessione")
                 return
@@ -94,7 +103,7 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
                 print("Errore di lettura del dell'Ordine richiesto")
                 return
             }
-            self.orderReaded?.userDestination?.idApp = self.userDestinationID!
+            self.orderReaded?.userDestination?.idApp = idUserDestination
             self.orderReaded?.userDestination?.fullName = dictionary!["fullName"] as? String
             self.orderReaded?.userDestination?.pictureUrl = dictionary!["pictureUrl"] as? String
             self.userFullName_label.text = dictionary!["fullName"] as? String
@@ -143,17 +152,17 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
             let defaultAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
             self.alert.addAction(defaultAction)
             self.present(self.alert, animated: true, completion: nil)
-        } else if (self.orderReaded?.offerState == "Offerta accettata" || self.orderReaded?.offerState == "Offerta scalata") && self.orderReaded?.paymentState == "Valid" {
+        } else if (self.orderReaded?.offerState == .accepted || self.orderReaded?.offerState == .scaled) && self.orderReaded?.paymentState == .valid {
             self.myTable.isHidden = false
             self.authButton.isHidden = false
             self.orderState_label.text = "ORDINE VALIDO"
-        } else if self.orderReaded?.offerState != "Offerta accettata" && self.orderReaded?.offerState != "Offerta scalata"  {
+        } else if self.orderReaded?.offerState != .accepted && self.orderReaded?.offerState != .scaled  {
             self.orderState_label.text = "ORDINE NON VALIDO"
             self.alert = UIAlertController(title: "Ordine non valido!", message: "Stato ordine non compatibile", preferredStyle: .alert)
             let defaultAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
             self.alert.addAction(defaultAction)
             self.present(self.alert, animated: true, completion: nil)
-        } else if self.orderReaded?.paymentState != "Valid" {
+        } else if self.orderReaded?.paymentState != .valid {
             self.orderState_label.text = "ORDINE NON VALIDO"
             
             self.alert = UIAlertController(title: "Ordine non valido!", message: "Problemi con lo stato di pagamento", preferredStyle: .alert)
@@ -188,7 +197,8 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
         if section == 0 {
             return 1
         }else {
-            return (self.orderReaded?.prodotti?.count)!
+            guard let count = orderReaded?.prodotti?.count else { return 1 }
+            return count
         }
     }
     
@@ -200,16 +210,16 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
             cell?.textLabel?.text = "Morgana Music Club"
         } else {
             cell = tableView.dequeueReusableCell(withIdentifier: "productCell", for: indexPath)
-            let product = self.orderReaded?.prodotti![indexPath.row]
+            guard let product = self.orderReaded?.prodotti![indexPath.row], let quantity = product.quantity else { return cell! }
             
             if !self.orderScanned {
-                (cell as! AutOrderTableViewCell).productName_label.text = product?.productName
-                (cell as! AutOrderTableViewCell).productQuantity_label.text = String((product?.quantity)!)
+                (cell as! AutOrderTableViewCell).productName_label.text = product.productName
+                (cell as! AutOrderTableViewCell).productQuantity_label.text = String(quantity)
                 self.myIndexPath.append(indexPath)
-                self.productQuantity.append((product?.quantity)!)
+                self.productQuantity.append(quantity)
                 (cell as! AutOrderTableViewCell).myStepper.tag = indexPath.row
-                (cell as! AutOrderTableViewCell).myStepper.value = Double((product?.quantity)!)
-                (cell as! AutOrderTableViewCell).myStepper.maximumValue = Double((product?.quantity)!)
+                (cell as! AutOrderTableViewCell).myStepper.value = Double(quantity)
+                (cell as! AutOrderTableViewCell).myStepper.maximumValue = Double(quantity)
                 (cell as! AutOrderTableViewCell).myStepper.minimumValue = 0
                 (cell as! AutOrderTableViewCell).myStepper.addTarget(self, action: #selector(stepperAction(_:)), for: .touchUpInside)
             }else {
@@ -222,20 +232,29 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
     
     @objc func stepperAction( _ sender: UIStepper!) {
         let cell = self.myTable.cellForRow(at: myIndexPath[sender.tag])
-        
+        guard let products = self.orderReaded?.prodotti else { return }
         (cell as! AutOrderTableViewCell).productQuantity_label.text = String(Int(sender.value))
-        self.orderReaded?.prodotti![sender.tag].quantity = Int((cell as! AutOrderTableViewCell).myStepper.maximumValue) - Int(sender.value)
+        products[sender.tag].quantity = Int((cell as! AutOrderTableViewCell).myStepper.maximumValue) - Int(sender.value)
         
     }
     
     private func prepareProductsOfferDetailsDictionary()->[String:String]{
         var newProductsOfferDictionary: [String:String] = [:]
         var count = 0
-        for product in (self.orderReaded?.prodotti)! {
+        guard let products = self.orderReaded?.prodotti else { return newProductsOfferDictionary }
+        
+        for product in products {
+            
+            guard let productName = product.productName,
+                let quantity = product.quantity,
+                let price = product.price
+            else { return newProductsOfferDictionary }
+            
             if product.quantity == self.productQuantity[count] {
-                newProductsOfferDictionary[product.productName!+"_climbed"] = "0x" + String(format:"%.2f", (product.price)!)
+                
+                newProductsOfferDictionary[productName+"_climbed"] = "0x" + String(format:"%.2f", price)
             }else {
-                newProductsOfferDictionary[product.productName!+"_climbed"] = String((product.quantity)!) + "x" + String(format:"%.2f", (product.price)!)
+                newProductsOfferDictionary[productName+"_climbed"] = String(quantity) + "x" + String(format:"%.2f", price)
             }
             count += 1
         }
@@ -245,7 +264,9 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
     private func numberOfProducts()->Int{
         var totQuantity = 0
         
-        for product in (self.orderReaded?.prodotti)!{
+        guard let products = orderReaded?.prodotti else { return totQuantity}
+        
+        for product in products{
             totQuantity += product.quantity!
         }
         return totQuantity
@@ -255,25 +276,34 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
     
     private func updateNewProductsOfferDetails(){
         
+        guard let companyId = orderReaded?.company?.companyId,
+            let offerId = orderReaded?.idOfferta,
+            let userDestinationIdApp = orderReaded?.userDestination?.idApp,
+            let orderAutoId = orderReaded?.orderAutoId,
+            let totalCost = orderReaded?.costoTotale,
+            let currentDate = actualDateString,
+            let userSenderIdApp = orderReaded?.userSender?.idApp
+        else { return }
+        
         if productQuantity.reduce(0, +) != numberOfProducts() {
             //update new quantity
             var newProductsOfferDictionary: [String:String] = [:]
             newProductsOfferDictionary = prepareProductsOfferDetailsDictionary()
-            FireBaseAPI.updateNode(node: "productsOffersDetails/\((self.orderReaded?.company?.companyId)!)/\((self.orderReaded?.idOfferta)!)", value: newProductsOfferDictionary)
+            FireBaseAPI.updateNode(node: "productsOffersDetails/\(companyId)/\(offerId)", value: newProductsOfferDictionary)
             
             //orderState Offerta scalata
-            FireBaseAPI.updateNode(node: "ordersReceived/\((self.orderReaded?.userDestination?.idApp)!)/\((self.orderReaded?.company?.companyId)!)/\((self.orderReaded?.orderAutoId)!)", value: ["offerState":"Offerta scalata", "total" : String(format:"%.2f", (self.orderReaded?.costoTotale)!),"consumingDate":self.actualDateString!])
-            FireBaseAPI.updateNode(node: "ordersSent/\((self.orderReaded?.userSender?.idApp)!)/\((self.orderReaded?.company?.companyId)!)/\((self.orderReaded?.idOfferta)!)", value: ["offerState":"Offerta scalata", "total" : String(format:"%.2f", (self.orderReaded?.costoTotale)!),"consumingDate":self.actualDateString!])
+            FireBaseAPI.updateNode(node: "ordersReceived/\(userDestinationIdApp)/\(companyId)/\(orderAutoId)", value: ["offerState":"Offerta scalata", "total" : String(format:"%.2f", totalCost),"consumingDate":currentDate])
+            FireBaseAPI.updateNode(node: "ordersSent/\(userSenderIdApp)/\(companyId)/\(offerId)", value: ["offerState":"Offerta scalata", "total" : String(format:"%.2f", totalCost), "consumingDate":currentDate])
             self.sendNotifications()
             
         } else {
             //update orderState "Offerta consumata"
-            FireBaseAPI.updateNode(node: "ordersReceived/\((self.orderReaded?.userDestination?.idApp)!)/\((self.orderReaded?.company?.companyId)!)/\((self.orderReaded?.orderAutoId)!)", value: ["offerState":"Offerta consumata","consumingDate":self.actualDateString!])
-            FireBaseAPI.updateNode(node: "ordersSent/\((self.orderReaded?.userSender?.idApp)!)/\((self.orderReaded?.company?.companyId)!)/\((self.orderReaded?.idOfferta)!)", value: ["offerState":"Offerta consumata","consumingDate":self.actualDateString!])
+            FireBaseAPI.updateNode(node: "ordersReceived/\(userDestinationIdApp)/\(companyId)/\(orderAutoId)", value: ["offerState":"Offerta consumata","consumingDate":currentDate])
+            FireBaseAPI.updateNode(node: "ordersSent/\(userSenderIdApp)/\(companyId)/\(offerId)", value: ["offerState":"Offerta consumata","consumingDate":currentDate])
            
             self.sendNotifications()
         }
-        FireBaseAPI.updateNode(node: "ordersReceived/\((self.orderReaded?.userDestination?.idApp)!)/\((self.orderReaded?.company?.companyId)!)", value: ["scanningQrCode":true])
+        FireBaseAPI.updateNode(node: "ordersReceived/\(userDestinationIdApp)/\(companyId)", value: ["scanningQrCode":true])
         
         self.alert = UIAlertController(title: "Operazione completata!", message: "Ordine autorizzato correttamente", preferredStyle: .alert)
         let confirm = UIAlertAction(title: "Ok", style: .default, handler: nil)
@@ -286,20 +316,26 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
         //Send notification
         var msg: String = ""
         
-        msg = "Il tuo amico \((self.orderReaded?.userDestination?.fullName)!) ha appena consumato l'ordine da te inviato "
-        NotificationsCenter.sendConsuptionNotification(userDestinationIdApp: (self.orderReaded?.userSender?.idApp)!, msg: msg, controlBadgeFrom: "purchased")
+        guard let userDestinationIdApp = orderReaded?.userSender?.idApp,
+            let friendName = orderReaded?.userDestination?.fullName
+        else { return }
+        
+        msg = "Il tuo amico \(friendName) ha appena consumato l'ordine da te inviato "
+        NotificationsCenter.sendConsuptionNotification(userDestinationIdApp: userDestinationIdApp, msg: msg, controlBadgeFrom: "purchased")
         print("Notifica al sender inviata")
     }
     
     private func sendNotificationToUserReceiver(){
         let msg = "Il tuo ordine è stato approvato "
-        NotificationsCenter.sendConsuptionNotification(userDestinationIdApp: (self.orderReaded?.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
-        print("notifica al receiver inviata")
+        guard let userDestinationIdApp = orderReaded?.userDestination?.idApp else { return }
+        
+        NotificationsCenter.sendConsuptionNotification(userDestinationIdApp: userDestinationIdApp, msg: msg, controlBadgeFrom: "received")
+        
     }
     
     private func sendNotifications(){
         //if order is accepted and if is not a autopurchased case, send notification to sender and receiver and add point else only send notification to receiver
-        if orderReaded?.offerState == "Offerta accettata"{
+        if orderReaded?.offerState == .accepted {
             if orderReaded?.userDestination?.idApp != orderReaded?.userSender?.idApp {
                 sendNotificationToUserSender()
                 sendNotificationToUserReceiver()
@@ -312,16 +348,20 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
     }
     
     private func updateUserPoints(){
-        PointsManager.sharedInstance.readUserPointsStatsOnFirebase(userId: (self.orderReaded?.userDestination?.idApp)!,onCompletion: { (error) in
+        guard let userDestinationIdApp = orderReaded?.userDestination?.idApp,
+            let currentDate = actualDate
+        else { return }
+        
+        PointsManager.sharedInstance.readUserPointsStatsOnFirebase(userId: userDestinationIdApp, onCompletion: { (error) in
             guard error == nil else {
                 print(error!)
                 return
             }
-            let points = PointsManager.sharedInstance.addPointsForConsumption(date: self.actualDate!, numberOfProducts: self.numberOfProducts())
-            PointsManager.sharedInstance.updateNewValuesOnFirebase(actualUserId: (self.orderReaded?.userDestination?.idApp)!, onCompletion: {
+            let points = PointsManager.sharedInstance.addPointsForConsumption(date: currentDate, numberOfProducts: self.numberOfProducts())
+            PointsManager.sharedInstance.updateNewValuesOnFirebase(actualUserId: userDestinationIdApp, onCompletion: {
                 //send notification
                 let msg = "Il tuo ordine è stato approvato, hai cumulato \(points) punti"
-                NotificationsCenter.sendConsuptionNotification(userDestinationIdApp: (self.orderReaded?.userDestination?.idApp)!, msg: msg, controlBadgeFrom: "received")
+                NotificationsCenter.sendConsuptionNotification(userDestinationIdApp: userDestinationIdApp, msg: msg, controlBadgeFrom: "received")
                 
             })
         })

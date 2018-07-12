@@ -29,6 +29,8 @@
 		2A3492EB1F98948A00F2C6A7 /* SWRevealViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A3492EA1F98948A00F2C6A7 /* SWRevealViewController.m */; };
 		2A3492EF1F98AB6D00F2C6A7 /* MenuTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3492EE1F98AB6D00F2C6A7 /* MenuTableViewController.swift */; };
 		2A3492F11F98B99800F2C6A7 /* UserProfileMenuRowTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3492F01F98B99800F2C6A7 /* UserProfileMenuRowTableViewCell.swift */; };
+		2A3C3A3420DC64950023F11B /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3C3A3320DC64950023F11B /* NotificationService.swift */; };
+		2A3C3A3820DC64950023F11B /* NotificationService.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 2A3C3A3120DC64950023F11B /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		2A40AD151F1779A400864227 /* SegmentControlExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A40AD141F1779A400864227 /* SegmentControlExtension.swift */; };
 		2A53AB5D1EAE893F0018B8E9 /* TestConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A53AB5C1EAE893E0018B8E9 /* TestConnection.swift */; };
 		2A53AB671EB0AC120018B8E9 /* Product.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A53AB661EB0AC120018B8E9 /* Product.swift */; };
@@ -113,7 +115,28 @@
 			remoteGlobalIDString = 2AE35F851E93EF5800DF453F;
 			remoteInfo = MorganaMusic;
 		};
+		2A3C3A3620DC64950023F11B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2AE35F7E1E93EF5800DF453F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2A3C3A3020DC64950023F11B;
+			remoteInfo = NotificationService;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		2A3C3A3C20DC64950023F11B /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				2A3C3A3820DC64950023F11B /* NotificationService.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		17C88BB35E78272643DA482B /* Pods_MorganaMusicTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MorganaMusicTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -144,6 +167,9 @@
 		2A3492EA1F98948A00F2C6A7 /* SWRevealViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SWRevealViewController.m; sourceTree = "<group>"; };
 		2A3492EE1F98AB6D00F2C6A7 /* MenuTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuTableViewController.swift; sourceTree = "<group>"; };
 		2A3492F01F98B99800F2C6A7 /* UserProfileMenuRowTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileMenuRowTableViewCell.swift; sourceTree = "<group>"; };
+		2A3C3A3120DC64950023F11B /* NotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		2A3C3A3320DC64950023F11B /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		2A3C3A3520DC64950023F11B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2A40AD141F1779A400864227 /* SegmentControlExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegmentControlExtension.swift; sourceTree = "<group>"; };
 		2A53AB5C1EAE893E0018B8E9 /* TestConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestConnection.swift; sourceTree = "<group>"; };
 		2A53AB661EB0AC120018B8E9 /* Product.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Product.swift; sourceTree = "<group>"; };
@@ -236,6 +262,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		2A3C3A2E20DC64950023F11B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		2AE35F831E93EF5800DF453F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -318,6 +351,15 @@
 			name = "Menù";
 			sourceTree = "<group>";
 		};
+		2A3C3A3220DC64950023F11B /* NotificationService */ = {
+			isa = PBXGroup;
+			children = (
+				2A3C3A3320DC64950023F11B /* NotificationService.swift */,
+				2A3C3A3520DC64950023F11B /* Info.plist */,
+			);
+			path = NotificationService;
+			sourceTree = "<group>";
+		};
 		2AC5A67C1E94EA010081CAA0 /* FacebookFramework */ = {
 			isa = PBXGroup;
 			children = (
@@ -333,6 +375,7 @@
 			isa = PBXGroup;
 			children = (
 				2AE35F881E93EF5800DF453F /* MorganaMusic */,
+				2A3C3A3220DC64950023F11B /* NotificationService */,
 				2AE35F871E93EF5800DF453F /* Products */,
 				65312183B46FE65E26A89277 /* Frameworks */,
 				2A01EBB01F7C741400EB49C1 /* MorganaMusicTests */,
@@ -347,6 +390,7 @@
 				2AE35F861E93EF5800DF453F /* MorganaMusic.app */,
 				2A01EBAF1F7C741400EB49C1 /* MorganaMusicTests.xctest */,
 				2A01EBBD1F7C743B00EB49C1 /* MorganaMusicUITests.xctest */,
+				2A3C3A3120DC64950023F11B /* NotificationService.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -514,6 +558,23 @@
 			productReference = 2A01EBBD1F7C743B00EB49C1 /* MorganaMusicUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		2A3C3A3020DC64950023F11B /* NotificationService */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2A3C3A3B20DC64950023F11B /* Build configuration list for PBXNativeTarget "NotificationService" */;
+			buildPhases = (
+				2A3C3A2D20DC64950023F11B /* Sources */,
+				2A3C3A2E20DC64950023F11B /* Frameworks */,
+				2A3C3A2F20DC64950023F11B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NotificationService;
+			productName = NotificationService;
+			productReference = 2A3C3A3120DC64950023F11B /* NotificationService.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		2AE35F851E93EF5800DF453F /* MorganaMusic */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2AE35F9B1E93EF5800DF453F /* Build configuration list for PBXNativeTarget "MorganaMusic" */;
@@ -523,10 +584,12 @@
 				2AE35F831E93EF5800DF453F /* Frameworks */,
 				2AE35F841E93EF5800DF453F /* Resources */,
 				49DC1D64E5F39BA39F03BB0F /* [CP] Embed Pods Frameworks */,
+				2A3C3A3C20DC64950023F11B /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				2A3C3A3720DC64950023F11B /* PBXTargetDependency */,
 			);
 			name = MorganaMusic;
 			productName = MorganaMusic;
@@ -539,26 +602,33 @@
 		2AE35F7E1E93EF5800DF453F /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0900;
+				LastSwiftUpdateCheck = 0940;
 				LastUpgradeCheck = 0930;
 				ORGANIZATIONNAME = "Vittorio Scocca";
 				TargetAttributes = {
 					2A01EBAE1F7C741400EB49C1 = {
 						CreatedOnToolsVersion = 9.0;
 						DevelopmentTeam = 42U6W2K3HU;
+						LastSwiftMigration = 1000;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 2AE35F851E93EF5800DF453F;
 					};
 					2A01EBBC1F7C743B00EB49C1 = {
 						CreatedOnToolsVersion = 9.0;
 						DevelopmentTeam = 42U6W2K3HU;
+						LastSwiftMigration = 1000;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 2AE35F851E93EF5800DF453F;
+					};
+					2A3C3A3020DC64950023F11B = {
+						CreatedOnToolsVersion = 9.4.1;
+						DevelopmentTeam = FP3LS7BNMG;
+						ProvisioningStyle = Automatic;
 					};
 					2AE35F851E93EF5800DF453F = {
 						CreatedOnToolsVersion = 8.3;
 						DevelopmentTeam = FP3LS7BNMG;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1000;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Push = {
@@ -584,6 +654,7 @@
 				2AE35F851E93EF5800DF453F /* MorganaMusic */,
 				2A01EBAE1F7C741400EB49C1 /* MorganaMusicTests */,
 				2A01EBBC1F7C743B00EB49C1 /* MorganaMusicUITests */,
+				2A3C3A3020DC64950023F11B /* NotificationService */,
 			);
 		};
 /* End PBXProject section */
@@ -597,6 +668,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		2A01EBBB1F7C743B00EB49C1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2A3C3A2F20DC64950023F11B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -724,6 +802,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		2A3C3A2D20DC64950023F11B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2A3C3A3420DC64950023F11B /* NotificationService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		2AE35F821E93EF5800DF453F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -810,6 +896,11 @@
 			isa = PBXTargetDependency;
 			target = 2AE35F851E93EF5800DF453F /* MorganaMusic */;
 			targetProxy = 2A01EBC21F7C743B00EB49C1 /* PBXContainerItemProxy */;
+		};
+		2A3C3A3720DC64950023F11B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2A3C3A3020DC64950023F11B /* NotificationService */;
+			targetProxy = 2A3C3A3620DC64950023F11B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -920,6 +1011,50 @@
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = MorganaMusic;
+			};
+			name = Release;
+		};
+		2A3C3A3920DC64950023F11B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = FP3LS7BNMG;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = NotificationService/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.vittorioscoccs.MorganaMusic.NotificationService;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		2A3C3A3A20DC64950023F11B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = FP3LS7BNMG;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = NotificationService/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.vittorioscoccs.MorganaMusic.NotificationService;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -1110,6 +1245,15 @@
 			buildConfigurations = (
 				2A01EBC51F7C743B00EB49C1 /* Debug */,
 				2A01EBC61F7C743B00EB49C1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2A3C3A3B20DC64950023F11B /* Build configuration list for PBXNativeTarget "NotificationService" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2A3C3A3920DC64950023F11B /* Debug */,
+				2A3C3A3A20DC64950023F11B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

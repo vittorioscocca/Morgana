@@ -20,17 +20,19 @@ class CacheImage {
         if let pictureUrl = url{
             if let img = imageCache[pictureUrl] {
                 onCompletion(img)
-                
             } else {
-                let request = NSMutableURLRequest(url: NSURL(string: (url)!)! as URL)
+                guard let nsUrl = NSURL(string: pictureUrl) else { return }
+                let request = NSMutableURLRequest(url: nsUrl as URL)
                 let session = URLSession.shared
-                
                 let task = session.dataTask(with: request as URLRequest, completionHandler: {data, response, error -> Void in
                     if error == nil {
-                        let image = UIImage(data: data!)
-                        self.imageCache[(url)!] = image
+                        guard let imageData = data else {
+                            onCompletion(nil)
+                            return
+                        }
+                        let image = UIImage(data: imageData)
+                        self.imageCache[pictureUrl] = image
                         onCompletion(image)
-                        //NotificationCenter.default.post(name: .CacheImageLoadImage, object: nil)
                     }
                     else {
                         print("Error: \(error!.localizedDescription)")

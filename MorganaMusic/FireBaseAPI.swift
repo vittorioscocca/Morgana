@@ -91,7 +91,7 @@ class FireBaseAPI {
                 return
             }
             // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
-            let nodeDictionary = snap_value as! NSDictionary
+            guard let nodeDictionary = snap_value as? NSDictionary else { return }
             dictionary = [:]
             for (chiave,valore) in nodeDictionary {
                 dictionary?[chiave as! String] = valore
@@ -122,7 +122,7 @@ class FireBaseAPI {
             }
             
             // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
-            let nodeDictionary = snap_value as! NSDictionary
+            guard let nodeDictionary = snap_value as? NSDictionary else { return }
             dictionary = [:]
             for (chiave,valore) in nodeDictionary {
                 dictionary?[chiave as! String] = valore
@@ -149,7 +149,7 @@ class FireBaseAPI {
             }
             
             // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
-            let nodeDictionary = snap_value as! NSDictionary
+            guard let nodeDictionary = snap_value as? NSDictionary else { return }
             dictionary = [:]
             
             // leggo i dati dell'ordine o offerte
@@ -208,13 +208,14 @@ class FireBaseAPI {
             }
             
             // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
-            let nodeDictionary = snap_value as! NSDictionary
+            guard let nodeDictionary = snap_value as? NSDictionary else { return }
             dictionary = [:]
             
             // leggo i dati dell'ordine o offerte
             for (autoId, childDictionary) in nodeDictionary{
                 dictionary?["autoId"] = autoId
-                for (chiave,valore) in (childDictionary as! NSDictionary) {
+                guard let childDic = childDictionary as? NSDictionary else { return }
+                for (chiave,valore) in (childDic) {
                     dictionary?[chiave as! String] = valore
                 }
                 //dictionaries?.append(dictionary!)
@@ -267,7 +268,7 @@ class FireBaseAPI {
                 return
             }
             // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
-            let nodeDictionary = snap_value as! NSDictionary
+            guard let nodeDictionary = snap_value as? NSDictionary else { return }
             dictionary = [:]
             
             // leggo i dati dell'ordine o offerte
@@ -289,7 +290,7 @@ class FireBaseAPI {
                 return
             }
             // eseguo il cast in dizionario dato che so che sotto offers c'è un dizionario
-            let nodeDictionary = snap_value as! NSDictionary
+            guard let nodeDictionary = snap_value as? NSDictionary else { return }
             dictionary = [:]
             
             // leggo i dati dell'ordine o offerte
@@ -324,7 +325,7 @@ class FireBaseAPI {
         }
         ref.child("sessions").setValue(ServerValue.timestamp())
         ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
-            let timeStamp = snap.value! as! TimeInterval
+            guard let timeStamp = snap.value as? TimeInterval else { return }
             onCompletion(timeStamp)
         })
     }

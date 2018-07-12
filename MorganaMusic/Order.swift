@@ -27,40 +27,30 @@ class Order {
     var orderExpirationNotificationIsScheduled :Bool?
     var consumingDate: String?
     
-    var paymentState: String?
-    var offerState: String?
+    var paymentState: Payment.State
+    var offerState: OfferStates
     var dataCreazioneOfferta: String?
     var idOfferta: String?
     var totalReadedFromFirebase: String = ""
     var company: Company?
-    var viewState: String?
+    var viewState: ViewStates
     
-    enum offerStates: String {
-        case rifiutata = "Offerta rifiutata" //l'utente destinatario dell'offerta rifiuta l'offerta
-        case accettata = "Offerta accettata" // l'utente destinatario dell'offerta accetta l'offerta
-        case inoltrata = "Offerta inoltrata" // l'utente destinatario dell'offerta ha inoltrato l'offerta
-        case offertaTerminata = "Scaduta" // data scadenza raggiunta
-        case offertaConsumata = "Offerta consumata" // data scadenza raggiunta
+    enum OfferStates: String {
+        case refused = "Offerta rifiutata" //l'utente destinatario dell'offerta rifiuta l'offerta
+        case accepted = "Offerta accettata" // l'utente destinatario dell'offerta accetta l'offerta
+        case forward = "Offerta inoltrata" // l'utente destinatario dell'offerta ha inoltrato l'offerta
+        case expired = "Scaduta" // data scadenza raggiunta
+        case consumed = "Offerta consumata" // data scadenza raggiunta
         case pending = "Pending" //stato di default
         case ransom = "Offerta riscattata"
-    
+        case scaled = "Offerta scalata"  
     }
     
-    enum viewStates: String {
+    enum ViewStates: String {
         case active = "active" //l'utente destinatario dell'offerta rifiuta l'offerta
         case deleted = "deleted" // l'utente destinatario dell'offerta accetta l'offerta
         case filed = "filed" // l'utente destinatario dell'offerta ha inoltrato l'offerta
     }
-    
-    
-    
-    enum paymentStates: String {
-        case offertaValida = "Valid" // pagamento avvenuto con successo l'amico ha consumato l'offerta
-        case offertaNonValida = "Not Valid" //in caso di errore di pagamento
-        case pending = "Pending" //aspetta l'autorizzazione al pagamento
-
-    }
-    
     var costoTotale: Double {
         var tot: Double = 0.0
         for i in prodotti! {
@@ -82,12 +72,12 @@ class Order {
         self.expirationeDate = ""
         self.consumingDate = ""
         self.userDestination = UserDestination(nil,nil,nil,nil,nil)
-        self.paymentState = paymentStates.pending.rawValue
-        self.offerState = offerStates.pending.rawValue
+        self.paymentState = .pending
+        self.offerState = OfferStates.pending
         self.userSender = UserDestination(nil,nil,nil,nil,nil)
         self.ordersSentAutoId = ""
         self.company = Company()
-        self.viewState = viewStates.active.rawValue
+        self.viewState = ViewStates.active
     }
     
     
@@ -97,52 +87,45 @@ class Order {
         self.userDestination = userDestination
         self.userSender = userSender
         self.dataCreazioneOfferta = ""
-        self.paymentState = paymentStates.pending.rawValue
-        self.offerState = offerStates.pending.rawValue
+        self.paymentState = .pending
+        self.offerState = OfferStates.pending
         self.ordersSentAutoId = ""
         self.orderNotificationIsScheduled = false
         self.orderReaded = false
         self.orderExpirationNotificationIsScheduled = false
         self.company = Company()
-        self.viewState = viewStates.active.rawValue
+        self.viewState = ViewStates.active
     }
-    
-    
     
     func validateOffer(){
-        self.paymentState = paymentStates.offertaValida.rawValue
+        self.paymentState = .valid
     }
     
-    
-    
-    func terminateOffer(){
-        self.paymentState = offerStates.offertaTerminata.rawValue
-    }
     func notValidateOffer(){
-        self.paymentState = paymentStates.offertaNonValida.rawValue
+        self.paymentState = .notValid
     }
     func pendingOffer(){
-        self.paymentState = paymentStates.pending.rawValue
+        self.paymentState = .pending
     }
     
     func refuseOffer(){
-        self.offerState = offerStates.rifiutata.rawValue
+        self.offerState = .refused
     }
     
     func acceptOffer(){
-        self.offerState = offerStates.accettata.rawValue
+        self.offerState = .accepted
     }
     
     func forwardOffer(){
-        self.offerState = offerStates.inoltrata.rawValue
+        self.offerState = .forward
     }
     
     func consumedOffer(){
-        self.offerState = offerStates.offertaConsumata.rawValue
+        self.offerState = .consumed
     }
     
     func ransomOffer(){
-        self.offerState = offerStates.ransom.rawValue
+        self.offerState = OfferStates.ransom
     }
     
     func addProduct(product: Product) {
@@ -177,5 +160,27 @@ class Order {
             self.expirationeDate = formatter.string(from: date)
         }
     }
-    
+}
+
+extension Order {
+    static let expirationDate = "expirationDate"
+    static let paymentStateString = "paymentState"
+    static let offerState = "offerState"
+    static let facebookUserDestination = "facebookUserDestination"
+    static let offerCreationDate = "offerCreationDate"
+    static let total = "total"
+    static let IdAppUserDestination = "IdAppUserDestination"
+    static let timestamp = "timestamp"
+    static let ordersSentAutoId = "ordersSentAutoId"
+    static let orderNotificationIsScheduled = "orderNotificationIsScheduled"
+    static let orderAutoId = "orderAutoId"
+    static let pendingPaymentAutoId = "pendingPaymentAutoId"
+    static let userSender = "userSender"
+    static let orderReaded = "orderReaded"
+    static let consumingDate = "consumingDate"
+    static let viewState = "viewState"
+    static let autoId = "autoId"
+    static let offerId = "offerId"
+    static let orderExpirationNotificationIsScheduled = "orderExpirationNotificationIsScheduled"
+    static let scanningQrCode = "scanningQrCode"
 }

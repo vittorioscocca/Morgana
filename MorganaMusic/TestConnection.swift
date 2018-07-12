@@ -27,7 +27,9 @@ public class CheckConnection {
             }
         }
         
-        if SCNetworkReachabilityGetFlags(defaultRouteReachability!, &flags) == false {
+        guard let reach = defaultRouteReachability else { return false }
+        
+        if SCNetworkReachabilityGetFlags(reach, &flags) == false {
             return false
         }
         

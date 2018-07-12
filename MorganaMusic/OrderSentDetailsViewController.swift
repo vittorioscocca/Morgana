@@ -44,7 +44,8 @@ class OrderSentDetailsViewController: UIViewController, UITableViewDelegate, UIT
         if section == 0 {
             return 1
         }else {
-            return (offertaInviata?.prodottiTotali)!
+            guard let totalProducts = offertaInviata?.prodottiTotali else { return 0 }
+            return totalProducts
         }
     }
     
@@ -84,10 +85,16 @@ class OrderSentDetailsViewController: UIViewController, UITableViewDelegate, UIT
         } else {
             cell = tableView.dequeueReusableCell(withIdentifier: "defaultCell", for: indexPath)
             
-            if  indexPath.row <= (offertaInviata?.prodotti?.count)! - 1  {
-                let product = offertaInviata?.prodotti?[indexPath.row]
+            guard let products = offertaInviata?.prodotti else { return cell! }
+            
+            if  indexPath.row <= products.count - 1  {
+                let product = products[indexPath.row]
+                guard let quantity = product.quantity,
+                    let productName = product.productName,
+                    let price = product.price
+                else { return cell!}
                 
-                cell?.textLabel?.text = "(\((product?.quantity)!))  " + (product?.productName)! + " € " + String(format:"%.2f", (product?.price!)!)
+                cell?.textLabel?.text = "(\(quantity))  " + productName + " € " + String(format:"%.2f", price)
                 cell?.textLabel?.textColor = #colorLiteral(red: 0.7419371009, green: 0.1511851847, blue: 0.20955199, alpha: 1)
             }
         }
