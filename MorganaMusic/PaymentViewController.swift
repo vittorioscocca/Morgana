@@ -151,13 +151,14 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
             
             for order in Cart.sharedIstance.carrello{
                 order.dataCreazioneOfferta = paycreatetime
-                order.calcolaDataScadenzaOfferta(selfOrder: (self.user?.idApp! == order.userDestination?.idApp!))
+                order.calcolaDataScadenzaOfferta(selfOrder: (self.user?.idApp == order.userDestination?.idApp))
                 order.pendingOffer()
             }
             DispatchQueue.main.async {
                 self.startActivityIndicator("Pagamento in validazione...")
             }
-            FirebaseData.sharedIstance.saveCartOnFirebase(user: self.user!, badgeValue: self.productOfferedBadge.object(forKey: "paymentOfferedBadge") as? Int, onCompletion: {
+            guard let userApp = self.user, let userIdApp = self.user?.idApp else { return }
+            FirebaseData.sharedIstance.saveCartOnFirebase(user: userApp, badgeValue: self.productOfferedBadge.object(forKey: "paymentOfferedBadge") as? Int, onCompletion: {
                 print("ordine salvato su firebase")
                 DispatchQueue.main.async {
                     // ritorno sul main thread ed aggiorno la view
@@ -167,15 +168,15 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
                 if Cart.sharedIstance.state == "Valid" {
                     print("Pagamento carrello valido")
                     
-                    PointsManager.sharedInstance.readUserPointsStatsOnFirebase(userId: (self.user?.idApp)!, onCompletion: { (error) in
+                    PointsManager.sharedInstance.readUserPointsStatsOnFirebase(userId: userIdApp, onCompletion: { (error) in
                         guard error == nil else {
                             print(error!)
                             return
                         }
-                        let points = PointsManager.sharedInstance.addPointsForShopping(userId:(self.user?.idApp)!,expense: Cart.sharedIstance.costoTotale)
-                        PointsManager.sharedInstance.updateNewValuesOnFirebase(actualUserId: (self.user?.idApp)!,onCompletion: {
+                        let points = PointsManager.sharedInstance.addPointsForShopping(userId:userIdApp, expense: Cart.sharedIstance.costoTotale)
+                        PointsManager.sharedInstance.updateNewValuesOnFirebase(actualUserId: userIdApp, onCompletion: {
                             DispatchQueue.main.async(execute: {
-                                NotificationsCenter.pointsNotification(title: "Congratulazioni \((self.user?.firstName)!)", body: "Hai appena cumulato \(points) Punti!")
+                                NotificationsCenter.pointsNotification(title: "Congratulazioni \((userApp.firstName)!)", body: "Hai appena cumulato \(points) Punti!")
                             })
                         })
                         
@@ -233,8 +234,10 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
              let paymentDetails = PayPalPaymentDetails(subtotal: subtotal, withShipping: shipping, withTax: tax)
              let total = subtotal.adding(shipping).adding(tax)*/
             var items: [PayPalItem] = []
-            for i in Order.sharedIstance.prodotti! {
-                let item = PayPalItem(name: i.productName!, withQuantity: UInt(i.quantity!), withPrice: NSDecimalNumber(string: String(format:"%.2f", i.price!)), withCurrency: "EUR", withSku: "")
+            guard let ordersProducts = Order.sharedIstance.prodotti else { return }
+            for product in ordersProducts {
+                guard let name = product.productName, let quantity = product.quantity, let price = product.price else { return }
+                let item = PayPalItem(name: name, withQuantity: UInt(quantity), withPrice: NSDecimalNumber(string: String(format:"%.2f", price)), withCurrency: "EUR", withSku: "")
                 items.append(item)
             }
             //let total = PayPalItem.totalPrice(forItems: items)
@@ -288,15 +291,16 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
     private func completeCartInformation(){
         for j in Cart.sharedIstance.carrello {
             //Get idApp
-            FirebaseData.sharedIstance.readUserIdAppFromIdFB(node: "users", child: "idFB", idFB: (j.userDestination?.idFB)!, onCompletion: { (error,idApp) in
+            guard let idFBUserDestination = j.userDestination?.idFB else { return }
+            FirebaseData.sharedIstance.readUserIdAppFromIdFB(node: "users", child: "idFB", idFB: idFBUserDestination, onCompletion: { (error,idApp) in
                 guard error == nil else {
                     print(error!)
                     return
                 }
-                guard idApp != nil else {return}
-                if idApp! != "04fLLHPLYYboLfy8enAkogDcdI02" {
-                    j.userDestination?.idApp = idApp!
-                    self.completeCartWithFirebaseToken(idApp: idApp!)
+                guard let IDApp = idApp else {return}
+                if IDApp != "04fLLHPLYYboLfy8enAkogDcdI02" {
+                    j.userDestination?.idApp = IDApp
+                    self.completeCartWithFirebaseToken(idApp: IDApp)
                 }
             })
             

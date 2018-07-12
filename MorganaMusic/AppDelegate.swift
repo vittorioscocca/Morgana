@@ -98,13 +98,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate  {
         
         //Firebase push notification
         if #available(iOS 10.0, *) {
+            // For iOS 10 display notification (sent via APNS)
+            UNUserNotificationCenter.current().delegate = self
             let authOptions : UNAuthorizationOptions = [.alert, .badge, .sound]
             UNUserNotificationCenter.current().requestAuthorization(
                 options: authOptions,
                 completionHandler: {(granted, error) in
                     if (granted) {
                         DispatchQueue.main.async(execute: {
-                            //UIApplication.shared.registerForRemoteNotifications()
+                            UIApplication.shared.registerForRemoteNotifications()
                             //application.registerForRemoteNotifications()
                         })
                     } else{

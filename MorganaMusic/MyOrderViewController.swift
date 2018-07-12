@@ -70,10 +70,10 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             view.addGestureRecognizer(self.revealViewController().panGestureRecognizer())
         }
         
-        self.setSegmentcontrol()
-        self.uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
-        self.user = CoreDataController.sharedIstance.findUserForIdApp(self.uid)
-        self.updateSegmentControl()
+        setSegmentcontrol()
+        uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
+        user = CoreDataController.sharedIstance.findUserForIdApp(self.uid)
+        updateSegmentControl()
         
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(FireBaseDataUserReadedNotification),
@@ -130,7 +130,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     @objc private func FireBaseDataUserReadedNotification() {
-        self.myTable.reloadData()
+        //self.myTable.reloadData()
     }
     
     private func setSegmentcontrol() {
@@ -164,7 +164,9 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     private func updateSegmentControl(){
         let ref = Database.database().reference()
         
-        ref.child("users/" + (self.user?.idApp)!).observe(.value, with: { (snap) in
+        guard let userIdApp = user?.idApp else { return }
+        
+        ref.child("users/" + userIdApp).observe(.value, with: { (snap) in
             
             guard snap.exists() else {return}
             guard snap.value != nil else {return}
@@ -201,19 +203,25 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     private func resetSegmentControl1(){
-        FireBaseAPI.updateNode(node: "users/" + (self.user?.idApp)!, value: ["numberOfPendingReceivedProducts" : 0])
+        guard let userIdApp = user?.idApp else { return }
+        FireBaseAPI.updateNode(node: "users/" + userIdApp, value: ["numberOfPendingReceivedProducts" : 0])
         self.drinksList_segmentControl.setTitle("Ricevuti", forSegmentAt: 1)
     }
     
     private func resetSegmentControl0(){
-        FireBaseAPI.updateNode(node: "users/" + (self.user?.idApp)!, value: ["numberOfPendingPurchasedProducts" : 0])
+        guard let userIdApp = user?.idApp else { return }
+        FireBaseAPI.updateNode(node: "users/" + userIdApp, value: ["numberOfPendingPurchasedProducts" : 0])
         self.drinksList_segmentControl.setTitle("Inviati", forSegmentAt: 0)
     }
     
     private func readAndSolvePendingPayPalPayment(order: Order, paymentId: String,onCompletion: @escaping () -> ()){
         let ref = Database.database().reference()
-        //self.pendingPayments.removeAll()
-        ref.child("pendingPayments/\((self.user?.idApp)!)/\((order.company?.companyId)!)/\(paymentId)").observeSingleEvent(of:.value, with: { (snap) in
+    
+        guard let userIdApp = user?.idApp,
+            let companyId = order.company?.companyId
+            else { return }
+        
+        ref.child("pendingPayments/\(userIdApp)/\(companyId)/\(paymentId)").observeSingleEvent(of:.value, with: { (snap) in
             
             guard snap.exists() else {return}
             guard snap.value != nil else {return}
@@ -226,20 +234,20 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             for (chiave,valore) in dizionario_pagamenti {
                 
                 switch chiave as! String {
-                case "idPayment":
+                case Payment.idPayment:
                     payment.idPayment = valore as? String
                     break
-                case "statePayment":
+                case Payment.statePayment:
                     payment.statePayment = valore as? String
                     break
-                case "total":
+                case Payment.total:
                     payment.total = valore as? String
                     break
                 case let x where (x.range(of:"offerID") != nil):
                     payment.relatedOrders.append((valore as? String)!)
                     count += 1
                     break
-                case "pendingUserIdApp":
+                case Payment.pendingUserIdApp:
                     payment.pendingUserIdApp = (valore as? String)!
                     break
                 default:
@@ -273,7 +281,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         for i in self.ordersSent{
             for j in payment.relatedOrders{
                 if i.idOfferta == j{
-                    i.paymentState = "Valid"
+                    i.paymentState = .valid
                 }
             }
         }
@@ -291,84 +299,88 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         var cell = UITableViewCell()
         
         if self.drinksList_segmentControl.selectedSegmentIndex == 0 && !self.ordersSent.isEmpty {
-            var orderSent: Order?
             
             cell = tableView.dequeueReusableCell(withIdentifier: "myDrinksPurchasedCell", for: indexPath)
+            
             guard !self.ordersSent.isEmpty else {
-                cell.textLabel?.text = "Nessun drink inviato"
+                cell.textLabel?.text = "Nessun ordine inviato"
                 return cell
             }
-            orderSent = self.ordersSent[indexPath.row]
-            if !(orderSent?.orderReaded)! {
-                (cell as! OrderSentTableViewCell).cellReaded = false
-            } else {
-                (cell as! OrderSentTableViewCell).cellReaded = true
+            
+            let orderSent = self.ordersSent[indexPath.row]
+            
+            guard let offerCreationDate = orderSent.dataCreazioneOfferta else { return cell }
+            
+            if orderSent.orderReaded != nil {
+                if !(orderSent.orderReaded)! {
+                    (cell as! OrderSentTableViewCell).cellReaded = false
+                } else {
+                    (cell as! OrderSentTableViewCell).cellReaded = true
+                }
             }
             
-            (cell as! OrderSentTableViewCell).friendFullName.text = orderSent?.userDestination?.fullName
+            (cell as! OrderSentTableViewCell).friendFullName.text = orderSent.userDestination?.fullName
             
-            switch orderSent!.paymentState! {
-            case "Not Valid":
+            switch orderSent.paymentState {
+            case .notValid:
                 (cell as! OrderSentTableViewCell).lastDate.text = "Problema con il pagamento"
                 (cell as! OrderSentTableViewCell).lastDate.textColor = UIColor.red
                 (cell as! OrderSentTableViewCell).createDate.text = ""
-                break
-            case "Pending":
+                
+            case .pending:
                 (cell as! OrderSentTableViewCell).lastDate.text = ""
                 (cell as! OrderSentTableViewCell).createDate.text = "Clicca per verificare il pagamento"
                 (cell as! OrderSentTableViewCell).createDate.textColor = UIColor.red
-                break
-            case "Valid":
+                
+            case .valid:
                 (cell as! OrderSentTableViewCell).createDate.textColor = UIColor.gray
-                switch orderSent!.offerState! {
-                case "Scaduta":
+                switch orderSent.offerState {
+                case .expired:
                     (cell as! OrderSentTableViewCell).lastDate.text = "Ordine scaduto"
                     (cell as! OrderSentTableViewCell).lastDate.textColor = UIColor.red
-                    (cell as! OrderSentTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: (orderSent?.dataCreazioneOfferta)!)
-                    break
-                case "Offerta rifiutata":
+                    (cell as! OrderSentTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: offerCreationDate)
+                    
+                case .refused:
                     (cell as! OrderSentTableViewCell).lastDate.text = "Ordine rifiutato"
                     (cell as! OrderSentTableViewCell).lastDate.textColor = UIColor.red
-                    (cell as! OrderSentTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: (orderSent?.dataCreazioneOfferta)!)
-                    break
-                case "Pending":
+                    (cell as! OrderSentTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: offerCreationDate)
+                    
+                case .pending:
                     (cell as! OrderSentTableViewCell).lastDate.text = "Ordine inviato"
                     (cell as! OrderSentTableViewCell).lastDate.textColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
                     (cell as! OrderSentTableViewCell).createDate.textColor = UIColor.gray
-                    break
-                case "Offerta accettata":
+                    (cell as! OrderSentTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: offerCreationDate)
+                    
+                case .accepted:
                     (cell as! OrderSentTableViewCell).lastDate.text = "Ordine accettato"
                     (cell as! OrderSentTableViewCell).lastDate.textColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
-                    (cell as! OrderSentTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: (orderSent?.dataCreazioneOfferta)!)
-                    break
-                case "Offerta inoltrata":
+                    (cell as! OrderSentTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: offerCreationDate)
+                    
+                case .forward:
                     (cell as! OrderSentTableViewCell).lastDate.text = "Ordine inoltrato"
                     (cell as! OrderSentTableViewCell).lastDate.textColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
-                    (cell as! OrderSentTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: (orderSent?.dataCreazioneOfferta)!)
-                    break
-                case "Offerta scalata":
+                    (cell as! OrderSentTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: offerCreationDate)
+                    
+                case .scaled:
                     (cell as! OrderSentTableViewCell).lastDate.text = "Ordine scalato"
                     (cell as! OrderSentTableViewCell).lastDate.textColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
-                    (cell as! OrderSentTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: (orderSent?.dataCreazioneOfferta)!)
-                    break
-                case "Offerta consumata":
+                    (cell as! OrderSentTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: offerCreationDate)
+                    
+                case .consumed:
                     (cell as! OrderSentTableViewCell).lastDate.text = ""
-                    (cell as! OrderSentTableViewCell).createDate.text = "Ordine consumato il " + stringTodate(dateString: (orderSent?.consumingDate)!)
-                    (cell as! OrderSentTableViewCell).createDate.textColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
-                    break
-                default:
-                    (cell as! OrderSentTableViewCell).lastDate.text = "Scade il: " + stringTodate(dateString: (orderSent?.expirationeDate)!)
-                    (cell as! OrderSentTableViewCell).lastDate.textColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
-                    (cell as! OrderSentTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: (orderSent?.dataCreazioneOfferta)!)
+                    if orderSent.consumingDate != nil {
+                        (cell as! OrderSentTableViewCell).createDate.text = "Ordine consumato il " + stringTodate(dateString: orderSent.consumingDate!)
+                        (cell as! OrderSentTableViewCell).createDate.textColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
+                    }
+                    
+                case .ransom:
                     break
                 }
-            default:
-                break
             }
-            (cell as! OrderSentTableViewCell).productus.text = "Prodotti totali: " + String(orderSent!.prodottiTotali)
-            (cell as! OrderSentTableViewCell).cost.text = "€ " + String(format:"%.2f",(orderSent?.costoTotale)!)
+            (cell as! OrderSentTableViewCell).productus.text = "Prodotti totali: " + String(orderSent.prodottiTotali)
+            (cell as! OrderSentTableViewCell).cost.text = "€ " + String(format:"%.2f",orderSent.costoTotale)
             
-            CacheImage.getImage(url: orderSent?.userDestination?.pictureUrl, onCompletion: { (image) in
+            CacheImage.getImage(url: orderSent.userDestination?.pictureUrl, onCompletion: { (image) in
                 guard image != nil else {
                     print("immagine utente non reperibile")
                     return
@@ -380,7 +392,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 })
             })
         } else if (self.drinksList_segmentControl.selectedSegmentIndex == 1 && !self.ordersReceived.isEmpty) {
-            var offertaRicevuta: Order?
+            
             cell = tableView.dequeueReusableCell(withIdentifier: "myDrinksRiceivedCell", for: indexPath)
             
             guard !self.ordersReceived.isEmpty else {
@@ -388,39 +400,46 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 return cell
             }
             
-            offertaRicevuta = self.ordersReceived[indexPath.row]
-            if !(offertaRicevuta?.orderReaded)! {
-                (cell as! OrderReceivedTableViewCell).cellReaded = false
-            } else {
-                (cell as! OrderReceivedTableViewCell).cellReaded = true
+            let orderReceived = self.ordersReceived[indexPath.row]
+            
+            if orderReceived.orderReaded != nil {
+                if !(orderReceived.orderReaded)! {
+                    (cell as! OrderReceivedTableViewCell).cellReaded = false
+                } else {
+                    (cell as! OrderReceivedTableViewCell).cellReaded = true
+                }
             }
-            
-            (cell as! OrderReceivedTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: (offertaRicevuta?.dataCreazioneOfferta)!)
-            
-            if offertaRicevuta?.offerState == "Scaduta" {
+            if orderReceived.dataCreazioneOfferta != nil {
+                 (cell as! OrderReceivedTableViewCell).createDate.text = "Invio: " + stringTodate(dateString: (orderReceived.dataCreazioneOfferta)!)
+            }
+            if orderReceived.offerState == .expired {
                 (cell as! OrderReceivedTableViewCell).lastDate.text = "Ordine scaduto"
                 (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
-            } else if offertaRicevuta?.offerState == "Offerta rifiutata"{
+            } else if orderReceived.offerState == .refused {
                 (cell as! OrderReceivedTableViewCell).lastDate.text = "Ordine rifiutato"
                 (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
-            } else if offertaRicevuta?.offerState == "Offerta consumata"{
+            } else if orderReceived.offerState == .consumed{
                 (cell as! OrderReceivedTableViewCell).createDate.text = ""
-                (cell as! OrderReceivedTableViewCell).lastDate.text = "Ordine consumato il " + stringTodate(dateString: (offertaRicevuta?.consumingDate)!)
-                (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
-            } else if offertaRicevuta?.offerState == "Offerta scalata"{
+                if orderReceived.consumingDate != nil {
+                    (cell as! OrderReceivedTableViewCell).lastDate.text = "Ordine consumato il " + stringTodate(dateString: (orderReceived.consumingDate)!)
+                    (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
+                }
+            } else if orderReceived.offerState == .scaled {
                 (cell as! OrderReceivedTableViewCell).lastDate.text = "Ordine scalato"
                 (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
             } else {
-                (cell as! OrderReceivedTableViewCell).lastDate.text = "Scade il: " + stringTodate(dateString: (offertaRicevuta?.expirationeDate)!)
-                (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
+                if orderReceived.expirationeDate != nil  {
+                    (cell as! OrderReceivedTableViewCell).lastDate.text = "Scade il: " + stringTodate(dateString: (orderReceived.expirationeDate)!)
+                    (cell as! OrderReceivedTableViewCell).lastDate.textColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
+                }
             }
-            (cell as! OrderReceivedTableViewCell).productus.text = "Prodotti totali: " + String(offertaRicevuta!.prodottiTotali)
-            (cell as! OrderReceivedTableViewCell).cost.text = "€ " + String(format:"%.2f",(offertaRicevuta?.costoTotale)!)
-            (cell as! OrderReceivedTableViewCell).ordersSentAutoId = offertaRicevuta?.idOfferta
-            (cell as! OrderReceivedTableViewCell).orderReceivedAutoId = offertaRicevuta?.orderAutoId
-            (cell as! OrderReceivedTableViewCell).friendFullName.text = offertaRicevuta?.userSender?.fullName
+            (cell as! OrderReceivedTableViewCell).productus.text = "Prodotti totali: " + String(orderReceived.prodottiTotali)
+            (cell as! OrderReceivedTableViewCell).cost.text = "€ " + String(format:"%.2f",orderReceived.costoTotale)
+            (cell as! OrderReceivedTableViewCell).ordersSentAutoId = orderReceived.idOfferta
+            (cell as! OrderReceivedTableViewCell).orderReceivedAutoId = orderReceived.orderAutoId
+            (cell as! OrderReceivedTableViewCell).friendFullName.text = orderReceived.userSender?.fullName
             
-            CacheImage.getImage(url: offertaRicevuta?.userSender?.pictureUrl, onCompletion: { (image) in
+            CacheImage.getImage(url: orderReceived.userSender?.pictureUrl, onCompletion: { (image) in
                 guard image != nil else {
                     print("immagine utente non reperibile")
                     return
@@ -432,42 +451,44 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 })
             })
             
-            if (offertaRicevuta!.offerState!) == "Offerta accettata" { //"Pending"
+            if orderReceived.offerState == .accepted { //"Pending"
                 //cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
-            } else if (offertaRicevuta!.offerState!) == "Pending" {
+            } else if orderReceived.offerState == .pending {
                 cell.accessoryType = UITableViewCellAccessoryType.none
-            } else if (offertaRicevuta!.offerState!) == "Offerta consumata"{
+            } else if orderReceived.offerState == .consumed {
                 cell.accessoryType = UITableViewCellAccessoryType.none
                 (cell as? OrderReceivedTableViewCell)?.cellReaded = true
-            } else if (offertaRicevuta!.offerState!) == "Offerta scalata"{
+            } else if orderReceived.offerState == .scaled {
                 //cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
-                (cell as? OrderReceivedTableViewCell)?.cellReaded = false
-                
+                (cell as? OrderReceivedTableViewCell)?.cellReaded = true
             }
-            
         }
         return cell
     }
     
-    private func stringTodateObject(date: String)->Date {
+    private func stringTodateObject(date: String) -> Date {
         let dateFormatter = DateFormatter()
         dateFormatter.amSymbol = "AM"
         dateFormatter.pmSymbol = "PM"
         dateFormatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
-        //let dateString = dateFormatter.string(from: date as Date)
-        
-        return dateFormatter.date(from: date)!
+        guard let date = dateFormatter.date(from: date) else { return Date()}
+        return  date
     }
     
     private func scheduleExpiryNotification(order: Order){
         //scheduling notification appearing in expirationDate
-        if !order.orderNotificationIsScheduled! {
-            DispatchQueue.main.async {
-                NotificationsCenter.scheduledExpiratedOrderLocalNotification(title: "Ordine scaduto", body: "Il prodotto che ti è stato offerto  è scaduto", identifier:"expirationDate-"+order.idOfferta!, expirationDate: self.stringTodateObject(date: order.expirationeDate!))
-                print("Notifica scadenza schedulata correttamente")
-                order.orderNotificationIsScheduled = true
-                FireBaseAPI.updateNode(node: "ordersReceived/\((self.user?.idApp)!)/\((order.company?.companyId)!)/\(order.orderAutoId)", value: ["orderNotificationIsScheduled":true])
-            }
+        guard let notificationIsScheduled = order.orderNotificationIsScheduled,
+            let companyId = order.company?.companyId,
+            let userIdApp = self.user?.idApp,
+            let expirationDate = order.expirationeDate
+        else { return }
+        
+        if !notificationIsScheduled {
+            NotificationsCenter.scheduledExpiratedOrderLocalNotification(title: "Ordine scaduto", body: "Il prodotto che ti è stato offerto  è scaduto", identifier:"expirationDate-"+order.idOfferta!, expirationDate: self.stringTodateObject(date: expirationDate))
+            print("Notifica scadenza schedulata correttamente")
+            order.orderNotificationIsScheduled = true
+            FireBaseAPI.updateNode(node: "ordersReceived/\(userIdApp)/\(companyId)/\(order.orderAutoId)", value: ["orderNotificationIsScheduled":true])
+            
         }
     }
     
@@ -555,12 +576,13 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     private func beginFetchOrdersSent() {
+        guard let user = self.user else { return }
         fetchingMoreOrdersSent = true
-        FirebaseData.sharedIstance.readOrdersSentOnFireBaseRange(user: self.user!, onCompletion: { (order) in
+        FirebaseData.sharedIstance.readOrdersSentOnFireBaseRange(user: user, onCompletion: { (order) in
             DispatchQueue.main.async(execute: {
                 self.fetchingMoreOrdersSent = false
                 guard let orderRange = order else {return}
-                self.ordersSent = orderRange
+                self.ordersSent = orderRange.filter{$0.viewState != .deleted}
                 print("**// order sent dimension: \(self.ordersSent.count)")
                 self.myTable.reloadData()
             })
@@ -568,12 +590,13 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     private func beginFetchOrdersReceived() {
+        guard let user = self.user else { return }
         fetchingMoreOrdersReceived = true
-        FirebaseData.sharedIstance.readOrdersReceivedOnFireBaseRange(user: self.user!, onCompletion: { (order) in
+        FirebaseData.sharedIstance.readOrdersReceivedOnFireBaseRange(user: user, onCompletion: { (order) in
             DispatchQueue.main.async(execute: {
                 self.fetchingMoreOrdersReceived = false
                 guard let orderRange = order else {return}
-                self.ordersReceived = orderRange
+                self.ordersReceived = orderRange.filter{ $0.viewState != .deleted }
                 print("**// order received dimension: \(self.ordersReceived.count)")
                 self.myTable.reloadData()
             })
@@ -582,9 +605,14 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     private func scheduleRememberExpiryNotification(order: Order){
         let ref = Database.database().reference()
+        
         ref.child("sessions").setValue(ServerValue.timestamp())
+        
         ref.child("sessions").observeSingleEvent(of: .value, with: { (snap) in
-            let timeStamp = snap.value! as! TimeInterval
+            guard let timeStamp = snap.value as? TimeInterval,
+                let orderExpirationDate = order.expirationeDate
+                else { return }
+            
             let date = NSDate(timeIntervalSince1970: timeStamp/1000)
             
             let dateFormatter = DateFormatter()
@@ -592,22 +620,27 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             dateFormatter.pmSymbol = "PM"
             dateFormatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
             let dateString = dateFormatter.string(from: date as Date)
-            let currentDate = dateFormatter.date(from: dateString)
-            self.lastOrderReceivedReadedTimestamp.set(currentDate!, forKey: "lastOrderReceivedReadedTimestamp")
+            guard let currentDate = dateFormatter.date(from: dateString) else { return }
+            self.lastOrderReceivedReadedTimestamp.set(currentDate, forKey: "lastOrderReceivedReadedTimestamp")
             
             let date1Formatter = DateFormatter()
             date1Formatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
             date1Formatter.locale = Locale.init(identifier: "it_IT")
             
-            let expirationDate = date1Formatter.date(from: order.expirationeDate!)
-            let components = Calendar.current.dateComponents([.day], from: currentDate!, to: expirationDate!)
-            print("difference is \(components.day ?? 0) days  ")
-            //components.day! < 2
-            if  components.day! <= 2 && !order.orderExpirationNotificationIsScheduled!{
+            guard let expirationDate = date1Formatter.date(from: orderExpirationDate) else { return }
+            let components = Calendar.current.dateComponents([.day], from: currentDate, to: expirationDate)
+        
+            guard let notificationIsScheduled = order.orderExpirationNotificationIsScheduled,
+                let offerId = order.idOfferta,
+                let companyId = order.company?.companyId,
+                let userIdApp = self.user?.idApp
+                else { return }
+            
+            if  components.day! <= 2 && !notificationIsScheduled{
                 DispatchQueue.main.async {
-                    NotificationsCenter.scheduledRememberExpirationLocalNotification(title: "Ordine in scadenza", body: "l'ordine di € \(order.totalReadedFromFirebase) è in scadenza, affrettati a consumare", identifier: "RememberExpiration-"+order.idOfferta!)
+                    NotificationsCenter.scheduledRememberExpirationLocalNotification(title: "Ordine in scadenza", body: "l'ordine di € \(order.totalReadedFromFirebase) è in scadenza, affrettati a consumare", identifier: "RememberExpiration-"+offerId)
                     order.orderExpirationNotificationIsScheduled = true
-                    FireBaseAPI.updateNode(node: "ordersReceived/\((self.user?.idApp)!)/\((order.company?.companyId)!)/\(order.orderAutoId)", value: ["orderExpirationNotificationIsScheduled":true])
+                    FireBaseAPI.updateNode(node: "ordersReceived/\(userIdApp)/\(companyId)/\(order.orderAutoId)", value: ["orderExpirationNotificationIsScheduled":true])
                 }
             }
         })
@@ -635,10 +668,10 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         let thisCell = tableView.cellForRow(at: indexPath)
         
         if self.drinksList_segmentControl.selectedSegmentIndex == 1 {
-            switch self.ordersReceived[indexPath.row].offerState! {
-            case "Offerta accettata":
+            switch self.ordersReceived[indexPath.row].offerState {
+            case .accepted:
                 return nil
-            case "Pending":
+            case .pending:
                 
                 //Action refuse order
                 let refuseOrderAction = UITableViewRowAction(style: .destructive, title: "Rifiuta") { (action, index) in
@@ -651,7 +684,16 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 let acceptOrderAction = UITableViewRowAction(style: .normal, title: "Accetta") { (action, index) in
                     (thisCell as? OrderReceivedTableViewCell)?.cellReaded = true
                     FirebaseData.sharedIstance.user = self.user
-                    FirebaseData.sharedIstance.acceptOrder(state: "Offerta accettata", userFullName: (self.user?.fullName)!, userIdApp: (self.user?.idApp)!, comapanyId: (self.ordersReceived[indexPath.row].company?.companyId)!, userSenderIdApp: (self.ordersReceived[indexPath.row].userSender?.idApp)!, idOrder: self.ordersReceived[indexPath.row].idOfferta!, autoIdOrder: self.ordersReceived[indexPath.row].orderAutoId)
+                    
+                    guard let userFullName = self.user?.fullName,
+                        let userIdApp = self.user?.idApp,
+                        let companyId = self.ordersReceived[indexPath.row].company?.companyId,
+                        let userSenderIdApp = self.ordersReceived[indexPath.row].userSender?.idApp,
+                        let offerId = self.ordersReceived[indexPath.row].idOfferta
+                        else { return }
+                        
+                    FirebaseData.sharedIstance.acceptOrder(state: "Offerta accettata", userFullName: userFullName, userIdApp: userIdApp, comapanyId: companyId, userSenderIdApp: userSenderIdApp, idOrder: offerId, autoIdOrder: self.ordersReceived[indexPath.row].orderAutoId)
+                    
                     self.scheduleExpiryNotification(order: self.ordersReceived[indexPath.row])
                     self.scheduleRememberExpiryNotification(order: self.ordersReceived[indexPath.row])
                     self.ordersReceived[indexPath.row].acceptOffer()
@@ -680,10 +722,17 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                  forwardOrderAction.backgroundColor = #colorLiteral(red: 0.6000000238, green: 0.6000000238, blue: 0.6000000238, alpha: 1)*/
                 
                 return [refuseOrderAction, acceptOrderAction]
-            case "Scaduta" :
+                
+            case .expired:
                 //Action delete order
+                
                 let deleteOrderAction = UITableViewRowAction(style: .destructive, title: "Elimina") { (action, index) in
-                    FirebaseData.sharedIstance.deleteOrderOnFirebase(node: "ordersReceived", userIdApp: (self.user?.idApp)!, comapanyId: (self.ordersReceived[indexPath.row].company?.companyId)!, autoIdOrder: self.ordersReceived[indexPath.row].orderAutoId, viewState: "deleted")
+                    guard let userIdApp = self.user?.idApp,
+                        let companyId = (self.ordersReceived[indexPath.row].company?.companyId)
+                        else { return }
+                
+                    FirebaseData.sharedIstance.deleteOrderOnFirebase(node: "ordersReceived", userIdApp: userIdApp, comapanyId: companyId, autoIdOrder: self.ordersReceived[indexPath.row].orderAutoId, viewState: Order.ViewStates.deleted.rawValue)
+                    
                     tableView.setEditing(false, animated: true)
                     self.ordersReceived.remove(at: indexPath.row)
                     tableView.deleteRows(at: [indexPath], with: .fade)
@@ -691,23 +740,29 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 deleteOrderAction.backgroundColor = #colorLiteral(red: 0.9254902005, green: 0.2352941185, blue: 0.1019607857, alpha: 1)
                 return [deleteOrderAction]
                 
-            case  "Offerta consumata" :
+            case  .consumed:
                 let deleteOrderAction = UITableViewRowAction(style: .destructive, title: "Elimina") { (action, index) in
-                    FirebaseData.sharedIstance.deleteOrderOnFirebase(node: "ordersReceived", userIdApp: (self.user?.idApp)!, comapanyId: (self.ordersReceived[indexPath.row].company?.companyId)!, autoIdOrder: self.ordersReceived[indexPath.row].orderAutoId, viewState: "deleted")
+                    guard let userIdApp = self.user?.idApp,
+                        let companyId = (self.ordersReceived[indexPath.row].company?.companyId)
+                        else { return }
+                    
+                    FirebaseData.sharedIstance.deleteOrderOnFirebase(node: "ordersReceived", userIdApp: userIdApp, comapanyId: companyId, autoIdOrder: self.ordersReceived[indexPath.row].orderAutoId, viewState: Order.ViewStates.deleted.rawValue)
+                    
                     tableView.setEditing(false, animated: true)
-                    self.ordersReceived[indexPath.row].viewState =  "deleted"
+                    self.ordersReceived[indexPath.row].viewState = .deleted
                     self.ordersReceived.remove(at: indexPath.row)
                     tableView.deleteRows(at: [indexPath], with: .fade)
                 }
                 deleteOrderAction.backgroundColor = #colorLiteral(red: 0.9254902005, green: 0.2352941185, blue: 0.1019607857, alpha: 1)
                 return [deleteOrderAction]
+                
             default:
                 return nil
             }
         }
         else {
-            switch self.ordersSent[indexPath.row].offerState! {
-            case let x where (x == "Offerta rifiutata" || x == "Scaduta") :
+            switch self.ordersSent[indexPath.row].offerState {
+            case .refused, .expired:
                 //Action Add to credits
                 let addToYourCredits = UITableViewRowAction(style: .destructive, title: "Aggiungi\nai crediti") { (action, index) in
                     self.generateAlert(title: "Attenzione", msg: "Cliccando su 'Aggiungi' aggiungerai \(((thisCell as? OrderSentTableViewCell)?.cost.text)!) ai tuoi crediti. Utilizza i tuoi crediti per effetuare un acquisto futuro", indexPath: indexPath )
@@ -731,11 +786,16 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
                 ransomOrder.backgroundColor = #colorLiteral(red: 0.501960814, green: 0.501960814, blue: 0.501960814, alpha: 1)
                 return [ransomOrder,forwardOrderAction, addToYourCredits]
-            case  "Offerta consumata" :
+            case  .consumed:
                 let deleteOrderAction = UITableViewRowAction(style: .destructive, title: "Elimina") { (action, index) in
-                    FirebaseData.sharedIstance.deleteOrderOnFirebase(node: "ordersSent", userIdApp: (self.user?.idApp)!, comapanyId: (self.ordersSent[indexPath.row].company?.companyId)!, autoIdOrder: self.ordersSent[indexPath.row].orderAutoId, viewState: "deleted")
+                    guard let userIdApp = self.user?.idApp,
+                        let companyId = self.ordersSent[indexPath.row].company?.companyId
+                        else { return }
+                    
+                    FirebaseData.sharedIstance.deleteOrderOnFirebase(node: "ordersSent", userIdApp: userIdApp, comapanyId: companyId, autoIdOrder: self.ordersSent[indexPath.row].orderAutoId, viewState: Order.ViewStates.deleted.rawValue)
+                    
                     tableView.setEditing(false, animated: true)
-                    self.ordersSent[indexPath.row].viewState =  "deleted"
+                    self.ordersSent[indexPath.row].viewState = .deleted
                     self.ordersSent.remove(at: indexPath.row)
                     tableView.deleteRows(at: [indexPath], with: .fade)
                 }
@@ -750,17 +810,19 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         if self.drinksList_segmentControl.selectedSegmentIndex == 1 {
-            switch self.ordersReceived[indexPath.row].offerState! {
-            case "Offerta accettata":
+            precondition(indexPath.row < ordersReceived.count)
+            switch ordersReceived[indexPath.row].offerState {
+            case .accepted:
                 return false
             default:
                 return true
             }
-        }else{
-            switch self.ordersSent[indexPath.row].offerState! {
-            case "Offerta accettata":
+        } else {
+            precondition(indexPath.row < ordersSent.count)
+            switch ordersSent[indexPath.row].offerState {
+            case .accepted:
                 return false
-            case "Pending":
+            case .pending:
                 return false
             default:
                 return true
@@ -798,26 +860,36 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         let thisCell = tableView.cellForRow(at: indexPath)
         if  thisCell is OrderReceivedTableViewCell  {
             let orderReceived = ordersReceived[indexPath.row]
-            if  orderReceived.offerState == "Offerta accettata" ||  orderReceived.offerState == "Offerta scalata" {
+            if  orderReceived.offerState == .accepted ||  orderReceived.offerState == .scaled {
                 /*if drinksList_segmentControl.titleForSegment(at: 1) != "Ricevuti" {
                  OrdersListManager.instance.refreshOrdersList()
                  print("ho aggiornato gli Ordini-Ricevuti da Firebase")
                  }*/
                 performSegue(withIdentifier: "segueToOrderDetails", sender: indexPath)
                 tableView.deselectRow(at: indexPath, animated: true)
-            }else if orderReceived.offerState == "Pending" {
+            }else if orderReceived.offerState == .pending {
                 var msg = "Dettaglio:\n"
                 for i in orderReceived.prodotti! {
                     msg += "\(i.quantity!) " + i.productName! + "\n"
                 }
                 msg += "\nFai swipe sulla riga:\nAccetta o Rifiuta l'offerta"
-                self.generateAlert(title: "Guarda cosa ti ha offerto \((orderReceived.userSender?.fullName)!)", msg: msg, indexPath: indexPath )
+                if orderReceived.userSender?.fullName != nil {
+                    self.generateAlert(title: "Guarda cosa ti ha offerto \((orderReceived.userSender?.fullName)!)", msg: msg, indexPath: indexPath )
+                }
             }
             resetSegmentControl1()
-            //(thisCell as? OrderReceivedTableViewCell)?.cellReaded = true
-            ordersReceived[indexPath.row].orderReaded = true
-            FireBaseAPI.updateNode(node: "ordersReceived/\((self.user?.idApp)!)/\((orderReceived.company?.companyId)!)/\( orderReceived.orderAutoId)", value: ["orderReaded" : "true"])
+            
+            
             myTable.reloadData()
+            
+            guard let userIdApp = self.user?.idApp,
+                let companyId = orderReceived.company?.companyId
+            else { return }
+            if ordersReceived[indexPath.row].offerState != .pending {
+                ordersReceived[indexPath.row].orderReaded = true
+                FireBaseAPI.updateNode(node: "ordersReceived/\(userIdApp)/\(companyId)/\( orderReceived.orderAutoId)", value: ["orderReaded" : "true"])
+            }
+            
             
         } else if thisCell is OrderSentTableViewCell {
             let orderSent = self.ordersSent[indexPath.row]
@@ -839,8 +911,14 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
             //(thisCell as? OrderSentTableViewCell)?.cellReaded = true
             self.ordersSent[indexPath.row].orderReaded = true
-            FireBaseAPI.updateNode(node: "ordersSent/\((self.user?.idApp)!)/\((orderSent.company?.companyId)!)/\(orderSent.idOfferta!)", value: ["orderReaded" : "true"])
             myTable.reloadData()
+            
+            guard let userIdApp = self.user?.idApp,
+                let companyId = orderSent.company?.companyId
+                else { return }
+            
+            FireBaseAPI.updateNode(node: "ordersSent/\(userIdApp)/\(companyId)/\(orderSent.idOfferta!)", value: ["orderReaded" : "true"])
+            
         }
     }
     
@@ -931,11 +1009,12 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                                 return
                             }
                             self.showSuccess()
+                            
                         })
                     }
                     //Delete Order
                     if indexPath != nil {
-                        FirebaseData.sharedIstance.deleteOrderOnFirebase(node: "ordersSent", userIdApp: (self.user?.idApp)!, comapanyId: (self.ordersSent[(indexPath?.row)!].company?.companyId)!, autoIdOrder: self.ordersSent[(indexPath?.row)!].orderAutoId, viewState: "deleted")
+                        FirebaseData.sharedIstance.deleteOrderOnFirebase(node: "ordersSent", userIdApp: (self.user?.idApp)!, comapanyId: (self.ordersSent[(indexPath?.row)!].company?.companyId)!, autoIdOrder: self.ordersSent[(indexPath?.row)!].orderAutoId, viewState: Order.ViewStates.deleted.rawValue)
                         //self.myTable.deleteRows(at: [indexPath!], with: .fade)
                         self.ordersSent.remove(at: (indexPath?.row)!)
                     }
@@ -982,6 +1061,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                     self.ordersSent.remove(at: (indexPath?.row)!)
                     self.myTable.deleteRows(at: [indexPath!], with: .fade)
                     FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase((self.user?.idApp)!, recOrPurch: "received")
+                   
                 })
                 
             })
@@ -1085,10 +1165,10 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         dateFormatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
         dateFormatter.locale = Locale.init(identifier: "it_IT")
         
-        let dateObj = dateFormatter.date(from: dateString)
+        guard let dateObj = dateFormatter.date(from: dateString) else { return dateFormatter.string(from: Date()) }
         
         dateFormatter.dateFormat = "dd/MM/yyyy"
-        return dateFormatter.string(from: dateObj!)
+        return dateFormatter.string(from: dateObj)
     }
     
     @IBAction func unwindToMyDrinksWitoutValue(_ sender: UIStoryboardSegue) {
@@ -1102,22 +1182,39 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         switch sender.identifier! {
         case "unwindFromFriendsListToMyDrinks":
+            guard let forwarOrderUserDestinationId = forwardOrder?.userDestination?.idFB else { return }
             
-            FirebaseData.sharedIstance.readUserIdAppFromIdFB(node: "users", child: "idFB", idFB: (self.forwardOrder?.userDestination?.idFB)!, onCompletion: { (error,idApp) in
-                guard error == nil else {
+            FirebaseData.sharedIstance.readUserIdAppFromIdFB(node: "users", child: "idFB", idFB: forwarOrderUserDestinationId, onCompletion: { (error,idApp) in
+                guard error == nil, idApp != nil  else {
                     print(error!)
                     return
                 }
+                
                 self.forwardOrder?.userDestination?.idApp = idApp!
-                FireBaseAPI.updateNode(node: "ordersSent/\((self.user?.idApp)!)/\((self.forwardOrder?.company?.companyId)!)/\((self.forwardOrder?.idOfferta)!)", value: ["IdAppUserDestination" : (self.forwardOrder?.userDestination?.idApp)!, "facebookUserDestination":(self.forwardOrder?.userDestination?.idFB)!,"offerState":"Pending"])
-                FirebaseData.sharedIstance.moveFirebaseRecord(userApp: self.user!,user: self.oldFriendDestination!, company:(self.forwardOrder?.company?.companyId)!, order: self.forwardOrder!, onCompletion: { (error) in
+                guard let userIdApp  = self.user?.idApp,
+                    let forwardCompanyId = self.forwardOrder?.company?.companyId,
+                    let forwardOfferId = self.forwardOrder?.idOfferta,
+                    let forwardUserDestinationIdApp = self.forwardOrder?.userDestination?.idApp,
+                    let forwardUserDestinationIdFB = self.forwardOrder?.userDestination?.idFB,
+                    let user = self.user,
+                    let olderFriendDestination = self.oldFriendDestination,
+                    let orderForwarder = self.forwardOrder,
+                    let oldFriendDestinationIdApp = self.oldFriendDestination?.idApp
+                    else { return }
+                
+                FireBaseAPI.updateNode(node: "ordersSent/\(userIdApp)/\(forwardCompanyId)/\(forwardOfferId)", value: ["IdAppUserDestination" : forwardUserDestinationIdApp, "facebookUserDestination":forwardUserDestinationIdFB, "offerState":"Pending"])
+                
+                FirebaseData.sharedIstance.moveFirebaseRecord(userApp: user,user: olderFriendDestination, company: forwardCompanyId, order: orderForwarder, onCompletion: { (error) in
                     guard error == nil else {
                         self.generateAlert(title: "Errore", msg: error!, indexPath: nil)
                         return
                     }
                     self.showSuccess()
-                    FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase((self.oldFriendDestination?.idApp)!, recOrPurch: "received")
+                    
+                    FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase(oldFriendDestinationIdApp, recOrPurch: "received")
+                    
                 })
+                
             })
             break
         case "unwindToMyDrinks":

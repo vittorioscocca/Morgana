@@ -24,6 +24,7 @@ class CoreDataController {
     func addNewUser(_ idApp: String, _ idFB: String, _ email: String?, _ fullName: String?, _ firstName: String?, _ lastName: String?, _ gender: String?, _ pictureUrl: String? ) -> User {
         
         let user = self.findUserForIdApp(idApp)
+        
         guard  user == nil else {
             user?.idApp = idApp
             user?.idFB = idFB
@@ -35,9 +36,8 @@ class CoreDataController {
             user?.pictureUrl = pictureUrl
             return user!
         }
-        let entityUser = NSEntityDescription.entity(forEntityName: "User", in: self.context)
-        let newUser = User(entity: entityUser!, insertInto: self.context)
-        
+        guard let entityUser = NSEntityDescription.entity(forEntityName: "User", in: self.context) else { return user! }
+        let newUser = User(entity: entityUser, insertInto: self.context)
         newUser.idApp = idApp
         newUser.idFB = idFB
         newUser.email = email
@@ -48,13 +48,6 @@ class CoreDataController {
         newUser.pictureUrl = pictureUrl
         
         self.salvaContext()
-        print("Utente \(newUser.fullName!) salvato in memoria")
-        print(newUser.idApp!)
-        print(newUser.idFB!)
-        print(newUser.email!)
-        //print(newUser.gender!)
-        print(newUser.pictureUrl!)
-        
         return newUser
     }
     
@@ -82,7 +75,7 @@ class CoreDataController {
     //cerca un utente per la idApp
     func findUserForIdApp(_ idApp: String?) -> User? {
         
-        if idApp == nil {
+        guard let idAPP =  idApp else {
             return nil
         }
         var user: User?
@@ -90,7 +83,7 @@ class CoreDataController {
         let request: NSFetchRequest<User> = NSFetchRequest(entityName: "User")
         request.returnsObjectsAsFaults = false
         
-        let predicate = NSPredicate(format: "idApp = %@", idApp!)
+        let predicate = NSPredicate(format: "idApp = %@", idAPP)
         request.predicate = predicate
         
         
@@ -99,7 +92,7 @@ class CoreDataController {
             
             switch result.count {
             case 0:
-                print("L' utente: \(idApp!) non esiste!")
+                print("L' utente: \(idAPP) non esiste!")
                 return nil
                 
             case 1:
@@ -125,8 +118,6 @@ class CoreDataController {
     
     //cerca un utente per  email
     func findUserForEmail(_ email: String) -> User? {
-        var user: User?
-        
         let request: NSFetchRequest<User> = NSFetchRequest(entityName: "User")
         let predicate = NSPredicate(format: "email = %@", email)
         request.predicate = predicate
@@ -142,15 +133,14 @@ class CoreDataController {
                 
             case 1:
                 print("L'Utente \(email) è in memoria")
-                user = result[0]
-                print("Utente \(user!.email!) \(user!.idApp!)")
-                return user!
+                return result[0]
+                
             case 2:
-                user = result[0]
-                return user!
+                 return result[0]
+                
             case 3:
-                user = result[0]
-                return user!
+                return result[0]
+                
             default:
                 return nil
             }
@@ -176,64 +166,55 @@ class CoreDataController {
         newFriend.pictureUrl = pictureUrl
         newFriend.cityOfRecidence = cityOfRecidence
         currentUser!.addToFriends(newFriend)
-        
-        print("Amico  \(fullName!) aggiunto allo user \(currentUser!.fullName!)")
+
         self.salvaContext()
     }
     
     
     //Carica tutti gli amici di uno user
     func loadAllFriendsOfUser(idAppUser: String, completion:@ escaping ([Friend]?)->()){
-        print("[CDC] Recupero tutti gli amici dell'utente: \(idAppUser) ")
-        
-        let user = findUserForIdApp(idAppUser)
-        guard user != nil else  {
+        guard let user = findUserForIdApp(idAppUser) else  {
             completion(nil)
             return
         }
-        let friends = user?.friends!.allObjects as! [Friend]
+        guard let friends = user.friends?.allObjects as? [Friend] else { return }
         completion(friends)
         
     }
     
     //restituisce il numero di amici
     func friendsNumber(idAppUser: String) -> Int {
-        let user = findUserForIdApp(idAppUser)
-        guard user != nil  else{
+        guard let user = findUserForIdApp(idAppUser) else{
             return 0
         }
-        
-        let friends = user?.friends!.allObjects as! [Friend]
+        guard let friends = user.friends?.allObjects as? [Friend] else { return 0}
         return friends.count
     }
     
     
     //Cancelle tutti gli amici di un utente
-
     func deleteFriends(_ idApp: String) {
-        let user = findUserForIdApp(idApp)
-        user?.removeFromFriends((user?.friends)!)
+        guard let user = findUserForIdApp(idApp), let friend = user.friends else { return }
+        user.removeFromFriends(friend)
         do {
             try self.context.save()
         } catch let errore {
-            print("[CDC] Problema eliminazione amico ")
-            print("  Stampo l'errore: \n \(errore) \n")
+            print("[CDC] Errore cercando di eliminare un amico \(errore) \n")
         }
     }
     
     //cancella l'user
     func deleteUser(_ idApp: String) {
-        let user = self.findUserForIdApp(idApp)
-        if user != nil {
-            self.context.delete(user!)
+        guard let user = self.findUserForIdApp(idApp) else { return }
         
-        
-            do {
-                try self.context.save()
-            } catch let errore {
-                print("[CDC] Problema eliminazione user ")
-                print("  Stampo l'errore: \n \(errore) \n")
-            }
+        self.context.delete(user)
+    
+        do {
+            try self.context.save()
+        } catch let errore {
+            print("[CDC] Problema eliminazione user ")
+            print("  Stampo l'errore: \n \(errore) \n")
         }
+    
     }
 }

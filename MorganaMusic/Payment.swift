@@ -10,6 +10,23 @@ import Foundation
 
 class Payment {
     
+    //mapping DB
+    static let total = "total"
+    static let idPayment = "idPayment"
+    static let createTime = "createTime"
+    static let paymentType = "paymentType"
+    static let platform = "platform"
+    static let statePayment = "statePayment"
+    static let totalProducts = "totalProducts"
+    static let stateCartPayment = "stateCartPayment"
+    static let pendingUserIdApp = "pendingUserIdApp"
+    
+    enum State: String {
+        case notValid = "Not Valid"
+        case pending = "Pending"
+        case valid = "Valid"
+    }
+    
     var platform: String?
     var paymentType: String? //Apple or Paypal or Credits
     var createTime: String?
@@ -20,7 +37,6 @@ class Payment {
     var relatedOrders: [String]
     var pendingUserIdApp: String
     var company: Company?
-    
     
     init( platform: String, paymentType: String, createTime: String, idPayment: String, statePayment: String, autoId: String, total: String) {
         

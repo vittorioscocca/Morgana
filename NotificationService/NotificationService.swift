@@ -10,10 +10,10 @@ import UserNotifications
 
 
 class NotificationService: UNNotificationServiceExtension {
-
+    
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
-
+    
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         self.contentHandler = contentHandler
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
@@ -25,6 +25,9 @@ class NotificationService: UNNotificationServiceExtension {
             let attachmentURL = URL(string: attachmentURLAsString) else { // 4. And parse it to URL
                 return
         }
+        
+        //setCategories()
+    
         downloadImageFrom(url: attachmentURL) { (attachment) in
             if attachment != nil {
                 bestAttemptContent.attachments = [attachment!]
@@ -32,6 +35,19 @@ class NotificationService: UNNotificationServiceExtension {
             }
         }
         
+    }
+    
+    private func setCategories(){
+        
+        let deleteExpirationAction = UNNotificationAction(identifier: "delete.action",title: "Non ricordarlmelo più",options: [])
+        let acceptOrderAction = UNNotificationAction(identifier: "acceptOrder.action",title: "eheh",options: [.foreground])
+        let refuseOrderAction = UNNotificationAction(identifier: "refuseOrder.action",title: "Rifiuta",options: [])
+        let acceptCredits = UNNotificationAction(identifier: "acceptCredits.action",title: "Accetta i crediti",options: [])
+        
+        let remeberExpirationCategory = UNNotificationCategory(identifier: "RemeberExpiration",actions: [deleteExpirationAction],intentIdentifiers: [],options: [])
+        let OrderSentCategory = UNNotificationCategory(identifier: "OrderSent",actions: [acceptOrderAction,refuseOrderAction],intentIdentifiers: [],options: [])
+        let birthdayNotificationCategory = UNNotificationCategory(identifier: "birthdayNotification",actions: [acceptCredits],intentIdentifiers: [],options: [])
+        UNUserNotificationCenter.current().setNotificationCategories([remeberExpirationCategory,OrderSentCategory,birthdayNotificationCategory])
     }
     
     private func downloadImageFrom(url: URL, with completionHandler: @escaping (UNNotificationAttachment?) -> Void) {
@@ -45,7 +61,7 @@ class NotificationService: UNNotificationServiceExtension {
             // 2. Get current's user temporary directory path
             var urlPath = URL(fileURLWithPath: NSTemporaryDirectory())
             // 3. Add proper ending to url path, in the case .jpg (The system validates the content of attached files before scheduling the corresponding notification request. If an attached file is corrupted, invalid, or of an unsupported file type, the notification request is not scheduled for delivery. )
-            let uniqueURLEnding = ProcessInfo.processInfo.globallyUniqueString + ".jpg"
+            let uniqueURLEnding = ProcessInfo.processInfo.globallyUniqueString + ".png"
             urlPath = urlPath.appendingPathComponent(uniqueURLEnding)
             
             // 4. Move downloadedUrl to newly created urlPath
@@ -71,45 +87,45 @@ class NotificationService: UNNotificationServiceExtension {
         }
     }
     /*
-    private func createAttachment(identifier: String, image: UIImage?, options: [AnyHashable : Any]?) -> UNNotificationAttachment? {
-        do {
-            if let userImage = image {
-                if let roundedImage = maskRoundedImage(image: userImage) {
-                    if let newImageData =  UIImagePNGRepresentation(roundedImage) {
-                        let docDir = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-                        let imageURL = docDir.appendingPathComponent("\(UUID().uuidString).png")
-                        try newImageData.write(to: imageURL)
-                        return try UNNotificationAttachment.init(identifier: identifier, url: imageURL, options: options)
-                    }
-                }
-            }
-        } catch {
-            print("Unable to create image attachment for missed call notification \(error.localizedDescription)")
-        }
-        return nil
-    }
+     private func createAttachment(identifier: String, image: UIImage?, options: [AnyHashable : Any]?) -> UNNotificationAttachment? {
+     do {
+     if let userImage = image {
+     if let roundedImage = maskRoundedImage(image: userImage) {
+     if let newImageData =  UIImagePNGRepresentation(roundedImage) {
+     let docDir = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+     let imageURL = docDir.appendingPathComponent("\(UUID().uuidString).png")
+     try newImageData.write(to: imageURL)
+     return try UNNotificationAttachment.init(identifier: identifier, url: imageURL, options: options)
+     }
+     }
+     }
+     } catch {
+     print("Unable to create image attachment for missed call notification \(error.localizedDescription)")
+     }
+     return nil
+     }
+     
+     private func maskRoundedImage(image: UIImage) -> UIImage? {
+     let imageView: UIImageView = UIImageView(image: image)
+     
+     imageView.layer.masksToBounds = true
+     imageView.layer.cornerRadius = imageView.frame.size.width / 2
+     
+     UIGraphicsBeginImageContext(imageView.bounds.size)
+     
+     defer {
+     UIGraphicsEndImageContext()
+     }
+     guard let context = UIGraphicsGetCurrentContext() else {
+     return nil
+     }
+     
+     imageView.layer.render(in:context )
+     
+     guard let roundedImage = UIGraphicsGetImageFromCurrentImageContext() else {
+     return nil
+     }
+     return roundedImage
+     }*/
     
-    private func maskRoundedImage(image: UIImage) -> UIImage? {
-        let imageView: UIImageView = UIImageView(image: image)
-        
-        imageView.layer.masksToBounds = true
-        imageView.layer.cornerRadius = imageView.frame.size.width / 2
-        
-        UIGraphicsBeginImageContext(imageView.bounds.size)
-        
-        defer {
-            UIGraphicsEndImageContext()
-        }
-        guard let context = UIGraphicsGetCurrentContext() else {
-            return nil
-        }
-        
-        imageView.layer.render(in:context )
-        
-        guard let roundedImage = UIGraphicsGetImageFromCurrentImageContext() else {
-            return nil
-        }
-        return roundedImage
-    }*/
-
 }

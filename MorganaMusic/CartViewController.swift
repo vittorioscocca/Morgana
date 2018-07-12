@@ -100,7 +100,7 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
             print("elimo l'elemento \((elemento.userDestination?.fullName)!)")
 
             Cart.sharedIstance.carrello.remove(at: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: .left)
+            tableView.deleteRows(at: [indexPath], with: .fade)
             if Cart.sharedIstance.carrello.isEmpty {
                 unwind()
             } else {

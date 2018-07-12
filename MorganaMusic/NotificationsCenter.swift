@@ -212,7 +212,8 @@ class NotificationsCenter{
                 
                 request.setValue(authorizationKey, forHTTPHeaderField: "Authorization")//This is where you add your HTTP headers like Content-Type, Accept and so on
                 request.timeoutInterval = 200000.0
-                let params = ["to" : fireBaseIstanceIDToken, "data" : ["identifier" : "OrderSent","attachment-url" : (dictionary?["pictureUrl"])!, "userFullName": userFullName, "userIdApp": userDestinationIdApp, "userSenderIdApp": userSenderIdApp, "idOrder": idOrder, "autoIdOrder": autoIdOrder, "companyId": companyId], "notification" :["title" : "", "body": msg, "click_action":"OrderSent", "sound" : "default", "badge" : String(userDestinationBadgeValue)], "priority" : "high"] as [String : Any]
+                let params = ["to" : fireBaseIstanceIDToken, "content_available": true,
+                              "mutable_content": true, "data" : ["identifier" : "OrderSent", "userFullName": userFullName,"mediaUrl" : (dictionary?["pictureUrl"])!, "userIdApp": userDestinationIdApp, "userSenderIdApp": userSenderIdApp, "idOrder": idOrder, "autoIdOrder": autoIdOrder, "companyId": companyId], "notification" :["title" : "", "body": msg, "click_action":"OrderSent", "sound" : "default", "badge" : String(userDestinationBadgeValue)], "priority" : "high" ] as [String : Any]
                 var httpData :Data = Data()
                 do {
                     httpData = try JSONSerialization.data(withJSONObject: params, options: .prettyPrinted)

@@ -103,7 +103,6 @@ class QrReaderViewControllerViewController: UIViewController,AVCaptureMetadataOu
         //Obtain UserId and Expiration Date
         token = orderIdPlusExpirationDay.components(separatedBy: "||*")
         self.orderId = String(token[0])
-        print("OrderID:", self.orderId!)
         let expirationDatePlusCompanyId = String(token[1])
         
         token = expirationDatePlusCompanyId.components(separatedBy: "*")

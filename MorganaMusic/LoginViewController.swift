@@ -103,6 +103,7 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
             let fullName = user.fullName,
             let idFB = user.idFB,
             let email = user.email,
+            let gender = user.gender,
             let pictureUrl = user.pictureUrl,
             let fcmToken = Messaging.messaging().fcmToken
             else { return }
@@ -119,7 +120,7 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                     "fullName" : fullName,
                     "idFB" : idFB,
                     "email" : email,
-                    "gender" : "",//user.gender!,
+                    "gender" : gender,
                     "pictureUrl" : pictureUrl,
                     "fireBaseIstanceIDToken" : fcmToken, //InstanceID.instanceID().token()!,
                     ] as [String : Any]
@@ -134,7 +135,7 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                 "fullName" : fullName,
                 "idFB" : idFB,
                 "email" : email,
-                "gender" : "", //gender,
+                "gender" : gender,
                 "pictureUrl" : pictureUrl,
                 "numberOfPendingPurchasedProducts": 0,
                 "numberOfPendingReceivedProducts" : 0,

@@ -15,7 +15,6 @@ class MapViewController: UIViewController, CLLocationManagerDelegate {
     @IBOutlet var menuButton: UIBarButtonItem!
     
     private var locationManager = CLLocationManager()
-    private var userLocation: CLLocationCoordinate2D?
     private var merchantLocation: CLLocationCoordinate2D?
     private var merchantCoordinate: (latitude:CLLocationDegrees? ,longitude:CLLocationDegrees?)
     
@@ -44,14 +43,14 @@ class MapViewController: UIViewController, CLLocationManagerDelegate {
         //if we have the coordinates from manager
         if let location = locationManager.location?.coordinate{
             
-            userLocation = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
+            let userLocation = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
             
-            let region = MKCoordinateRegion(center: userLocation!, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+            let region = MKCoordinateRegion(center: userLocation, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
             
             myMap.setRegion(region, animated: true)
             let annotion = MKPointAnnotation()
-            annotion.coordinate = userLocation!
-            annotion.title = "Your Position"
+            annotion.coordinate = userLocation
+            annotion.title = "La tua posizione"
             myMap.addAnnotation(annotion)
             
         }
@@ -157,7 +156,4 @@ class MapViewController: UIViewController, CLLocationManagerDelegate {
             onCompletion(coordinates)
         })
     }
-    
-
-    
 }

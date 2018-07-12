@@ -493,7 +493,10 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
     
     @IBAction func addToCaourosel(_ sender: UIButton) {
-        guard (Order.sharedIstance.prodotti?.count)! > 1 else {
+        guard let orderProducts = Order.sharedIstance.prodotti else {
+            return
+        }
+        guard orderProducts.count > 1 else {
             self.generateAlert(title: Alert.productsNotSelected_title.rawValue, msg: Alert.productsNotSelected_msg.rawValue)
             return
         }
@@ -510,7 +513,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
             userDestination.idApp = self.user?.idApp
         }
         
-        let order = Order(prodotti: Order.sharedIstance.prodotti!, userDestination: userDestination, userSender: UserDestination(nil,self.user?.idApp,nil,nil,nil))
+        let order = Order(prodotti: orderProducts, userDestination: userDestination, userSender: UserDestination(nil,self.user?.idApp,nil,nil,nil))
         
         order.company = self.companies?[0]  //insert Morgana Company Order
         var insertOk = false
