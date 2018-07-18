@@ -21,16 +21,16 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet var menuButton: UIBarButtonItem!
     @IBOutlet weak var myActivityIndicator: UIActivityIndicatorView!
     
-    var user: User?
-    var friendsList: [Friend]?
-    var uid: String?
+    private var user: User?
+    private var friendsList: [Friend]?
+    private var uid: String?
     
     //device memory
-    var fireBaseToken = UserDefaults.standard
-    var productSendBadge = UserDefaults.standard
-    var lastOrderSentReadedTimestamp = UserDefaults.standard
-    var lastOrderReceivedReadedTimestamp = UserDefaults.standard
-    var firebaseObserverKilled = UserDefaults.standard
+    private var fireBaseToken = UserDefaults.standard
+    private var productSendBadge = UserDefaults.standard
+    private var lastOrderSentReadedTimestamp = UserDefaults.standard
+    private var lastOrderReceivedReadedTimestamp = UserDefaults.standard
+    private var firebaseObserverKilled = UserDefaults.standard
     
     var ordersSent = [Order]()
     var ordersReceived = [Order]()
@@ -39,26 +39,27 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     private var fetchingMoreOrdersSent = false
     private var fetchingMoreOrdersReceived = false
     
-    var payPalAccessToken = String()
-    var PayPalPaymentDataDictionary: NSDictionary?
+    private var payPalAccessToken = String()
+    private var PayPalPaymentDataDictionary: NSDictionary?
     
     //Alert Controller
-    var controller :UIAlertController?
+    private var controller :UIAlertController?
     
     //Activity Indicator
-    var activityIndicator: UIActivityIndicatorView = UIActivityIndicatorView()
-    var strLabel = UILabel()
-    let effectView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
+    private var activityIndicator: UIActivityIndicatorView = UIActivityIndicatorView()
+    private var strLabel = UILabel()
+    private let effectView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
     
     //forward action var
-    var forwardOrder :Order?
-    var oldFriendDestination: UserDestination?
-    var pendingPaymentId = String()
+    public var forwardOrder :Order?
+    private var oldFriendDestination: UserDestination?
+    private var pendingPaymentId = String()
+    private let pageTableView = FirebaseData.DIM_PAGE_SCROLL
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.myTable.dataSource = self
-        self.myTable.delegate = self
+        myTable.dataSource = self
+        myTable.delegate = self
         
         
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
@@ -85,10 +86,12 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                                                name: .OrdersListStateDidChange,
                                                object: nil)
         
-        self.ordersSent = OrdersListManager.instance.readOrdersList().ordersList.ordersSentList
-        self.ordersReceived = OrdersListManager.instance.readOrdersList().ordersList.ordersReceivedList
+        ordersSent = OrdersListManager.instance.readOrdersList().ordersList.ordersSentList
+        ordersReceived = OrdersListManager.instance.readOrdersList().ordersList.ordersReceivedList
+        beginFetchOrdersSent()
+        beginFetchOrdersReceived()
         
-        self.myTable.addSubview(refreshControl1)
+        myTable.addSubview(refreshControl1)
         successView.isHidden = true
     }
     
@@ -121,11 +124,12 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             let orderRiceivedList = OrdersListManager.instance.readOrdersList().ordersList.ordersReceivedList
             ordersSent = orderSentList
             ordersReceived = orderRiceivedList
+            beginFetchOrdersSent()
+            beginFetchOrdersReceived()
             DispatchQueue.main.async(execute: { () -> Void in
                 self.myTable.reloadData()
             })
-            
-            print("**// Order list changed, table reloaded")
+            print(" Order list changed, table reloaded")
         }
     }
     
@@ -289,9 +293,9 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if self.drinksList_segmentControl.selectedSegmentIndex == 0 {
-            return (self.ordersSent.count)
+            return (ordersSent.count)
         } else {
-            return (self.ordersReceived.count)
+            return (ordersReceived.count)
         }
     }
     
@@ -560,14 +564,14 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
         
-        if self.drinksList_segmentControl.selectedSegmentIndex == 0 {
-            if offsetY > contentHeight - scrollView.frame.height * 2 {
+        guard offsetY > 0 else { return }
+        
+        if offsetY > contentHeight - scrollView.frame.height {
+            if self.drinksList_segmentControl.selectedSegmentIndex == 0 {
                 if !fetchingMoreOrdersSent {
                     beginFetchOrdersSent()
                 }
-            }
-        } else if self.drinksList_segmentControl.selectedSegmentIndex == 1 {
-            if offsetY > contentHeight - scrollView.frame.height * 2 {
+            } else if self.drinksList_segmentControl.selectedSegmentIndex == 1 {
                 if !fetchingMoreOrdersReceived {
                     beginFetchOrdersReceived()
                 }
@@ -575,15 +579,29 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
     
+    private func deleteDuplicate(_ orders: inout [Order]){
+        for order in orders {
+            orders = orders.filter({$0.timeStamp != order.timeStamp})
+            orders.append(order)
+        }
+    }
+    
     private func beginFetchOrdersSent() {
         guard let user = self.user else { return }
         fetchingMoreOrdersSent = true
+        
         FirebaseData.sharedIstance.readOrdersSentOnFireBaseRange(user: user, onCompletion: { (order) in
+            //if orderSent view has the first group of element minor the vie dim page, fetch other data
+            if self.ordersSent.count < self.pageTableView && FirebaseData.sharedIstance.totalNumberOrdersSentReaded < FirebaseData.sharedIstance.totalNumberOrdersSent{
+                self.beginFetchOrdersSent()
+            }
             DispatchQueue.main.async(execute: {
                 self.fetchingMoreOrdersSent = false
                 guard let orderRange = order else {return}
-                self.ordersSent = orderRange.filter{$0.viewState != .deleted}
-                print("**// order sent dimension: \(self.ordersSent.count)")
+                
+                self.ordersSent = self.ordersSent + orderRange.filter{$0.viewState != .deleted}
+                self.deleteDuplicate(&self.ordersSent)
+                print("****// order sent dimension from interface: \(self.ordersSent.count)")
                 self.myTable.reloadData()
             })
         })
@@ -592,12 +610,18 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     private func beginFetchOrdersReceived() {
         guard let user = self.user else { return }
         fetchingMoreOrdersReceived = true
+        
         FirebaseData.sharedIstance.readOrdersReceivedOnFireBaseRange(user: user, onCompletion: { (order) in
+            if self.ordersReceived.count < self.pageTableView && FirebaseData.sharedIstance.totalNumberOrdesReceivedReaded < FirebaseData.sharedIstance.totalNumberOrdesReceived{
+                self.beginFetchOrdersReceived()
+            }
             DispatchQueue.main.async(execute: {
                 self.fetchingMoreOrdersReceived = false
                 guard let orderRange = order else {return}
-                self.ordersReceived = orderRange.filter{ $0.viewState != .deleted }
-                print("**// order received dimension: \(self.ordersReceived.count)")
+                
+                self.ordersReceived = self.ordersReceived + orderRange.filter{ $0.viewState != .deleted }
+                self.deleteDuplicate(&self.ordersReceived)
+                print("order received dimension: \(self.ordersReceived.count)")
                 self.myTable.reloadData()
             })
         })
