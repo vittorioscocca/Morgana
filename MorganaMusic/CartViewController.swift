@@ -10,7 +10,8 @@ import UIKit
 
 class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataSource {
     @IBOutlet weak var myTable: UITableView!
-
+    @IBOutlet weak var confirmOrderButton: UIButton!
+    
     var sectionTitle = ["Offerte", "Riepilogo"]
     var controller :UIAlertController?
     
@@ -24,6 +25,9 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
         
         self.myTable.dataSource = self
         self.myTable.delegate = self
+        
+        confirmOrderButton.layer.cornerRadius = 10
+        confirmOrderButton.layer.masksToBounds = true
         
     }
     
@@ -90,8 +94,15 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
         return cell!
     }
     
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        if (sectionTitle[indexPath.section] == sectionTitle[0]){
+            return true
+        }else {
+            return false
+        }
+    }
+    
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        
         switch editingStyle {
         case .delete:
             print("premuto il tasto Delete")
@@ -166,12 +177,9 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
         self.generateAlert(title: Alert.deleteCart_title.rawValue, msg: Alert.deleteCart_msg.rawValue)
     }
     
-    @IBAction func segueToPayment(_ sender: UIBarButtonItem) {
-        self.performSegue(withIdentifier: "segueToPayement", sender: nil)
-    }
     
-    @IBAction func unwindCarousel(_ sender: UIStoryboardSegue) {
-        print("Unwind to offer profilo")
+    @IBAction func confirmOrder(_ sender: UIButton) {
+        self.performSegue(withIdentifier: "segueToPayement", sender: nil)
     }
     
 }

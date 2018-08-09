@@ -554,12 +554,8 @@ class FirebaseData {
                         self.mangeExpiredOffers(timeStamp: timeStamp, order: order, ref: self.ref)
                     })
                 }
-                
-                if order.paymentState != .valid  {
-                    orderList.append(order)
-                } else if self.user?.idApp != order.userDestination?.idApp   {
-                    orderList.append(order)
-                }
+            
+                orderList.append(order)
                 //if consumption is before expirationDate, scheduled notification is killed
                 //attenzione lo fa ogni volta che legge
                 if order.offerState == .consumed {
@@ -571,9 +567,9 @@ class FirebaseData {
         }
         self.ordersSent = self.ordersSent + orderList
         self.ordersSent = deleteDuplicate(sortArray(self.ordersSent))
-        
         self.firstKnownKeyOrderSent = self.ordersSent.last?.idOfferta
-    
+        self.ordersSent  = self.ordersSent.filter{$0.userDestination?.idApp != self.user?.idApp && $0.paymentState != .valid}
+        
         self.readProductsSentDetails(ordersToRead: deleteDuplicate(sortArray(orderList)), onCompletion: { (orders) in
             self.notificationCenter.post(name: .FireBaseDataUserReadedNotification, object: nil)
             onCompletion(orders)
@@ -819,18 +815,15 @@ class FirebaseData {
                     }
                     order = self.readOrderData(order: order, orderDataDictionary: orderDataDictionary)
                     self.manageExpirationOrder(order: order)
-                    if order.viewState != .deleted {
-                        if order.paymentState == .valid && order.offerState != .refused && order.offerState != .forward {
-                            orderList.append(order)
-                        }
-                        //if consumption is before expirationDate, scheduled notification is killed
-                        if order.offerState == .consumed {
-                            //attenzione killa ogni volta che carica le offeerte, deve farlo una volta
-                            let center = UNUserNotificationCenter.current()
-                            center.removePendingNotificationRequests(withIdentifiers: ["expirationDate-"+order.idOfferta!,"RememberExpiration-"+order.idOfferta!])
-                            print("scheduled notification killed")
-                        }
+                    orderList.append(order)
+                    //if consumption is before expirationDate, scheduled notification is killed
+                    if order.offerState == .consumed {
+                        //attenzione killa ogni volta che carica le offeerte, deve farlo una volta
+                        let center = UNUserNotificationCenter.current()
+                        center.removePendingNotificationRequests(withIdentifiers: ["expirationDate-"+order.idOfferta!,"RememberExpiration-"+order.idOfferta!])
+                        print("scheduled notification killed")
                     }
+                    
                     
                 }
             }

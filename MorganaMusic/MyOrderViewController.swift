@@ -13,7 +13,7 @@ import FirebaseMessaging
 import FirebaseInstanceID
 import UserNotifications
 
-class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchResultsUpdating {
     
     @IBOutlet weak var myTable: UITableView!
     @IBOutlet weak var drinksList_segmentControl: UISegmentedControl!
@@ -24,6 +24,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     private var user: User?
     private var friendsList: [Friend]?
     private var uid: String?
+    var searchController = UISearchController(searchResultsController: nil)
     
     //device memory
     private var fireBaseToken = UserDefaults.standard
@@ -34,6 +35,8 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     var ordersSent = [Order]()
     var ordersReceived = [Order]()
+    var ordersSentFilteredList = [Order]()
+    var ordersReceivedFilteredList = [Order]()
     
     //infinitive scroll variable
     private var fetchingMoreOrdersSent = false
@@ -60,10 +63,44 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         super.viewDidLoad()
         myTable.dataSource = self
         myTable.delegate = self
+    
+        //navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .defaultPrompt)
+        //navigationController?.navigationBar.shadowImage = UIImage()
         
-        
-        navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
-        navigationController?.navigationBar.shadowImage = UIImage()
+        if #available(iOS 11.0, *) {
+            searchController = ({
+                // creo un oggetto di tipo UISearchController
+                let controller = UISearchController(searchResultsController: nil)
+                // remove the  background tableView to show finded elements
+                controller.dimsBackgroundDuringPresentation = false
+                controller.searchResultsUpdater = self
+                controller.searchBar.sizeToFit()
+                controller.searchBar.searchBarStyle = .prominent
+                
+                return controller
+            })()
+            navigationItem.searchController = searchController
+            navigationItem.searchController?.searchBar.tintColor = .white
+            
+            UITextField.appearance(whenContainedInInstancesOf: [UISearchBar.self]).defaultTextAttributes = [NSAttributedStringKey.foregroundColor.rawValue: UIColor.white]
+            
+            UITextField.appearance(whenContainedInInstancesOf: [UISearchBar.self]).attributedPlaceholder = NSAttributedString(string: "Cerca ordine", attributes: nil)
+            
+        } else {
+            searchController = ({
+                // creo un oggetto di tipo UISearchController
+                let controller = UISearchController(searchResultsController: nil)
+                // remove the  background tableView to show finded elements
+                controller.dimsBackgroundDuringPresentation = false
+                controller.searchResultsUpdater = self
+                controller.searchBar.sizeToFit()
+                
+                // set searchBar to Table Header View
+                self.myTable.tableHeaderView = controller.searchBar
+                
+                return controller
+            })()
+        }
         
         if revealViewController() != nil {
             menuButton.target = revealViewController()
@@ -86,11 +123,19 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                                                name: .OrdersListStateDidChange,
                                                object: nil)
         
-        ordersSent = OrdersListManager.instance.readOrdersList().ordersList.ordersSentList
-        ordersReceived = OrdersListManager.instance.readOrdersList().ordersList.ordersReceivedList
-        beginFetchOrdersSent()
-        beginFetchOrdersReceived()
+        ordersSent = OrdersListManager.instance.readOrdersList().ordersList.ordersSentList.filter{$0.viewState != .deleted &&
+            $0.userDestination?.idApp != self.user?.idApp &&
+            $0.paymentState != .valid}
         
+        ordersReceived = OrdersListManager.instance.readOrdersList().ordersList.ordersReceivedList.filter{ $0.viewState != .deleted ||
+            $0.paymentState == .valid && $0.offerState != .refused && $0.offerState != .forward}
+        if !fetchingMoreOrdersSent {
+            beginFetchOrdersSent()
+        }
+        if !fetchingMoreOrdersReceived {
+            beginFetchOrdersReceived()
+        }
+       
         myTable.addSubview(refreshControl1)
         successView.isHidden = true
     }
@@ -102,6 +147,29 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.updateSegmentControl()
+    }
+    
+    func contentsFilter(text: String) {
+        if self.drinksList_segmentControl.selectedSegmentIndex == 0 {
+            ordersSentFilteredList.removeAll(keepingCapacity: true)
+            for order in ordersSent {
+                if order.userDestination?.fullName?.localizedLowercase.range(of: text.localizedLowercase) != nil {
+                    ordersSentFilteredList.append(order)
+                }
+            }
+        } else {
+            ordersReceivedFilteredList.removeAll(keepingCapacity: true)
+            for order in ordersReceived {
+                if order.userSender?.fullName?.localizedLowercase.range(of: text.localizedLowercase) != nil {
+                    ordersReceivedFilteredList.append(order)
+                }
+            }
+        }
+        self.myTable.reloadData()
+    }
+    
+    func updateSearchResults(for: UISearchController){
+        contentsFilter(text: searchController.searchBar.text!)
     }
     
     @objc func OrdersListStateDidChange(){
@@ -122,10 +190,22 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             myTable.isUserInteractionEnabled = true
             let orderSentList = OrdersListManager.instance.readOrdersList().ordersList.ordersSentList
             let orderRiceivedList = OrdersListManager.instance.readOrdersList().ordersList.ordersReceivedList
-            ordersSent = orderSentList
-            ordersReceived = orderRiceivedList
-            beginFetchOrdersSent()
-            beginFetchOrdersReceived()
+            
+            ordersSent = orderSentList.filter{$0.viewState != .deleted &&
+                $0.userDestination?.idApp != self.user?.idApp &&
+                $0.paymentState != .valid}
+            
+            ordersReceived = orderRiceivedList.filter{ $0.viewState != .deleted ||
+                $0.paymentState == .valid && $0.offerState != .refused && $0.offerState != .forward}
+            
+            if !fetchingMoreOrdersSent {
+                beginFetchOrdersSent()
+            }
+            
+            if !fetchingMoreOrdersReceived {
+                beginFetchOrdersReceived()
+            }
+            
             DispatchQueue.main.async(execute: { () -> Void in
                 self.myTable.reloadData()
             })
@@ -293,9 +373,17 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if self.drinksList_segmentControl.selectedSegmentIndex == 0 {
-            return (ordersSent.count)
+            if searchController.isActive {
+                return ordersSentFilteredList.count
+            } else {
+                return (ordersSent.count)
+            }
         } else {
-            return (ordersReceived.count)
+            if searchController.isActive {
+                return ordersReceivedFilteredList.count
+            } else {
+                return (ordersReceived.count)
+            }
         }
     }
     
@@ -310,8 +398,14 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 cell.textLabel?.text = "Nessun ordine inviato"
                 return cell
             }
+            let orderSent: Order
             
-            let orderSent = self.ordersSent[indexPath.row]
+            if self.searchController.isActive && !ordersSentFilteredList.isEmpty {
+                orderSent = ordersSentFilteredList[indexPath.row]
+            } else {
+                // search bar is no active,friendsListPaginated is data source
+                orderSent = self.ordersSent[indexPath.row]
+            }
             
             guard let offerCreationDate = orderSent.dataCreazioneOfferta else { return cell }
             
@@ -391,7 +485,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
                 DispatchQueue.main.async(execute: {
                     if let cellToUpdate = tableView.cellForRow(at: indexPath) {
-                        (cellToUpdate as! OrderSentTableViewCell).friendImageView.image = image
+                        (cellToUpdate as? OrderSentTableViewCell)?.friendImageView.image = image
                     }
                 })
             })
@@ -403,8 +497,14 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 cell.textLabel?.text = "Nessun drink ricevuto"
                 return cell
             }
+            let orderReceived: Order
             
-            let orderReceived = self.ordersReceived[indexPath.row]
+            if self.searchController.isActive && !ordersReceivedFilteredList.isEmpty {
+                orderReceived = ordersReceivedFilteredList[indexPath.row]
+            } else {
+                // search bar is no active,friendsListPaginated is data source
+                orderReceived = self.ordersReceived[indexPath.row]
+            }
             
             if orderReceived.orderReaded != nil {
                 if !(orderReceived.orderReaded)! {
@@ -559,7 +659,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     //        }
     //    }
     
-    
+    //MARK: - infinitive scroll
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
@@ -591,15 +691,17 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         fetchingMoreOrdersSent = true
         
         FirebaseData.sharedIstance.readOrdersSentOnFireBaseRange(user: user, onCompletion: { (order) in
-            //if orderSent view has the first group of element minor the vie dim page, fetch other data
+            
             if self.ordersSent.count < self.pageTableView && FirebaseData.sharedIstance.totalNumberOrdersSentReaded < FirebaseData.sharedIstance.totalNumberOrdersSent{
                 self.beginFetchOrdersSent()
             }
             DispatchQueue.main.async(execute: {
                 self.fetchingMoreOrdersSent = false
                 guard let orderRange = order else {return}
-                
-                self.ordersSent = self.ordersSent + orderRange.filter{$0.viewState != .deleted}
+               
+                self.ordersSent = self.ordersSent + orderRange.filter{$0.viewState != .deleted &&
+                    $0.userDestination?.idApp != self.user?.idApp &&
+                    $0.paymentState != .valid}
                 self.deleteDuplicate(&self.ordersSent)
                 print("****// order sent dimension from interface: \(self.ordersSent.count)")
                 self.myTable.reloadData()
@@ -618,8 +720,9 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             DispatchQueue.main.async(execute: {
                 self.fetchingMoreOrdersReceived = false
                 guard let orderRange = order else {return}
-                
-                self.ordersReceived = self.ordersReceived + orderRange.filter{ $0.viewState != .deleted }
+                        
+                self.ordersReceived = self.ordersReceived + orderRange.filter{ $0.viewState != .deleted ||
+                    $0.paymentState == .valid && $0.offerState != .refused && $0.offerState != .forward}
                 self.deleteDuplicate(&self.ordersReceived)
                 print("order received dimension: \(self.ordersReceived.count)")
                 self.myTable.reloadData()
@@ -855,8 +958,11 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     @IBAction func segmentControl_clicked(_ sender: UISegmentedControl) {
-        
+        if searchController.isActive {
+            searchController.searchBar.text = nil
+        }
         if sender.selectedSegmentIndex == 0 {
+            
             print("segment control clicked pari a 0")
             //da impelemtare la notifica per i pagamenti inviati appena vatto il pagamento il quale si trova ancora nello stato pending
             if self.drinksList_segmentControl.titleForSegment(at: 0) != "Inviati" {
@@ -882,13 +988,16 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let thisCell = tableView.cellForRow(at: indexPath)
+        
         if  thisCell is OrderReceivedTableViewCell  {
-            let orderReceived = ordersReceived[indexPath.row]
+            let orderReceived: Order
+            if self.searchController.isActive && !ordersSentFilteredList.isEmpty {
+                orderReceived = ordersReceivedFilteredList[indexPath.row]
+            } else {
+                // search bar is no active,friendsListPaginated is data source
+                orderReceived = self.ordersReceived[indexPath.row]
+            }
             if  orderReceived.offerState == .accepted ||  orderReceived.offerState == .scaled {
-                /*if drinksList_segmentControl.titleForSegment(at: 1) != "Ricevuti" {
-                 OrdersListManager.instance.refreshOrdersList()
-                 print("ho aggiornato gli Ordini-Ricevuti da Firebase")
-                 }*/
                 performSegue(withIdentifier: "segueToOrderDetails", sender: indexPath)
                 tableView.deselectRow(at: indexPath, animated: true)
             }else if orderReceived.offerState == .pending {
@@ -902,21 +1011,24 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
             }
             resetSegmentControl1()
-            
-            
             myTable.reloadData()
-            
             guard let userIdApp = self.user?.idApp,
                 let companyId = orderReceived.company?.companyId
             else { return }
-            if ordersReceived[indexPath.row].offerState != .pending {
-                ordersReceived[indexPath.row].orderReaded = true
+            if orderReceived.offerState != .pending {
+                orderReceived.orderReaded = true
                 FireBaseAPI.updateNode(node: "ordersReceived/\(userIdApp)/\(companyId)/\( orderReceived.orderAutoId)", value: ["orderReaded" : "true"])
             }
-            
-            
         } else if thisCell is OrderSentTableViewCell {
-            let orderSent = self.ordersSent[indexPath.row]
+            let orderSent: Order
+            
+            if self.searchController.isActive && !ordersSentFilteredList.isEmpty {
+                orderSent = ordersSentFilteredList[indexPath.row]
+            } else {
+                // search bar is no active,friendsListPaginated is data source
+                orderSent = self.ordersSent[indexPath.row]
+            }
+    
             if (thisCell as! OrderSentTableViewCell).createDate.text == "Clicca per verificare il pagamento" {
                 startActivityIndicator("Processing...")
                 pendingPaymentId = orderSent.pendingPaymentAutoId
@@ -934,7 +1046,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 resetSegmentControl0()
             }
             //(thisCell as? OrderSentTableViewCell)?.cellReaded = true
-            self.ordersSent[indexPath.row].orderReaded = true
+            orderSent.orderReaded = true
             myTable.reloadData()
             
             guard let userIdApp = self.user?.idApp,
@@ -958,24 +1070,39 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         switch identifier {
         case "segueToOrderDetails":
             guard let path = sender else {return}
-            let offertaRicevuta = self.ordersReceived[(path as! IndexPath).row]
-            (segue.destination as! QROrderGenerationViewController).offertaRicevuta = offertaRicevuta
+            let orderReceived: Order
+            if self.searchController.isActive && !ordersSentFilteredList.isEmpty {
+                orderReceived = ordersReceivedFilteredList[(path as! IndexPath).row]
+            } else {
+                // search bar is no active,friendsListPaginated is data source
+                orderReceived = self.ordersReceived[(path as! IndexPath).row]
+            }
+            (segue.destination as! QROrderGenerationViewController).offertaRicevuta = orderReceived
             (segue.destination as! QROrderGenerationViewController).user = user
-            (segue.destination as! QROrderGenerationViewController).dataScadenza = offertaRicevuta.expirationeDate
-            guard self.ordersReceived[(path as! IndexPath).row].orderReaded == false else {return}
+            (segue.destination as! QROrderGenerationViewController).dataScadenza = orderReceived.expirationeDate
+            self.searchController.dismiss(animated: false) {
+                self.searchController.searchBar.text = nil
+            }
+            guard orderReceived.orderReaded == false else {return}
             break
-            
         case "segueToOrderOfferedDetails":
             guard let path = sender else {return}
-            let orderSent = self.ordersSent[(path as! IndexPath).row]
+            let orderSent: Order
+            if self.searchController.isActive && !ordersSentFilteredList.isEmpty {
+                orderSent = ordersSentFilteredList[(path as! IndexPath).row]
+            } else {
+                // search bar is no active,friendsListPaginated is data source
+                orderSent = self.ordersSent[(path as! IndexPath).row]
+            }
             (segue.destination as! OrderSentDetailsViewController).offertaInviata = orderSent
+            self.searchController.dismiss(animated: false) {
+                self.searchController.searchBar.text = nil
+            }
             break
-            
         case "segueToForwardToFriend":
             (segue.destination as! FriendsListViewController).segueFrom = "myDrinks"
             (segue.destination as! FriendsListViewController).forwardOrder = forwardOrder
             break
-            
         default:
             break
         }

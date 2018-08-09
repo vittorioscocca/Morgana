@@ -22,7 +22,7 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     let fireBaseToken = UserDefaults.standard
     var userId: String?
     var friendsList: [Friend]? = []
-    var FilteredList = [Friend]()
+    var filteredList = [Friend]()
     var start = 0
     var end = 0
     var page:Int?, friendsForPage:Int?, lastPageFriends:Int?
@@ -39,7 +39,8 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
         self.myTable.dataSource = self
         self.myTable.delegate = self
         self.userId = fireBaseToken.object(forKey: "FireBaseToken")! as? String
-        self.resultSearchController = ({
+    
+        resultSearchController = ({
             // creo un oggetto di tipo UISearchController
             let controller = UISearchController(searchResultsController: nil)
             // remove the  background tableView to show finded elements
@@ -49,9 +50,10 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
             
             // set searchBar to Table Header View
             self.myTable.tableHeaderView = controller.searchBar
-
+            
             return controller
         })()
+       
         myTable.addSubview(refreshControl1)
         friendsList = deleteForwardFriend(friendListPass: FacebookFriendsListManager.instance.readContactList().facebookFriendsList)
         guard let fbFriendsList = friendsList else { return }
@@ -129,18 +131,18 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     }
     
     func contentsFilter(text: String) {
-        FilteredList.removeAll(keepingCapacity: true)
+        filteredList.removeAll(keepingCapacity: true)
         guard let fbFriendsList = friendsList else { return }
-        for x in fbFriendsList {
-            if x.fullName?.localizedLowercase.range(of: text.localizedLowercase) != nil {
-                FilteredList.append(x)
+        for friend in fbFriendsList {
+            if friend.fullName?.localizedLowercase.range(of: text.localizedLowercase) != nil {
+                filteredList.append(friend)
             }
             self.myTable.reloadData()
         }
     }
     
     func updateSearchResults(for: UISearchController){
-        self.contentsFilter(text: (resultSearchController?.searchBar.text!)!)
+        contentsFilter(text: (resultSearchController?.searchBar.text!)!)
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -152,7 +154,7 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
             return 0
         }
         if result.isActive {
-            return FilteredList.count
+            return filteredList.count
         } else {
             guard let list = friendsList else { return 0 }
             return list.count
@@ -164,7 +166,7 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
         let friend: Friend?
         // if searchBar is active, listafiltrata is source data
         if self.resultSearchController!.isActive {
-            friend = FilteredList[indexPath.row]
+            friend = filteredList[indexPath.row]
         } else {
             // search bar is no active,friendsListPaginated is data source
             friend = self.friendsList?[indexPath.row]
