@@ -39,6 +39,11 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
         } else {
             self.gender_label.text = ""
         }
+        if #available(iOS 11.0, *) {
+            navigationItem.largeTitleDisplayMode = .never
+        } else {
+            // Fallback on earlier versions
+        }
         
         self.readImage()
         self.setCustomImage()

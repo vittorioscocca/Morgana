@@ -94,6 +94,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate  {
         _ = FacebookFriendsListManager.instance
         _ = LoadRemoteProducts.instance
         _ = OrdersListManager.instance
+        _ = PointsManager.sharedInstance
         
         
         //Firebase push notification

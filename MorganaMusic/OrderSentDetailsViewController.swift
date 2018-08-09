@@ -21,6 +21,12 @@ class OrderSentDetailsViewController: UIViewController, UITableViewDelegate, UIT
 
         self.myTable.dataSource = self
         self.myTable.delegate = self
+        
+        if #available(iOS 11.0, *) {
+            navigationItem.largeTitleDisplayMode = .never
+        } else {
+            // Fallback on earlier versions
+        }
     }
 
     override func didReceiveMemoryWarning() {

@@ -8,6 +8,10 @@
 
 import Foundation
 
+public extension NSNotification.Name {
+    static let ReadingRemoteUserPointDidFinish = NSNotification.Name("ReadingRemoteUserPointDidFinish")
+    
+}
 
 class PointsManager {
     static let sharedInstance = PointsManager()
@@ -68,10 +72,15 @@ class PointsManager {
     
     //Metodi
     private init(){
-        
         self.days = [Int]()
-        //self.user = CoreDataController.sharedIstance.findUserForIdApp(uid)
+        let uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
         
+        readUserPointsStatsOnFirebase(userId: (CoreDataController.sharedIstance.findUserForIdApp(uid)?.idApp)!) { (error) in
+            if error != nil {
+                print("\(String(describing: error?.description))")
+            }
+            NotificationCenter.default.post(name: .ReadingRemoteUserPointDidFinish, object: self)
+        }
     }
     
     func readUserPointsStatsOnFirebase (userId: String,onCompletion: @escaping (String?)->()) {

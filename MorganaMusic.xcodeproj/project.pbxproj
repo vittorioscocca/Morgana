@@ -331,13 +331,13 @@
 			name = Model;
 			sourceTree = "<group>";
 		};
-		2A2A39B21F41991000D59476 /* View */ = {
+		2A2A39B21F41991000D59476 /* UI */ = {
 			isa = PBXGroup;
 			children = (
 				2AE35F8D1E93EF5800DF453F /* Main.storyboard */,
 				2AE35F951E93EF5800DF453F /* LaunchScreen.storyboard */,
 			);
-			name = View;
+			name = UI;
 			sourceTree = "<group>";
 		};
 		2A3492E81F98944C00F2C6A7 /* Menù */ = {
@@ -405,7 +405,7 @@
 				2A2A39B11F4198D900D59476 /* Model */,
 				2AE35F9E1E93EF6500DF453F /* CoreData */,
 				2AC5A67C1E94EA010081CAA0 /* FacebookFramework */,
-				2A2A39B21F41991000D59476 /* View */,
+				2A2A39B21F41991000D59476 /* UI */,
 			);
 			path = MorganaMusic;
 			sourceTree = "<group>";

@@ -11,15 +11,16 @@ import FirebaseAuth
 
 //This is the controller for Friend order View. It's possibole choose Morgana products, saved on Firebase
 class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource  {
-    
-    
     @IBOutlet weak var imageFriend_Picture: UIImageView!
     @IBOutlet weak var fullNameFrienf_label: UILabel!
     @IBOutlet weak var pickerView: UIPickerView!
     @IBOutlet weak var product1_label: UILabel!
     @IBOutlet weak var price1_label: UILabel!
-    @IBOutlet weak var quantità: UILabel!
+    @IBOutlet weak var points_label: UILabel!
+    @IBOutlet weak var quantity: UILabel!
     @IBOutlet weak var num_quantità: UIStepper!
+    @IBOutlet weak var addToOrder: UIButton!
+    @IBOutlet weak var total_label: UILabel!
     
     enum ErrorMessages: String {
         case erroreTitle = "Attenzione"
@@ -27,7 +28,6 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
         case enterQuantity_message = "Inserisci una quantità di prodotto maggiore di 0"
     }
     
-    var productCount = 0
     var userId: String?
     
     typealias selectionType = (product:String?, price: Double?)
@@ -42,23 +42,21 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
     var idFBFriend: String?
     var friendURLImage: String?
     
-    
     //alert per comunicazioni
     var controller :UIAlertController?
-    
     
     override func viewDidLoad() {
         
         super.viewDidLoad()
-        self.fullNameFrienf_label.text = fullNameFriend
+        fullNameFrienf_label.text = fullNameFriend
         
         //modifying image
-        self.imageFriend_Picture.layer.masksToBounds = false
-        self.imageFriend_Picture.layer.cornerRadius = imageFriend_Picture.frame.height/2
-        self.imageFriend_Picture.clipsToBounds = true
-        self.imageFriend_Picture.layer.borderWidth = 2.5
-        self.imageFriend_Picture.layer.borderColor = #colorLiteral(red: 0.7419371009, green: 0.1511851847, blue: 0.20955199, alpha: 1)
-        
+        imageFriend_Picture.layer.masksToBounds = false
+        imageFriend_Picture.layer.cornerRadius = imageFriend_Picture.frame.height/2
+        imageFriend_Picture.clipsToBounds = true
+        imageFriend_Picture.layer.borderWidth = 2.5
+        imageFriend_Picture.layer.borderColor = #colorLiteral(red: 0.7419371009, green: 0.1511851847, blue: 0.20955199, alpha: 1)
+        quantity.text = "1"
         CacheImage.getImage(url: friendURLImage, onCompletion: { (image) in
             guard image != nil else {
                 print("immagine utente non reperibile")
@@ -72,6 +70,20 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
                                                selector: #selector(remoteProductsListDidChange),
                                                name: .RemoteProductsListDidChange,
                                                object: nil)
+        
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(updateUserPoints),
+                                               name: .ReadingRemoteUserPointDidFinish,
+                                               object: nil)
+        addToOrder.layer.cornerRadius = 10
+        addToOrder.layer.masksToBounds = true
+        
+        if #available(iOS 11.0, *) {
+            navigationItem.largeTitleDisplayMode = .never
+        } else {
+            // Fallback on earlier versions
+        }
+        
         // Connect data:
         self.pickerView.delegate = self
         self.pickerView.dataSource = self
@@ -85,6 +97,16 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
     @objc func remoteProductsListDidChange(){
         print("did receive product did change notification")
         loadOfferte()
+    }
+    
+    @objc func updateUserPoints(){
+        guard let userid = userId,
+            let price = price1_label.text?.replacingOccurrences(of: " €", with: "", options: .regularExpression),
+            let quantity = quantity.text
+            else {return}
+        
+        let totalPrice = Double(price)! * Double(quantity)!
+        points_label.text = String(PointsManager.sharedInstance.addPointsForShopping(userId: userid, expense: totalPrice))
     }
     
     override func didReceiveMemoryWarning() {
@@ -123,12 +145,15 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
     
     func updateLabels(row: Int){
         let product = self.productsList[row]
-        //self.storeSelection(self.productsList[row])
-        self.product1_label.text = product
-        self.selection.product = product
-        self.selection.price = self.offersDctionary[product]
-        let priceString = String(format:"%.2f", self.selection.price!)
-        self.price1_label.text = priceString + " €"
+        product1_label.text = product
+        selection.product = product
+        selection.price = self.offersDctionary[product]
+        
+        let priceString = String(format:"%.2f", selection.price!)
+        price1_label.text = priceString + " €"
+        points_label.text = String(PointsManager.sharedInstance.addPointsForShopping(userId: userId!,expense: selection.price! * Double(quantity.text!)!))
+        total_label.text = String(format:"%.2f", selection.price! * Double(Int(quantity.text!)!))
+        
     }
     
     // Catpure the picker view selection
@@ -141,18 +166,17 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
         
     }
     
-    /*
-     @IBAction func newRequest(_ sender: UIButton) {
-     if self.selection.product != "" {
-     self.product1_label.text = self.selection.product
-     let priceString = String(format:"%.2f", self.selection.price!)
-     self.price1_label.text = priceString + " €"
-     //self.memorizza(self.scelta.product!)
-     }
-     }*/
-    
     @IBAction func stepperValueChange(_ sender: UIStepper) {
-        self.quantità.text = String(Int(sender.value))
+        quantity.text = String(Int(sender.value))
+        print("sender touched")
+        guard let userid = userId,
+            let price = price1_label.text?.replacingOccurrences(of: " €", with: "", options: .regularExpression),
+            let quantity = quantity.text
+            else {return}
+        
+        let totalPrice = Double(price)! * Double(quantity)!
+        points_label.text = String(PointsManager.sharedInstance.addPointsForShopping(userId: userid, expense: totalPrice))
+        total_label.text = String(format:"%.2f",totalPrice)
     }
     
     @IBAction func sendOrder_clicked(_ sender: UIButton) {
@@ -160,12 +184,12 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
             self.generateAlert(title: ErrorMessages.erroreTitle.rawValue, message: ErrorMessages.enterOneProduct_message.rawValue)
             return
         }
-        guard quantità.text != "0" else {
+        guard quantity.text != "0" else {
             self.generateAlert(title: ErrorMessages.erroreTitle.rawValue, message: ErrorMessages.enterQuantity_message.rawValue)
             return
         }
         guard let price = selection.price else { return }
-        let prod = Product(productName: self.selection.product, price: price, quantity: Int(quantità.text!))
+        let prod = Product(productName: self.selection.product, price: price, quantity: Int(quantity.text!))
         Order.sharedIstance.addProduct(product: prod)
         
         performSegue(withIdentifier: "unwindToOffersFromOffriDrink", sender: nil)

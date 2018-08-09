@@ -22,6 +22,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
     @IBOutlet weak var delete: UIBarButtonItem!
     @IBOutlet weak var carousel: UIBarButtonItem!
     @IBOutlet var menuButton: UIBarButtonItem!
+    @IBOutlet weak var addToCart: UIButton!
     
     
     enum Alert: String {
@@ -92,6 +93,9 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
                                             selector: #selector(networkStatusDidChange),
                                             name: .NetworkStatusDidChange,
                                             object: nil)
+        
+        addToCart.layer.masksToBounds = true
+        addToCart.layer.cornerRadius = 10
         
         //reset Firebase DB. only for simulator tests
         //FireBaseAPI.resetFirebaseDB()
@@ -492,7 +496,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
     }
     
-    @IBAction func addToCaourosel(_ sender: UIButton) {
+    @IBAction func addOrderToCart(_ sender: UIButton) {
         guard let orderProducts = Order.sharedIstance.prodotti else {
             return
         }
@@ -545,7 +549,6 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         self.carousel.isEnabled = true
         self.carousel.addBadge(number: Cart.sharedIstance.carrello.count)
         self.deleteOrdine()
-        
     }
     
     @IBAction func carousel_clicked(_ sender: UIBarButtonItem) {
