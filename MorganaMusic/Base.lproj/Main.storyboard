@@ -667,11 +667,11 @@
                             <constraint firstItem="f2c-43-M4V" firstAttribute="centerX" secondItem="eUb-DJ-pp5" secondAttribute="centerX" id="9sb-WO-fDR"/>
                             <constraint firstItem="Vbe-tu-LhV" firstAttribute="width" secondItem="eUb-DJ-pp5" secondAttribute="width" multiplier="0.5" id="QmJ-kj-5bK"/>
                             <constraint firstItem="Vbe-tu-LhV" firstAttribute="centerX" secondItem="eUb-DJ-pp5" secondAttribute="centerX" id="Vxa-CM-tf1"/>
-                            <constraint firstItem="f2c-43-M4V" firstAttribute="top" secondItem="qJR-Xm-rf4" secondAttribute="bottom" id="X9F-mo-aJX"/>
                             <constraint firstItem="9fE-t2-pG0" firstAttribute="leading" secondItem="eUb-DJ-pp5" secondAttribute="leading" id="ciY-La-i7d"/>
                             <constraint firstItem="Vbe-tu-LhV" firstAttribute="top" secondItem="qJR-Xm-rf4" secondAttribute="bottom" constant="240" id="cuX-su-0EQ"/>
                             <constraint firstItem="Lzy-oy-BFz" firstAttribute="top" secondItem="9fE-t2-pG0" secondAttribute="bottom" id="hzA-fT-v8X"/>
                             <constraint firstItem="f2c-43-M4V" firstAttribute="width" secondItem="eUb-DJ-pp5" secondAttribute="width" id="kXr-QG-P3z"/>
+                            <constraint firstItem="9fE-t2-pG0" firstAttribute="top" secondItem="f2c-43-M4V" secondAttribute="bottom" constant="-1" id="mNF-Z5-64i"/>
                             <constraint firstAttribute="trailing" secondItem="9fE-t2-pG0" secondAttribute="trailing" id="oMx-Vs-ehY"/>
                             <constraint firstItem="Vbe-tu-LhV" firstAttribute="height" secondItem="eUb-DJ-pp5" secondAttribute="height" multiplier="0.15" id="w32-Vr-78f"/>
                             <constraint firstItem="9fE-t2-pG0" firstAttribute="top" secondItem="qJR-Xm-rf4" secondAttribute="bottom" constant="34" id="wMh-1F-BMr"/>
@@ -986,14 +986,20 @@
                             <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" alignment="center" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="fgZ-dv-frp">
                                 <rect key="frame" x="0.0" y="377" width="375" height="33"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="  Quantità prodotti" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6jO-bq-eQj">
-                                        <rect key="frame" x="0.0" y="7.5" width="182.5" height="18"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="  Prodotti" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6jO-bq-eQj">
+                                        <rect key="frame" x="0.0" y="7.5" width="118.5" height="18"/>
+                                        <fontDescription key="fontDescription" type="system" weight="light" pointSize="15"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Punti" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="m0H-Qd-XhG">
+                                        <rect key="frame" x="128.5" y="7.5" width="118" height="18"/>
                                         <fontDescription key="fontDescription" type="system" weight="light" pointSize="15"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="  Totale" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ufx-6w-TB1">
-                                        <rect key="frame" x="192.5" y="7.5" width="182.5" height="18"/>
+                                        <rect key="frame" x="256.5" y="7.5" width="118.5" height="18"/>
                                         <fontDescription key="fontDescription" type="system" weight="light" pointSize="15"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
@@ -1050,6 +1056,7 @@
                         <outlet property="delete" destination="2Ui-BQ-Iv9" id="32w-Fe-TM1"/>
                         <outlet property="menuButton" destination="6E0-BA-vop" id="h07-at-uYz"/>
                         <outlet property="myTable" destination="Dym-U5-bRO" id="X9I-FQ-gjR"/>
+                        <outlet property="points_label" destination="m0H-Qd-XhG" id="mIB-p0-QDh"/>
                         <outlet property="quantità_label" destination="6jO-bq-eQj" id="SNk-cP-bdE"/>
                         <outlet property="totale_label" destination="ufx-6w-TB1" id="AP5-7K-tgK"/>
                         <segue destination="3fU-eq-mPr" kind="show" identifier="segueToOfferta" id="0Zc-dx-Z2J"/>

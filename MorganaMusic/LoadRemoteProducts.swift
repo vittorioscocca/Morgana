@@ -53,6 +53,11 @@ class LoadRemoteProducts {
                                             name: .UIApplicationWillEnterForeground,
                                             object: uiApplication)
         
+        self.notificationCenter.addObserver(self,
+                                            selector: #selector(loadRemoteProducts),
+                                            name: .FirebaseTokenDidChangeNotification,
+                                            object: nil)
+        
         loadRemoteProducts()
     }
     deinit {
@@ -68,7 +73,7 @@ class LoadRemoteProducts {
         loadRemoteProducts()
     }
     
-    func loadRemoteProducts(){
+    @objc func loadRemoteProducts(){
         guard networkStatus.online else {
             self.productsList = nil
             self.offersDctionary = nil

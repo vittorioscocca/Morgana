@@ -234,7 +234,7 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
              let paymentDetails = PayPalPaymentDetails(subtotal: subtotal, withShipping: shipping, withTax: tax)
              let total = subtotal.adding(shipping).adding(tax)*/
             var items: [PayPalItem] = []
-            guard let ordersProducts = Order.sharedIstance.prodotti else { return }
+            guard let ordersProducts = Order.sharedIstance.products else { return }
             for product in ordersProducts {
                 guard let name = product.productName, let quantity = product.quantity, let price = product.price else { return }
                 let item = PayPalItem(name: name, withQuantity: UInt(quantity), withPrice: NSDecimalNumber(string: String(format:"%.2f", price)), withCurrency: "EUR", withSku: "")

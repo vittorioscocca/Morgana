@@ -13,14 +13,16 @@ class Product {
     var productName: String?
     var price: Double?
     var quantity: Int?
+    var points: Int?
     
     private init(){
     }
 
     
-    init(productName: String?, price: Double?, quantity: Int?){
+    init(productName: String?, price: Double?, quantity: Int?, points: Int?){
         self.productName = productName
         self.price = price
         self.quantity = quantity
+        self.points = points
     }
 }

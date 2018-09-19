@@ -91,7 +91,7 @@ class OrderSentDetailsViewController: UIViewController, UITableViewDelegate, UIT
         } else {
             cell = tableView.dequeueReusableCell(withIdentifier: "defaultCell", for: indexPath)
             
-            guard let products = offertaInviata?.prodotti else { return cell! }
+            guard let products = offertaInviata?.products else { return cell! }
             
             if  indexPath.row <= products.count - 1  {
                 let product = products[indexPath.row]

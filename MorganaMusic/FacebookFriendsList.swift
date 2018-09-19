@@ -43,7 +43,6 @@ class FacebookFriendsListManager: NSObject {
     private let uiApplication: UIApplication
     private static let requestRetryDelay: DispatchTimeInterval = DispatchTimeInterval.seconds(10)
     private var fbTokenString: String?
-    private var userId: String?
     private let fireBaseToken = UserDefaults.standard
     private var user: User?
     private var context: NSManagedObjectContext
@@ -54,8 +53,8 @@ class FacebookFriendsListManager: NSObject {
         self.notificationCenter = notificationCenter
         self.uiApplication = uiApplication
         internalState = FacebookFriendsListManager.setInitialState(networkStatus: networkStatus)
-        self.userId = fireBaseToken.object(forKey: "FireBaseToken") as? String
-        self.user = CoreDataController.sharedIstance.findUserForIdApp(userId)
+        
+        self.user = CoreDataController.sharedIstance.findUserForIdApp(fireBaseToken.object(forKey: "FireBaseToken") as? String)
         let application = uiApplication.delegate as! AppDelegate
         self.context = application.persistentContainer.viewContext
         
@@ -98,10 +97,9 @@ class FacebookFriendsListManager: NSObject {
     @objc private func fbTokenDidChange(){
         fbTokenString = UserDefaults.standard.object(forKey: "FBToken") as? String
         if let fbCredentials = fbTokenString {
-            userId = fireBaseToken.object(forKey: "FireBaseToken") as? String
-            self.user = CoreDataController.sharedIstance.findUserForIdApp(userId)
+            user = CoreDataController.sharedIstance.findUserForIdApp(fireBaseToken.object(forKey: "FireBaseToken") as? String)
             setInternalState(.startUp(fbCredentials))
-            self.requestContactList(freshness: .fresh)
+            requestContactList(freshness: .fresh)
         }
     }
     
@@ -378,8 +376,7 @@ class FacebookFriendsListManager: NSObject {
             
                     FirebaseData.sharedIstance.readNodeFromIdFB(node: "users", child: "idFB", idFB: idFB, onCompletion: { (error,dictionary) in
                         guard error == nil else {
-                            print(error!)
-                            completion(.transitoryError(error! as! Error))
+                            completion(.transitoryError(InternalError.unexpectedError(error!)))
                             return
                         }
                         guard dictionary != nil else {

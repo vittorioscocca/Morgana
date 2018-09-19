@@ -88,7 +88,7 @@ class UIBackgroundTabBarController: UITabBarController {
         guard final.object(forKey: "selectedViewController") != nil else {
             return
         }
-        switch final.object(forKey: "selectedViewController") as! Int {
+        switch final.object(forKey: "selectedViewController") as? Int {
         case 0:
             final.set(nil, forKey: "selectedViewController")
             self.selectedViewController = orderViewController
