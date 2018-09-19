@@ -14,7 +14,7 @@ import Firebase
 class Order {
     static let sharedIstance = Order()
     
-    var prodotti: [Product]?
+    var products: [Product]?
     var expirationeDate: String?
     var userDestination: UserDestination?
     var userSender: UserDestination?
@@ -26,7 +26,6 @@ class Order {
     var orderNotificationIsScheduled :Bool?
     var orderExpirationNotificationIsScheduled :Bool?
     var consumingDate: String?
-    
     var paymentState: Payment.State
     var offerState: OfferStates
     var dataCreazioneOfferta: String?
@@ -34,6 +33,16 @@ class Order {
     var totalReadedFromFirebase: String = ""
     var company: Company?
     var viewState: ViewStates
+    
+    var points: Int {
+        var innerPoints = 0
+        products?.forEach({ (product) in
+            if let point = product.points {
+               innerPoints += point
+            }
+        })
+        return innerPoints
+    }
     
     enum OfferStates: String {
         case refused = "Offerta rifiutata" //l'utente destinatario dell'offerta rifiuta l'offerta
@@ -53,7 +62,7 @@ class Order {
     }
     var costoTotale: Double {
         var tot: Double = 0.0
-        for i in prodotti! {
+        for i in products! {
             tot += i.price! * Double(i.quantity!)
         }
         return tot
@@ -61,14 +70,14 @@ class Order {
     
     var prodottiTotali: Int {
         var tot: Int = 0
-        for i in prodotti! {
+        for i in products! {
             tot += i.quantity!
         }
         return tot
     }
     
     private init(){
-        self.prodotti = []
+        self.products = []
         self.expirationeDate = ""
         self.consumingDate = ""
         self.userDestination = UserDestination(nil,nil,nil,nil,nil)
@@ -82,7 +91,7 @@ class Order {
     
     
     init(prodotti: [Product], userDestination: UserDestination, userSender: UserDestination){
-        self.prodotti = prodotti
+        self.products = prodotti
         self.expirationeDate = ""
         self.userDestination = userDestination
         self.userSender = userSender
@@ -130,14 +139,14 @@ class Order {
     
     func addProduct(product: Product) {
         var trovato = false
-        for i in self.prodotti! {
+        for i in self.products! {
             if i.productName == product.productName {
                 trovato = true
                 i.quantity! += product.quantity!
             }
         }
         guard trovato else {
-            self.prodotti?.insert(product, at: 0)
+            self.products?.insert(product, at: 0)
             return
         }
     }

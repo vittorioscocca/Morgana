@@ -95,7 +95,6 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
     }
     
     @objc func remoteProductsListDidChange(){
-        print("did receive product did change notification")
         loadOfferte()
     }
     
@@ -125,7 +124,6 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
             })
         }
     }
-    
     
     // The number of columns of data
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
@@ -173,8 +171,8 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
             let price = price1_label.text?.replacingOccurrences(of: " €", with: "", options: .regularExpression),
             let quantity = quantity.text
             else {return}
-        
-        let totalPrice = Double(price)! * Double(quantity)!
+        guard let finalPrice = Double(price), let finalQuantity = Double(quantity) else { return }
+        let totalPrice = finalPrice * finalQuantity
         points_label.text = String(PointsManager.sharedInstance.addPointsForShopping(userId: userid, expense: totalPrice))
         total_label.text = String(format:"%.2f",totalPrice)
     }
@@ -188,8 +186,10 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
             self.generateAlert(title: ErrorMessages.erroreTitle.rawValue, message: ErrorMessages.enterQuantity_message.rawValue)
             return
         }
-        guard let price = selection.price else { return }
-        let prod = Product(productName: self.selection.product, price: price, quantity: Int(quantity.text!))
+        guard let price = selection.price, let points = points_label.text else {
+            return
+        }
+        let prod = Product(productName: selection.product, price: price, quantity: Int(quantity.text!), points: Int(points))
         Order.sharedIstance.addProduct(product: prod)
         
         performSegue(withIdentifier: "unwindToOffersFromOffriDrink", sender: nil)

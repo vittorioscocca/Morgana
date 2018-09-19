@@ -75,12 +75,15 @@ class PointsManager {
         self.days = [Int]()
         let uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
         
-        readUserPointsStatsOnFirebase(userId: (CoreDataController.sharedIstance.findUserForIdApp(uid)?.idApp)!) { (error) in
+        guard let idApp = CoreDataController.sharedIstance.findUserForIdApp(uid)?.idApp else  { return }
+        
+        readUserPointsStatsOnFirebase(userId: idApp) { (error) in
             if error != nil {
                 print("\(String(describing: error?.description))")
             }
             NotificationCenter.default.post(name: .ReadingRemoteUserPointDidFinish, object: self)
         }
+
     }
     
     func readUserPointsStatsOnFirebase (userId: String,onCompletion: @escaping (String?)->()) {

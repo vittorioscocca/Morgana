@@ -23,6 +23,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
     @IBOutlet weak var carousel: UIBarButtonItem!
     @IBOutlet var menuButton: UIBarButtonItem!
     @IBOutlet weak var addToCart: UIButton!
+    @IBOutlet weak var points_label: UILabel!
     
     
     enum Alert: String {
@@ -72,8 +73,9 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         
         guard CheckConnection.isConnectedToNetwork() == true else{
             self.isConnectedtoNetwork = false
-            self.quantità_label.text = "   Quantità prodotti: " + "\(Order.sharedIstance.prodottiTotali)"
+            self.quantità_label.text = "   Prodotti: " + "\(Order.sharedIstance.prodottiTotali)"
             self.totale_label.text = "  Totale: € " + String(format:"%.2f", Order.sharedIstance.costoTotale)
+            self.points_label.text = "Punti: \(Order.sharedIstance.points)"
             self.generateAlert(title: Alert.lostConnection_title.rawValue, msg: Alert.lostConnection_msg.rawValue)
             return
         }
@@ -127,12 +129,13 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
     
     private func viewSettings(){
         UpdateBadgeInfo.sharedIstance.updateBadgeInformations(nsArray: self.tabBarController?.tabBar.items as NSArray?)
-        self.quantità_label.text = "   Quantità prodotti: 0"
-        self.totale_label.text = "   Totale: € 0,00"
-        self.myTable.dataSource = self
-        self.myTable.delegate = self
-        self.readCompanies()
-        self.firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
+        quantità_label.text = "   Prodotti: 0"
+        totale_label.text = "   Totale: € 0,00"
+        points_label.text = "Punti: 0"
+        myTable.dataSource = self
+        myTable.delegate = self
+        readCompanies()
+        firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
     }
     @objc func updateTable(){
         print("table reloaded")
@@ -214,11 +217,11 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
                 return localCompanies.count
             }else {return 1}
         case 2:
-            if (Order.sharedIstance.prodotti?.isEmpty)! {
-                let product = Product(productName: "+    Aggiungi prodotto", price: 0, quantity: 0)
-                Order.sharedIstance.prodotti?.append(product)
+            if (Order.sharedIstance.products?.isEmpty)! {
+                let product = Product(productName: "+    Aggiungi prodotto", price: 0, quantity: 0, points: 0)
+                Order.sharedIstance.products?.append(product)
             }
-            return (Order.sharedIstance.prodotti?.count)!
+            return (Order.sharedIstance.products?.count)!
         default:
             return 1
         }
@@ -272,15 +275,21 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         } else {
             cell = tableView.dequeueReusableCell(withIdentifier: "cellOffer", for: indexPath)
             
-            guard let products = Order.sharedIstance.prodotti else  { return cell! }
+            guard let products = Order.sharedIstance.products else  { return cell! }
             let elemento = products[indexPath.row]
-            guard let quantity = elemento.quantity, let productName = elemento.productName, let price = elemento.price else { return cell!}
+            guard let quantity = elemento.quantity,
+                let productName = elemento.productName,
+                let price = elemento.price,
+                let points = elemento.points
+            else { return cell!}
+            
             if indexPath.row < products.count  {
                 if quantity != 0 {
-                    cell?.textLabel?.text = "(\(quantity))  " + productName + " € " + String(format:"%.2f", price)
+                    cell?.textLabel?.text = "(\(quantity)) " + productName + "    Punti:\(points)    " + "€ "  + String(format:"%.2f", price)
                     
-                    self.quantità_label.text = "   Quantità prodotti: " + "\(Order.sharedIstance.prodottiTotali)"
-                    self.totale_label.text = "   Totale: € " + String(format:"%.2f", Order.sharedIstance.costoTotale)
+                    quantità_label.text = "   Prodotti: \(Order.sharedIstance.prodottiTotali)"
+                    totale_label.text = "   Totale: € " + String(format:"%.2f", Order.sharedIstance.costoTotale)
+                    points_label.text = "Punti: \(Order.sharedIstance.points)"
                 }else {
                     cell?.textLabel?.text = elemento.productName
                 }
@@ -320,7 +329,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
     
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         if (sectionTitle[indexPath.section] == sectionTitle[2]) {
-            if indexPath.row < (Order.sharedIstance.prodotti?.count)! - 1{
+            if indexPath.row < (Order.sharedIstance.products?.count)! - 1{
                 return true
             }
         }
@@ -333,14 +342,14 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         case .delete:
             print("premuto il tasto Delete")
             
-            let elemento = Order.sharedIstance.prodotti?[indexPath.row]
+            let elemento = Order.sharedIstance.products?[indexPath.row]
             print("elimo l'elemento \((elemento?.productName)!)")
             
-            Order.sharedIstance.prodotti?.remove(at: indexPath.row)
+            Order.sharedIstance.products?.remove(at: indexPath.row)
             
-            self.quantità_label.text = "   Quantità prodotti: " + "\(Order.sharedIstance.prodottiTotali)"
-            self.totale_label.text = "   Totale: € " + String(format:"%.2f", Order.sharedIstance.costoTotale)
-            
+            quantità_label.text = "   Prodotti: " + "\(Order.sharedIstance.prodottiTotali)"
+            totale_label.text = "   Totale: € " + String(format:"%.2f", Order.sharedIstance.costoTotale)
+            points_label.text = "Punti: 0"
             tableView.deleteRows(at: [indexPath], with: .left)
             break
         default:
@@ -382,9 +391,10 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
     
     private func deleteOrdine(){
         Order.sharedIstance.userDestination?.idFB = nil
-        Order.sharedIstance.prodotti?.removeAll()
-        self.quantità_label.text = "   Quantità prodotti: 0"
+        Order.sharedIstance.products?.removeAll()
+        self.quantità_label.text = "   Prodotti: 0"
         self.totale_label.text = "   Totale: € 0,00"
+        self.points_label.text = "Punti: 0"
         self.delete.isEnabled = false
         self.myTable.reloadData()
     }
@@ -456,7 +466,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         switch sender.identifier! {
         case "unwindToOffer":
             //Hide Delet BarButtonItem if cart is empty
-            if (Order.sharedIstance.prodotti?.count)! > 1 {
+            if (Order.sharedIstance.products?.count)! > 1 {
                 self.delete.isEnabled = true
             }
             
@@ -482,7 +492,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
             break
         }
         //Hide Delet BarButtonItem if cart is empty
-        if (Order.sharedIstance.prodotti?.count)! > 1 {
+        if (Order.sharedIstance.products?.count)! > 1 {
             self.delete.isEnabled = true
         }
         
@@ -497,7 +507,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
     
     @IBAction func addOrderToCart(_ sender: UIButton) {
-        guard let orderProducts = Order.sharedIstance.prodotti else {
+        guard let orderProducts = Order.sharedIstance.products else {
             return
         }
         guard orderProducts.count > 1 else {
@@ -526,20 +536,20 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         //Se l'Ordine è indirizzata ad un utente già presente nel carrello unisce i prodotti sotto lo stesso utente destinatario
         for cartOrder in Cart.sharedIstance.carrello {
             if cartOrder.userDestination?.idFB == order.userDestination?.idFB {
-                cartOrder.prodotti?.removeLast()
+                cartOrder.products?.removeLast()
                 //Se il prodotto è lo stesso cambia solo la quantità
-                for productInOrder in cartOrder.prodotti! {
+                for productInOrder in cartOrder.products! {
                     var numberProducts = 0
-                    for product in order.prodotti! {
+                    for product in order.products! {
                         if productInOrder.productName == product.productName {
                             productInOrder.quantity = productInOrder.quantity! +  product.quantity!
-                            order.prodotti?.remove(at: numberProducts)
+                            order.products?.remove(at: numberProducts)
                         }
                         numberProducts += 1
                     }
                     
                 }
-                cartOrder.prodotti = cartOrder.prodotti! + order.prodotti!
+                cartOrder.products = cartOrder.products! + order.products!
                 insertOk = true
             }
         }

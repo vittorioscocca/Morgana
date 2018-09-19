@@ -72,7 +72,7 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
                 return
             }
             let order = orders[0]
-            guard let products = order.prodotti else { return }
+            guard let products = order.products else { return }
             var newProduct = [Product]()
            
             for product in products {
@@ -82,7 +82,7 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
                 }
             }
             if newProduct.count != 0 {
-                order.prodotti = newProduct
+                order.products = newProduct
             }
             self.orderReaded = order
             self.readUserDetails()
@@ -197,7 +197,7 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
         if section == 0 {
             return 1
         }else {
-            guard let count = orderReaded?.prodotti?.count else { return 1 }
+            guard let count = orderReaded?.products?.count else { return 1 }
             return count
         }
     }
@@ -210,7 +210,7 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
             cell?.textLabel?.text = "Morgana Music Club"
         } else {
             cell = tableView.dequeueReusableCell(withIdentifier: "productCell", for: indexPath)
-            guard let product = self.orderReaded?.prodotti![indexPath.row], let quantity = product.quantity else { return cell! }
+            guard let product = self.orderReaded?.products![indexPath.row], let quantity = product.quantity else { return cell! }
             
             if !self.orderScanned {
                 (cell as! AutOrderTableViewCell).productName_label.text = product.productName
@@ -232,7 +232,7 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
     
     @objc func stepperAction( _ sender: UIStepper!) {
         let cell = self.myTable.cellForRow(at: myIndexPath[sender.tag])
-        guard let products = self.orderReaded?.prodotti else { return }
+        guard let products = self.orderReaded?.products else { return }
         (cell as! AutOrderTableViewCell).productQuantity_label.text = String(Int(sender.value))
         products[sender.tag].quantity = Int((cell as! AutOrderTableViewCell).myStepper.maximumValue) - Int(sender.value)
         
@@ -241,7 +241,7 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
     private func prepareProductsOfferDetailsDictionary()->[String:String]{
         var newProductsOfferDictionary: [String:String] = [:]
         var count = 0
-        guard let products = self.orderReaded?.prodotti else { return newProductsOfferDictionary }
+        guard let products = self.orderReaded?.products else { return newProductsOfferDictionary }
         
         for product in products {
             
@@ -264,7 +264,7 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
     private func numberOfProducts()->Int{
         var totQuantity = 0
         
-        guard let products = orderReaded?.prodotti else { return totQuantity}
+        guard let products = orderReaded?.products else { return totQuantity}
         
         for product in products{
             totQuantity += product.quantity!

@@ -15,6 +15,7 @@ import FirebaseInstanceID
 
 public extension NSNotification.Name {
     static let FbTokenDidChangeNotification = NSNotification.Name("LoginFbTokenDidChangeNotification")
+    static let FirebaseTokenDidChangeNotification = NSNotification.Name("LoginFirebaseTokenDidChangeNotification")
 }
 
 //Facebook and Firebase Login Controller
@@ -40,9 +41,7 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
             let appDelegate = UIApplication.shared.delegate as! AppDelegate
             appDelegate.window!.rootViewController = userPage
             
-        } else {
-            // No user is signed in.
-            
+        }else {
             //Facebook Login
             customFBButtom.delegate = self
             customFBButtom.readPermissions = ["public_profile", "email", "user_friends"]
@@ -59,14 +58,10 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
         let parameters = ["fields" : "email, name, first_name, last_name, age_range,id, gender, picture.type(large)"]
         
         FBSDKGraphRequest(graphPath: "me", parameters: parameters).start(completionHandler: { (connection, result, error) -> Void in
-            
-            if (error != nil)
-            {
+            if (error != nil){
                 // Process error
-                print("Error: \(error!)")
-            }
-            else
-            {
+                print("[LoginViewController]: Error: \(error!)")
+            }else {
                 let result = result as? NSDictionary
                 let email = result?["email"] as? String
                 let fullName = result?["name"] as? String
@@ -79,17 +74,11 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                 let url = data?["url"] as? String
                 
                 guard let user = self.fireBaseToken.object(forKey: "FireBaseToken") as? String else { return }
-                
-                
-                DispatchQueue.global(qos: .background).async { () -> Void in
-                    let newUser = CoreDataController.sharedIstance.addNewUser(user, user_id_fb, email, fullName, user_name, user_lastName, user_gender, url)
-                    self.addUserInCloud(user: newUser, onCompletion: {
-                        self.createUserPointsStats()
-                        DispatchQueue.main.async(execute: { () -> Void in
-                            NotificationCenter.default.post(name: .FbTokenDidChangeNotification, object: nil)
-                        })
-                    })
-                }
+                let newUser = CoreDataController.sharedIstance.addNewUser(user, user_id_fb, email, fullName, user_name, user_lastName, user_gender, url)
+                NotificationCenter.default.post(name: .FbTokenDidChangeNotification, object: self)
+                self.addUserInCloud(user: newUser, onCompletion: {
+                    self.createUserPointsStats()
+                })
             }
         })
     }
@@ -112,7 +101,7 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
         ref.child("users/" + userFireBase.uid).observeSingleEvent(of: .value, with: { (snap) in
             //if user exist on firbase exit, else save user data on firebase(only one time)
             guard !snap.exists() else {
-                print("exist: user already exist on Firebase")
+                print("[LoginViewController]: exist: user already exist on Firebase")
                 //Firebase Token can changed, so if there is such problem with a login/logout we have the new Token
                 let dataUser = [
                     "name" : firstName,
@@ -185,7 +174,7 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                     return
                 }
                 ref.child("usersPointsStats/" + userFireBase.uid + "/" + "lastDateShopping").setValue(ServerValue.timestamp())
-                print("userPointsSats salvate su Firebase")
+                print("[LoginViewController]: userPointsSats salvate su Firebase")
             })
             
         })
@@ -198,9 +187,7 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
         let action = UIAlertAction(title: "CHIUDI", style: UIAlertActionStyle.default, handler:
         {(paramAction:UIAlertAction!) in
             
-            print("Il messaggio di chiusura è stato premuto")
         })
-        
         controller!.addAction(action)
         self.present(controller!, animated: true, completion: nil)
         
@@ -221,20 +208,20 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                     if error != nil {
                         print(error!)
                     }else {
-                        print("User logged on FireBase")
+                        print("[LoginViewController]: User logged on FireBase")
                         
                         while Auth.auth().currentUser == nil {
-                            print("...waiting Firebase user id")
+                            print("[LoginViewController]...waiting Firebase user id")
                         }
-                        print("Success! User id is ready")
-                        
+                        print("[LoginViewController]: Success! User id is ready")
                         guard let fireBaseUser = Auth.auth().currentUser else { return }
                         
                         self.fireBaseToken.set(fireBaseUser.uid, forKey: "FireBaseToken")
-                        
+                        NotificationCenter.default.post(name: .FirebaseTokenDidChangeNotification, object: self)
                         
                         if (result.token) != nil {
-                            print("User logged on Facebook")
+                            print("[LoginViewController]: User logged on Facebook")
+                            
                             //save token on UserDefaults
                             self.fbToken.set(FBSDKAccessToken.current()?.tokenString, forKey: "FBToken")
                             self.fetchProfile()

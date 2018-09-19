@@ -193,7 +193,7 @@ class FirebaseData {
         
         var orderDetails: [String:String] = [:]
         for order in Cart.sharedIstance.carrello {
-            guard let products = order.prodotti else { return orderDetails }
+            guard let products = order.products else { return orderDetails }
             if (order.userDestination?.idFB == idFBFriend) && (order.dataCreazioneOfferta == creationDate) {
                 for product in products {
                     if product.productName != "+    Aggiungi prodotto" {
@@ -447,13 +447,13 @@ class FirebaseData {
         var newProduct = [Product]()
         
         for order in ordersSent {
-            guard let products = order.prodotti else { return ordersSent}
+            guard let products = order.products else { return ordersSent}
             for product in products {
                 if product.productName?.range(of:"_climbed") == nil {
                     newProduct.append(product)
                 }
             }
-            order.prodotti = newProduct
+            order.products = newProduct
             newProduct.removeAll()
         }
         return ordersSent
@@ -463,7 +463,7 @@ class FirebaseData {
         var newProduct = [Product]()
         
         for order in ordersReceived {
-            guard let products = order.prodotti else { return ordersReceived }
+            guard let products = order.products else { return ordersReceived }
             
             for product in products {
                 if product.productName?.range(of:"_climbed") != nil && product.quantity != 0 {
@@ -473,7 +473,7 @@ class FirebaseData {
             }
             
             if newProduct.count != 0 {
-                order.prodotti = newProduct
+                order.products = newProduct
             }
             
             newProduct.removeAll()
@@ -568,7 +568,7 @@ class FirebaseData {
         self.ordersSent = self.ordersSent + orderList
         self.ordersSent = deleteDuplicate(sortArray(self.ordersSent))
         self.firstKnownKeyOrderSent = self.ordersSent.last?.idOfferta
-        self.ordersSent  = self.ordersSent.filter{$0.userDestination?.idApp != self.user?.idApp && $0.paymentState != .valid}
+        self.ordersSent  = self.ordersSent.filter{$0.userDestination?.idApp != self.user?.idApp && $0.paymentState == .valid}
         
         self.readProductsSentDetails(ordersToRead: deleteDuplicate(sortArray(orderList)), onCompletion: { (orders) in
             self.notificationCenter.post(name: .FireBaseDataUserReadedNotification, object: nil)
@@ -981,7 +981,9 @@ class FirebaseData {
         let queue = DispatchQueue.init(label: "it.xcoding.queueReadProductsSentDetails", attributes: .concurrent, target: .main)
         
         for singleOrder in ordersToRead{
-            let node = "productsOffersDetails/\((singleOrder.company?.companyId)!)/\(singleOrder.idOfferta!)"
+            guard let orderId = singleOrder.idOfferta, let companyId = singleOrder.company?.companyId else { return }
+            
+            let node = "productsOffersDetails/\(companyId)/\(orderId)"
             
             
             //readNodeOnFireBase con Autoid
@@ -995,8 +997,8 @@ class FirebaseData {
                 guard error == nil else {return}
                 guard productData != nil else {return}
                 
-                var product: Product = Product(productName: nil, price: nil, quantity: nil)
-                singleOrder.prodotti?.removeAll()
+                var product: Product = Product(productName: nil, price: nil, quantity: nil, points: nil)
+                singleOrder.products?.removeAll()
                 for (chiave,valore) in productData! {
                     if chiave != Order.autoId {
                         product.productName = chiave
@@ -1007,9 +1009,9 @@ class FirebaseData {
                         product.price = Double((token?[1])!)
                         print("prezzo letto")
                         if (product.price != nil) && (product.productName != nil) && (product.quantity != nil){
-                            singleOrder.prodotti?.append(product)
-                            print("numero prodotti \((singleOrder.prodotti?.count)!)")
-                            product = Product(productName: nil, price: nil, quantity: nil)
+                            singleOrder.products?.append(product)
+                            print("numero prodotti \((singleOrder.products?.count)!)")
+                            product = Product(productName: nil, price: nil, quantity: nil, points: nil)
                         }
                         
                     }

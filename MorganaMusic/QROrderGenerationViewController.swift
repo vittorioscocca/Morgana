@@ -198,7 +198,7 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 0 {
-            guard let products = offertaRicevuta?.prodotti else { return 0}
+            guard let products = offertaRicevuta?.products else { return 0}
             return products.count
         }else {
             return 1
@@ -209,7 +209,7 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
         let cell = tableView.dequeueReusableCell(withIdentifier: "orderCell", for: indexPath)
         
         if (sectionTitle[indexPath.section] == sectionTitle[0]) {
-            guard let product = self.offertaRicevuta?.prodotti?[indexPath.row] else {return cell }
+            guard let product = self.offertaRicevuta?.products?[indexPath.row] else {return cell }
             guard let quantity = product.quantity,
                 let productName = product.productName,
                 let price = product.price

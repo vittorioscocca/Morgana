@@ -125,10 +125,11 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         ordersSent = OrdersListManager.instance.readOrdersList().ordersList.ordersSentList.filter{$0.viewState != .deleted &&
             $0.userDestination?.idApp != self.user?.idApp &&
-            $0.paymentState != .valid}
+            $0.paymentState == .valid}
         
         ordersReceived = OrdersListManager.instance.readOrdersList().ordersList.ordersReceivedList.filter{ $0.viewState != .deleted ||
             $0.paymentState == .valid && $0.offerState != .refused && $0.offerState != .forward}
+        
         if !fetchingMoreOrdersSent {
             beginFetchOrdersSent()
         }
@@ -193,7 +194,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             
             ordersSent = orderSentList.filter{$0.viewState != .deleted &&
                 $0.userDestination?.idApp != self.user?.idApp &&
-                $0.paymentState != .valid}
+                $0.paymentState == .valid}
             
             ordersReceived = orderRiceivedList.filter{ $0.viewState != .deleted ||
                 $0.paymentState == .valid && $0.offerState != .refused && $0.offerState != .forward}
@@ -697,11 +698,11 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
             DispatchQueue.main.async(execute: {
                 self.fetchingMoreOrdersSent = false
-                guard let orderRange = order else {return}
+                guard let orderRange = order else { return }
                
                 self.ordersSent = self.ordersSent + orderRange.filter{$0.viewState != .deleted &&
                     $0.userDestination?.idApp != self.user?.idApp &&
-                    $0.paymentState != .valid}
+                    $0.paymentState == .valid}
                 self.deleteDuplicate(&self.ordersSent)
                 print("****// order sent dimension from interface: \(self.ordersSent.count)")
                 self.myTable.reloadData()
@@ -721,7 +722,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 self.fetchingMoreOrdersReceived = false
                 guard let orderRange = order else {return}
                         
-                self.ordersReceived = self.ordersReceived + orderRange.filter{ $0.viewState != .deleted ||
+                self.ordersReceived = self.ordersReceived + orderRange.filter{ $0.viewState != .deleted &&
                     $0.paymentState == .valid && $0.offerState != .refused && $0.offerState != .forward}
                 self.deleteDuplicate(&self.ordersReceived)
                 print("order received dimension: \(self.ordersReceived.count)")
@@ -945,7 +946,8 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 return true
             }
         } else {
-            precondition(indexPath.row < ordersSent.count)
+            //precondition(indexPath.row < ordersSent.count)
+            guard  indexPath.row < ordersSent.count else { return false}
             switch ordersSent[indexPath.row].offerState {
             case .accepted:
                 return false
@@ -1002,7 +1004,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 tableView.deselectRow(at: indexPath, animated: true)
             }else if orderReceived.offerState == .pending {
                 var msg = "Dettaglio:\n"
-                for i in orderReceived.prodotti! {
+                for i in orderReceived.products! {
                     msg += "\(i.quantity!) " + i.productName! + "\n"
                 }
                 msg += "\nFai swipe sulla riga:\nAccetta o Rifiuta l'offerta"

@@ -79,8 +79,8 @@ class CartOrderDetailsViewController: UIViewController, UITableViewDelegate, UIT
             })
         } else {
             cell = tableView.dequeueReusableCell(withIdentifier: "cartOrderDetailsCell", for: indexPath)
-            guard let productsCount = orderSent?.prodotti?.count,
-            let products = orderSent?.prodotti else { return cell!}
+            guard let productsCount = orderSent?.products?.count,
+            let products = orderSent?.products else { return cell!}
             if  indexPath.row <= productsCount - 2  {
                 let product = products[indexPath.row]
                 guard let quantity = product.quantity,
