@@ -87,9 +87,12 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         self.isConnectedtoNetwork = true
         self.uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
         self.user = CoreDataController.sharedIstance.findUserForIdApp(uid)
+       
         if user == nil {
             self.logout()
-        } else {self.viewSettings()}
+        } else {
+            self.viewSettings()
+        }
         
         NotificationCenter.default.addObserver(self,
                                             selector: #selector(networkStatusDidChange),
@@ -109,7 +112,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
             self.viewDidLoad()
         }
         self.isConnectedtoNetwork = true
-        
+        readCompanies()
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(updateTable),
                                                name: .CacheImageLoadImage,
@@ -201,6 +204,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
                 //self.myTable.reloadData()
                 Cart.sharedIstance.company = self.companies?[0]
             })
+            Cart.sharedIstance.payPalEnvironment = PayPalEnvironment(companyId: (companies?[0].companyId)!)
         }
     }
     

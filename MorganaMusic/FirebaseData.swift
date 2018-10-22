@@ -44,10 +44,10 @@ class FirebaseData {
     var friendList: [Friend]?
     var ordersSent: [Order]
     var ordersReceived: [Order]
-    var totalNumberOrdersSent = 0
-    var totalNumberOrdesReceived = 0
-    var totalNumberOrdersSentReaded = 0
-    var totalNumberOrdesReceivedReaded = 0
+//    var totalNumberOrdersSent = 0
+//    var totalNumberOrdesReceived = 0
+//    var totalNumberOrdersSentReaded = 0
+//    var totalNumberOrdesReceivedReaded = 0
     
     var companies: [Company]
     var lastOrderSentReadedTimestamp = UserDefaults.standard
@@ -56,7 +56,7 @@ class FirebaseData {
     private var paymentAutoId: String?
     
     private let companyID = "mr001"
-    static let DIM_PAGE_SCROLL: UInt = 10
+//    static let DIM_PAGE_SCROLL: UInt = 10
     private var firstKnownKeyOrderSent: String?
     private var firstKnownKeyOrderReceived: String?
     fileprivate var _refHandle: DatabaseHandle!
@@ -95,7 +95,7 @@ class FirebaseData {
             return orderDetails[Order.offerState] as! String
         }
         
-        if userIdApp == (orderDetails[Order.IdAppUserDestination] as! String) {
+        if userIdApp == (orderDetails[Order.idAppUserDestination] as! String) {
             return "Offerta accettata"
         }
         
@@ -110,13 +110,13 @@ class FirebaseData {
             Order.facebookUserDestination: order.userDestination?.idFB != nil ? order.userDestination!.idFB! : "",
             Order.offerCreationDate: order.dataCreazioneOfferta != nil ? order.dataCreazioneOfferta! : "",
             Order.total: String(format:"%.2f", order.costoTotale),
-            Order.IdAppUserDestination: order.userDestination?.idApp != nil ? order.userDestination!.idApp! : "",
+            Order.idAppUserDestination: order.userDestination?.idApp != nil ? order.userDestination!.idApp! : "",
             Order.timestamp: ServerValue.timestamp(),
             Order.ordersSentAutoId: order.ordersSentAutoId,
             Order.orderNotificationIsScheduled: order.orderNotificationIsScheduled != nil ? order.orderNotificationIsScheduled! : "",
             Order.orderAutoId: order.orderAutoId,
             Order.pendingPaymentAutoId: paymentAutoId != nil ? paymentAutoId! : "",
-            Order.userSender: user?.idApp != nil ? user!.idApp! : "",
+            Order.userSenderIdApp: user?.idApp != nil ? user!.idApp! : "",
             Order.orderReaded:"false",
             Order.consumingDate: "",
             Order.viewState: order.viewState.rawValue
@@ -246,11 +246,11 @@ class FirebaseData {
         offerDetails.removeValue(forKey: Order.ordersSentAutoId)
         offerDetails.removeValue(forKey: Order.orderAutoId)
         offerDetails.removeValue(forKey: Order.pendingPaymentAutoId)
-        offerDetails[Order.userSender] = user?.idApp != nil ? user?.idApp! : ""
+        offerDetails[Order.userSenderIdApp] = user?.idApp != nil ? user?.idApp! : ""
         offerDetails[Order.orderReaded] = "false"
         offerDetails[Order.orderExpirationNotificationIsScheduled] = false
         offerDetails[Order.consumingDate] = ""
-        
+        offerDetails[Order.senderIdFB] = user?.idFB
         
         return offerDetails
     }
@@ -261,7 +261,7 @@ class FirebaseData {
                 print("read error on Firebase")
                 return
             }
-            FireBaseAPI.updateNode(node: "ordersReceived/\(orderDetails[Order.IdAppUserDestination] as! String)/\(companyId)", value: [Order.scanningQrCode :false])
+            FireBaseAPI.updateNode(node: "ordersReceived/\(orderDetails[Order.idAppUserDestination] as! String)/\(companyId)", value: [Order.scanningQrCode :false])
             
         })
     }
@@ -517,11 +517,11 @@ class FirebaseData {
                 order.offerState = Order.OfferStates(rawValue: (orderDataDictionary[Order.offerState] as? String)!)!
                 order.userDestination?.idFB = orderDataDictionary[Order.facebookUserDestination] as? String
                 order.dataCreazioneOfferta = orderDataDictionary[Order.offerCreationDate] as? String
-                order.userDestination?.idApp = orderDataDictionary[Order.IdAppUserDestination] as? String
+                order.userDestination?.idApp = orderDataDictionary[Order.idAppUserDestination] as? String
                 order.timeStamp = orderDataDictionary[Order.timestamp] as! TimeInterval
                 order.pendingPaymentAutoId = orderDataDictionary[Order.pendingPaymentAutoId] as! String
                 order.ordersSentAutoId = orderDataDictionary[Order.ordersSentAutoId] as! String
-                order.userSender?.idApp = orderDataDictionary[Order.userSender] as? String
+                order.userSender?.idApp = orderDataDictionary[Order.userSenderIdApp] as? String
                 order.orderNotificationIsScheduled = orderDataDictionary[Order.orderNotificationIsScheduled] as? Bool
                 order.consumingDate = orderDataDictionary[Order.consumingDate] as? String
                 order.viewState = Order.ViewStates(rawValue: (orderDataDictionary[Order.viewState] as? String)!)!
@@ -576,47 +576,47 @@ class FirebaseData {
         })
     }
     
-    //Reload for infinitive scroll
-    func readOrdersSentOnFireBaseRange(user: User, onCompletion: @escaping ([Order]?)->()){
-        guard let checkFirstKnowKey = firstKnownKeyOrderSent else {
-            onCompletion(nil)
-            return
-        }
-        
-        self.user = user
-        guard let userIdApp = user.idApp else { return }
-        
-        _refHandle = ref.child("ordersSent/" + userIdApp+"/\(companyID)")
-            .queryOrderedByKey()
-            .queryEnding(atValue: checkFirstKnowKey)
-            .queryLimited(toLast: FirebaseData.DIM_PAGE_SCROLL)
-            .observe(.value, with: { (snap) in
-                
-                guard snap.exists() else {
-                    onCompletion(nil)
-                    return
-                }
-                guard snap.value != nil else {
-                    onCompletion(nil)
-                    return
-                }
-              
-                self.totalNumberOrdersSentReaded += Int(snap.childrenCount)
-                
-                guard let orderDictionary = (snap.value! as? NSDictionary) else {
-                    onCompletion(nil)
-                    return
-                }
-                guard orderDictionary.count > 1 else {
-                    onCompletion(nil)
-                    return
-                }
-                
-                self.readOrderSentDictionary(orderDictionary: orderDictionary, onCompletion: { (orderSent) in
-                    onCompletion(self.deleteClimbedOrder(ordersSent: orderSent))
-                })
-            })
-    }
+//    //Reload for infinitive scroll
+//    func readOrdersSentOnFireBaseRange(user: User, onCompletion: @escaping ([Order]?)->()){
+//        guard let checkFirstKnowKey = firstKnownKeyOrderSent else {
+//            onCompletion(nil)
+//            return
+//        }
+//
+//        self.user = user
+//        guard let userIdApp = user.idApp else { return }
+//
+//        _refHandle = ref.child("ordersSent/" + userIdApp+"/\(companyID)")
+//            .queryOrderedByKey()
+//            .queryEnding(atValue: checkFirstKnowKey)
+//            .queryLimited(toLast: FirebaseData.DIM_PAGE_SCROLL)
+//            .observe(.value, with: { (snap) in
+//
+//                guard snap.exists() else {
+//                    onCompletion(nil)
+//                    return
+//                }
+//                guard snap.value != nil else {
+//                    onCompletion(nil)
+//                    return
+//                }
+//
+//                self.totalNumberOrdersSentReaded += Int(snap.childrenCount)
+//
+//                guard let orderDictionary = (snap.value! as? NSDictionary) else {
+//                    onCompletion(nil)
+//                    return
+//                }
+//                guard orderDictionary.count > 1 else {
+//                    onCompletion(nil)
+//                    return
+//                }
+//
+//                self.readOrderSentDictionary(orderDictionary: orderDictionary, onCompletion: { (orderSent) in
+//                    onCompletion(self.deleteClimbedOrder(ordersSent: orderSent))
+//                })
+//            })
+//    }
     
     
     func readOrdersSentOnFireBase(user: User, friendsList: [Friend]?, onCompletion: @escaping ([Order])->()){
@@ -624,19 +624,21 @@ class FirebaseData {
         self.friendList = friendsList
         self.ordersSent.removeAll()
         
+        
         guard Auth.auth().currentUser != nil, let userIdApp = user.idApp else {
             onCompletion([])
             return
         }
         
-        ref.child("ordersSent/" + userIdApp + "/\(companyID)").observeSingleEvent(of: .value) { (snap) in
-            self.totalNumberOrdersSent = Int(snap.childrenCount)
-        }
+//        ref.child("ordersSent/" + userIdApp + "/\(companyID)").observeSingleEvent(of: .value) { (snap) in
+//            self.totalNumberOrdersSent = Int(snap.childrenCount)
+//            self.totalNumberOrdersSentReaded = 0
+//        }
         
         _refHandle = ref.child("ordersSent/" + userIdApp + "/\(companyID)")
             .queryOrdered(byChild: Order.viewState)
             .queryEqual(toValue: Order.ViewStates.active.rawValue)
-            .queryLimited(toLast: FirebaseData.DIM_PAGE_SCROLL)
+//            .queryLimited(toLast: FirebaseData.DIM_PAGE_SCROLL)
             .observe(.value, with: { (snap) in  //snap.childrenCount
                 guard snap.exists() else {
                     onCompletion([])
@@ -646,7 +648,7 @@ class FirebaseData {
                     onCompletion([])
                     return
                 }
-                self.totalNumberOrdersSentReaded = Int(snap.childrenCount)
+//                self.totalNumberOrdersSentReaded = Int(snap.childrenCount)
                 
                 self.ordersSent.removeAll()
                 guard let orderDictionary = (snap.value! as? NSDictionary) else {
@@ -756,13 +758,16 @@ class FirebaseData {
             case Order.offerId:
                 order.idOfferta = valore as? String
                 break
-            case Order.userSender:
+            case Order.userSenderIdApp:
                 order.userSender?.idApp = valore as? String
+                break
+            case Order.senderIdFB:
+                order.userSender?.idFB = valore as? String
                 break
             case Order.timestamp:
                 order.timeStamp = (valore as? TimeInterval)!
                 break
-            case Order.IdAppUserDestination:
+            case Order.idAppUserDestination:
                 order.userDestination?.idApp = valore as? String
                 break
             case Order.orderReaded:
@@ -785,8 +790,25 @@ class FirebaseData {
             case Order.viewState:
                 order.viewState = Order.ViewStates(rawValue: (valore as? String)!)!
                 break
+            case Order.facebookUserDestination:
+                order.userDestination?.idFB = valore as? String
+                break
             default:
                 break
+            }
+            
+            if order.userDestination?.idFB == self.user?.idFB {
+                order.userSender?.fullName = self.user?.fullName
+                order.userSender?.pictureUrl = self.user?.pictureUrl
+                
+            } else if !(self.friendList?.isEmpty)! {
+                for friend in self.friendList! {
+                    if friend.idFB == order.userSender?.idFB {
+                        order.userSender?.fullName = friend.fullName
+                        order.userSender?.pictureUrl = friend.pictureUrl
+                        break
+                    }
+                }
             }
         }
         return order
@@ -814,6 +836,7 @@ class FirebaseData {
                         return
                     }
                     order = self.readOrderData(order: order, orderDataDictionary: orderDataDictionary)
+                   
                     self.manageExpirationOrder(order: order)
                     orderList.append(order)
                     //if consumption is before expirationDate, scheduled notification is killed
@@ -823,60 +846,57 @@ class FirebaseData {
                         center.removePendingNotificationRequests(withIdentifiers: ["expirationDate-"+order.idOfferta!,"RememberExpiration-"+order.idOfferta!])
                         print("scheduled notification killed")
                     }
-                    
-                    
                 }
             }
             
             self.ordersReceived = self.ordersReceived + orderList
             self.ordersReceived = self.deleteDuplicate(self.sortArray(self.ordersReceived))
-            
             self.firstKnownKeyOrderReceived = self.ordersReceived.last?.idOfferta
             
-            self.readUserSender(ordersToRead: self.sortArray(orderList), onCompletion: { (ordersResult) in
-                self.readProductsSentDetails(ordersToRead: ordersResult, onCompletion: { (orders) in
-                    self.notificationCenter.post(name: .FireBaseDataUserReadedNotification, object: nil)
-                    onCompletion(self.getClimbedOrders(ordersReceived: orders))
-                })
+            self.readProductsSentDetails(ordersToRead: self.sortArray(orderList), onCompletion: { (orders) in
+                self.notificationCenter.post(name: .FireBaseDataUserReadedNotification, object: nil)
+                onCompletion(self.getClimbedOrders(ordersReceived: orders))
             })
+        
         })
     }
-    //Reload for infinitive scroll
-    func readOrdersReceivedOnFireBaseRange(user: User, onCompletion: @escaping ([Order]?)->()){
-        guard let checkFirstKnowKey = firstKnownKeyOrderReceived, let userIdApp = user.idApp else {
-            onCompletion(nil)
-            return
-        }
-        self.user = user
-        
-        _refHandle = ref.child("ordersReceived/" + userIdApp + "/\(companyID)")
-            .queryOrderedByKey()
-            .queryEnding(atValue: checkFirstKnowKey)
-            .queryLimited(toLast: FirebaseData.DIM_PAGE_SCROLL)
-            .observe(.value, with: { (snap) in
-                
-                guard snap.exists() else {
-                    onCompletion(nil)
-                    return
-                }
-                guard snap.value != nil else {
-                    onCompletion(nil)
-                    return
-                }
-                self.totalNumberOrdesReceivedReaded += Int(snap.childrenCount)
-                guard let ordersDictionary = (snap.value! as? NSDictionary) else {
-                    onCompletion(nil)
-                    return
-                }
-                guard ordersDictionary.count > 1 else {
-                    onCompletion(nil)
-                    return
-                }
-                self.readOrderReceivedDictionary(dataOrder: ordersDictionary, onCompletion: { (orderReceived) in
-                    onCompletion(self.getClimbedOrders(ordersReceived: self.ordersReceived))
-                })
-            })
-    }
+    
+//    //Reload for infinitive scroll
+//    func readOrdersReceivedOnFireBaseRange(user: User, onCompletion: @escaping ([Order]?)->()){
+//        guard let checkFirstKnowKey = firstKnownKeyOrderReceived, let userIdApp = user.idApp else {
+//            onCompletion(nil)
+//            return
+//        }
+//        self.user = user
+//
+//        _refHandle = ref.child("ordersReceived/" + userIdApp + "/\(companyID)")
+//            .queryOrderedByKey()
+//            .queryEnding(atValue: checkFirstKnowKey)
+//            .queryLimited(toLast: FirebaseData.DIM_PAGE_SCROLL)
+//            .observe(.value, with: { (snap) in
+//
+//                guard snap.exists() else {
+//                    onCompletion(nil)
+//                    return
+//                }
+//                guard snap.value != nil else {
+//                    onCompletion(nil)
+//                    return
+//                }
+//                self.totalNumberOrdesReceivedReaded += Int(snap.childrenCount)
+//                guard let ordersDictionary = (snap.value! as? NSDictionary) else {
+//                    onCompletion(nil)
+//                    return
+//                }
+//                guard ordersDictionary.count > 1 else {
+//                    onCompletion(nil)
+//                    return
+//                }
+//                self.readOrderReceivedDictionary(dataOrder: ordersDictionary, onCompletion: { (orderReceived) in
+//                    onCompletion(self.getClimbedOrders(ordersReceived: self.ordersReceived))
+//                })
+//            })
+//    }
     
     func readOrderReceivedOnFireBase(user: User, onCompletion: @escaping ([Order])->()) {
         self.user = user
@@ -887,14 +907,15 @@ class FirebaseData {
             return
         }
         
-        ref.child("ordersReceived/" + userIdApp + "/\(companyID)").observeSingleEvent(of: .value) { (snap) in
-            self.totalNumberOrdesReceived = Int(snap.childrenCount)
-        }
+//        ref.child("ordersReceived/" + userIdApp + "/\(companyID)").observeSingleEvent(of: .value) { (snap) in
+//            self.totalNumberOrdesReceived = Int(snap.childrenCount)
+//            self.totalNumberOrdesReceivedReaded = 0
+//        }
         
         _refHandle = ref.child("ordersReceived/" + userIdApp + "/\(companyID)")
             .queryOrdered(byChild: Order.viewState)
             .queryEqual(toValue: Order.ViewStates.active.rawValue)
-            .queryLimited(toLast: FirebaseData.DIM_PAGE_SCROLL)
+//            .queryLimited(toLast: FirebaseData.DIM_PAGE_SCROLL)
             .observe(.value, with: { (snap) in
                 // controllo che lo snap dei dati non sia vuoto
                 guard snap.exists() else {
@@ -905,7 +926,7 @@ class FirebaseData {
                     onCompletion([])
                     return
                 }
-                self.totalNumberOrdesReceivedReaded = Int(snap.childrenCount)
+//                self.totalNumberOrdesReceivedReaded = Int(snap.childrenCount)
 
                 self.ordersReceived.removeAll()
                 
@@ -944,20 +965,20 @@ class FirebaseData {
             })
         })
     }
-    
+    //used only by readSingleOrder, it's very expensive in performance
     private func readUserSender(ordersToRead: [Order], onCompletion: @escaping ([Order])->()){
         var node = String()
         let dispatchGroup = DispatchGroup.init()
-        let queue = DispatchQueue.init(label: "it.xcoding.queueReadUsers", attributes: .concurrent, target: .main)
+        let queue = DispatchQueue.init(label: "it.morgnaMusic.queueReadUsers", attributes: .concurrent, target: .main)
         
         print("Orders Received contiene \(ordersToRead.count) ordini")
+        
         for singleOrder in ordersToRead{
             if let idApp = singleOrder.userSender?.idApp {
                 node = "users/" + idApp
                 FireBaseAPI.readNodeOnFirebaseWithOutAutoIdHandler(node: node, beginHandler: {
                     dispatchGroup.enter()
                     queue.async(group: dispatchGroup){
-                        print("user letto", node)
                     }
                 }, completionHandler: {(error, userData) in
                     guard error == nil else {return}
@@ -990,7 +1011,7 @@ class FirebaseData {
             FireBaseAPI.readNodeOnFirebaseWithOutAutoIdHandler(node: node, beginHandler: {
                 dispatchGroup.enter()
                 queue.async(group: dispatchGroup){
-                    print("eseguo lettura Dettaglio Ordini")
+                   
                 }
             }, completionHandler: { (error, productData) in
                 
@@ -1002,15 +1023,13 @@ class FirebaseData {
                 for (chiave,valore) in productData! {
                     if chiave != Order.autoId {
                         product.productName = chiave
-                        print("nome prodotto letto")
                         let token = (valore as? String)?.components(separatedBy: "x")
                         product.quantity = Int((token?[0])!)
-                        print("quantità letta")
                         product.price = Double((token?[1])!)
-                        print("prezzo letto")
+                       
                         if (product.price != nil) && (product.productName != nil) && (product.quantity != nil){
                             singleOrder.products?.append(product)
-                            print("numero prodotti \((singleOrder.products?.count)!)")
+                            
                             product = Product(productName: nil, price: nil, quantity: nil, points: nil)
                         }
                         
@@ -1134,7 +1153,7 @@ class FirebaseData {
         let newValues = [
             Order.offerCreationDate : creationDate,
             Order.timestamp: ServerValue.timestamp(),
-            Order.IdAppUserDestination: userDestinationIdApp,
+            Order.idAppUserDestination: userDestinationIdApp,
             Order.facebookUserDestination: userDestinationIdFB,
             Order.offerState: offerState,
             Order.orderReaded: "false",
