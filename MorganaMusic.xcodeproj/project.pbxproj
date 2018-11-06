@@ -1191,7 +1191,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.vittorioscoccs.MorganaMusic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_OBJC_BRIDGING_HEADER = "/Users/vittorioscocca/Library/Mobile Documents/com~apple~CloudDocs/Xcode/Progetti Personali Xcode/MorganaMusic/MorganaMusic/MorganaMusic-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "./MorganaMusic/MorganaMusic-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 4.0;
@@ -1221,7 +1221,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.vittorioscoccs.MorganaMusic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_OBJC_BRIDGING_HEADER = "/Users/vittorioscocca/Library/Mobile Documents/com~apple~CloudDocs/Xcode/Progetti Personali Xcode/MorganaMusic/MorganaMusic/MorganaMusic-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "./MorganaMusic/MorganaMusic-Bridging-Header.h";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 1;
