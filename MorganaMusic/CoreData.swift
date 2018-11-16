@@ -21,36 +21,55 @@ class CoreDataController {
     }
     
     
-    func addNewUser(_ idApp: String, _ idFB: String, _ email: String?, _ fullName: String?, _ firstName: String?, _ lastName: String?, _ gender: String?, _ pictureUrl: String? ) -> User {
+    func addNewUser(idApp: String,
+                    idFB: String,
+                    email: String?,
+                    fullName: String?,
+                    firstName: String?,
+                    lastName: String?,
+                    gender: String?,
+                    pictureUrl: String?,
+                    fbAccessToken: String?) -> User? {
         
-        let user = self.findUserForIdApp(idApp)
-        
-        guard  user == nil else {
-            user?.idApp = idApp
-            user?.idFB = idFB
-            user?.email = email
-            user?.fullName = fullName
-            user?.firstName = firstName
-            user?.lastName = lastName
-            user?.gender = gender
-            user?.pictureUrl = pictureUrl
-            return user!
+        guard  let user = self.findUserForIdApp(idApp) else {
+            guard let entityUser = NSEntityDescription.entity(forEntityName: "User", in: self.context) else {
+                return nil
+            }
+            let newUser = User(entity: entityUser, insertInto: self.context)
+            newUser.idApp = idApp
+            newUser.idFB = idFB
+            newUser.email = email
+            newUser.fullName = fullName
+            newUser.firstName = firstName
+            newUser.lastName = lastName
+            newUser.gender = gender
+            newUser.pictureUrl = pictureUrl
+            newUser.fbAccesToken = fbAccessToken
+            self.salvaContext()
+            return newUser
         }
-        guard let entityUser = NSEntityDescription.entity(forEntityName: "User", in: self.context) else { return user! }
-        let newUser = User(entity: entityUser, insertInto: self.context)
-        newUser.idApp = idApp
-        newUser.idFB = idFB
-        newUser.email = email
-        newUser.fullName = fullName
-        newUser.firstName = firstName
-        newUser.lastName = lastName
-        newUser.gender = gender
-        newUser.pictureUrl = pictureUrl
         
+        user.idApp = idApp
+        user.idFB = idFB
+        user.email = email
+        user.fullName = fullName
+        user.firstName = firstName
+        user.lastName = lastName
+        user.gender = gender
+        user.pictureUrl = pictureUrl
+        user.fbAccesToken = fbAccessToken
         self.salvaContext()
-        return newUser
+        return user
     }
     
+    func updateFBAccessToken(idApp: String, fbAccessToken: String) {
+        guard let user = self.findUserForIdApp(idApp) else {
+            print("[COREDATA]: user not found when tring to save fbAccessToken")
+            return
+        }
+        user.fbAccesToken = fbAccessToken
+        self.salvaContext()
+    }
     
     func saveCityAndBirthday(idApp: String, cityOfRecidence: String?, birthday: String?) {
         
@@ -74,7 +93,6 @@ class CoreDataController {
     
     //cerca un utente per la idApp
     func findUserForIdApp(_ idApp: String?) -> User? {
-        
         guard let idAPP =  idApp else {
             return nil
         }
@@ -114,7 +132,6 @@ class CoreDataController {
         
         return nil
     }
-    
     
     //cerca un utente per  email
     func findUserForEmail(_ email: String) -> User? {
@@ -170,7 +187,6 @@ class CoreDataController {
         self.salvaContext()
     }
     
-    
     //Carica tutti gli amici di uno user
     func loadAllFriendsOfUser(idAppUser: String, completion:@ escaping ([Friend]?)->()){
         guard let user = findUserForIdApp(idAppUser) else  {
@@ -190,7 +206,6 @@ class CoreDataController {
         guard let friends = user.friends?.allObjects as? [Friend] else { return 0}
         return friends.count
     }
-    
     
     //Cancelle tutti gli amici di un utente
     func deleteFriends(_ idApp: String) {
