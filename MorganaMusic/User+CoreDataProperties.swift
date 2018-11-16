@@ -26,6 +26,7 @@ extension User {
     @NSManaged public var idFB: String?
     @NSManaged public var lastName: String?
     @NSManaged public var pictureUrl: String?
+    @NSManaged public var fbAccesToken: String?
     @NSManaged public weak var friends: NSSet?
 
 }
