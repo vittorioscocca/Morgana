@@ -149,7 +149,7 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
         
         ref.child("usersPointsStats/" + userFireBase.uid).observeSingleEvent(of: .value, with: { (snap) in
             guard !snap.exists() else {
-                print("exist: userPoints already exist on Firebase")
+                print("[LoginViewController]: exist: userPoints already exist on Firebase")
                 return
             }
             //create user data on Firebase

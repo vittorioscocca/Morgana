@@ -15,24 +15,15 @@ import SystemConfiguration
 
 
 class UpdateBadgeInfo {
-    
     static let sharedIstance = UpdateBadgeInfo()
-    
     var user: User?
-    var uid: String?
-    
-    let fbToken = UserDefaults.standard
-    let fireBaseToken = UserDefaults.standard
     var productOfferedBadge = UserDefaults.standard
-    
-    
     
     private init(){
     }
     
     func updateBadgeInformations(nsArray: NSArray?){
-        self.uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
-        self.user = CoreDataController.sharedIstance.findUserForIdApp(uid)
+        self.user = CoreDataController.sharedIstance.findUserForIdApp(Auth.auth().currentUser?.uid)
         
         guard CheckConnection.isConnectedToNetwork() == true else {
             print("connessione assente")

@@ -80,19 +80,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate  {
         //Paypal sandbox credentials
         PayPalMobile.initializeWithClientIds(forEnvironments: [PayPalEnvironmentProduction: "ARowfMHmd5EwE2lUU2Gc3DkAwyQEFUi1H2qzmwhIiplZ9T2r0eqAAzh_qoE8O57fH6yEz6P9Kl6uRHU2",PayPalEnvironmentSandbox: "AfN_l2vZFwYniDa6bpCW3NmqrD4wX0VV7vH3VdDUb0Fjxsw2__X9gC0fee2VNKus-mRuvN4oHCjPJyBl"])
         
-        let firebaseUser = Auth.auth().currentUser
-        let user = CoreDataController.sharedIstance.findUserForIdApp(firebaseUser?.uid)
-        
         //Firebase configuration
         FirebaseApp.configure()
+        
         //Singleton initialization
         _ = FirebaseData.sharedIstance
         _ = NetworkStatus.default
-        _ = FacebookFriendsListManager.instance
-        _ = LoadRemoteProducts.instance
-        _ = OrdersListManager.instance
-        _ = PointsManager.sharedInstance
-        
         
         //Firebase push notification
         if #available(iOS 10.0, *) {
@@ -123,15 +116,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate  {
         
         application.registerForRemoteNotifications()
         
-        guard let currentUser = user, (( currentUser.fbAccesToken == nil) && (currentUser.idApp == nil) && lastViewControllerOnQuick.object(forKey: "lastViewControllerOnQuick") == nil) else{
-            print("[DEBUG] Salto il login iniziale")
-            MorganaMusicActivate()
-            updateFacebookAndFirebaseInfo()
-            return true
+        let firebaseUser = Auth.auth().currentUser
+        let user = CoreDataController.sharedIstance.findUserForIdApp(firebaseUser?.uid)
+        
+        if user != nil {
+            if user!.fbAccesToken != nil && user!.idApp != nil && lastViewControllerOnQuick.object(forKey: "lastViewControllerOnQuick") != nil {
+                print("[APPDELEGATE]: Salto il login iniziale")
+                MorganaMusicActivate()
+                updateFacebookAndFirebaseInfo()
+            }
         }
         
         //FBSDKLoginButton.classForCoder()
         FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
+        
+        _ = FacebookFriendsListManager.instance
+        _ = LoadRemoteProducts.instance
+        _ = OrdersListManager.instance
+        _ = PointsManager.sharedInstance
         
         initializeDynamicShortcuts()
         

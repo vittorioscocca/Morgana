@@ -13,22 +13,13 @@ import FirebaseDatabase
 import FirebaseAuth
 
 class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
-    
-    
     @IBOutlet weak var userImage_image: UIImageView!
     @IBOutlet weak var userFullName: UILabel!
     @IBOutlet weak var userEmail_text: UILabel!
-    
     @IBOutlet var userCredits_label: UILabel!
     @IBOutlet var menuButton: UIBarButtonItem!
     
-    var uid: String?
     var user: User?
-    var fbTokenString: String?
-    var fireBaseToken = UserDefaults.standard
-    let fbToken = UserDefaults.standard
-    let idUserApp = UserDefaults.standard
-    let defaults = UserDefaults.standard
     var qrcodeImage: CIImage!
     var activityIndicator: UIActivityIndicatorView = UIActivityIndicatorView()
     var strLabel = UILabel()
@@ -49,9 +40,7 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
             view.addGestureRecognizer(self.revealViewController().panGestureRecognizer())
         }
         if CheckConnection.isConnectedToNetwork() == true {
-            
-            uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
-            user = CoreDataController.sharedIstance.findUserForIdApp(uid)
+            user = CoreDataController.sharedIstance.findUserForIdApp(Auth.auth().currentUser?.uid)
             guard user != nil else { return }
             self.userFullName.text = self.user?.fullName
             self.userEmail_text.text = self.user?.email
@@ -85,7 +74,7 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
     private func readImage(){
         CacheImage.getImage(url: self.user?.pictureUrl, onCompletion: { (image) in
             guard let img = image else {
-                print("Attenzione URL immagine Mittente non presente")
+                print("[USERVIEWCONTROLLER]: Attenzione URL immagine Mittente non presente")
                 return
             }
             DispatchQueue.main.async(execute: {
@@ -136,7 +125,7 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         let action = UIAlertAction(title: "CHIUDI", style: UIAlertActionStyle.default, handler:
         {(paramAction:UIAlertAction!) in
             
-            print("Il messaggio di chiusura è stato premuto")
+            print("[USERVIEWCONTROLLER]: Il messaggio di chiusura è stato premuto")
         })
         
         controller!.addAction(action)
@@ -157,10 +146,10 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
                 FireBaseAPI.removeObserver(node: "ordersSent/" + userIdApp)
                 FireBaseAPI.removeObserver(node: "ordersReceived/" + userIdApp)
                 firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
-                print("Firebase Observer Killed")
+                print("[USERVIEWCONTROLLER]: Firebase Observer Killed")
             }
             
-        } else {print("no observer killed")}
+        } else {print("[USERVIEWCONTROLLER]: no observer killed")}
         
     }
     
@@ -172,8 +161,6 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         //effettuo logout FB
         let loginManager = FBSDKLoginManager()
         loginManager.logOut()
-        //self.fbToken.set(nil, forKey: "FBToken")
-        self.fbToken.set(nil, forKey: "FBToken")
         
         //effettuologout da firebase
         let firebaseAuth = Auth.auth()
@@ -181,11 +168,10 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
             //kill firebase observer
             self.killFirebaseObserver()
             try firebaseAuth.signOut()
-            self.fireBaseToken.removeObject(forKey: "FireBaseToken")
             
-            print("utente disconnesso di firebase")
+            print("[USERVIEWCONTROLLER]: utente disconnesso di firebase")
         } catch let signOutError as NSError {
-            print ("Error signing out: %@", signOutError)
+            print ("[USERVIEWCONTROLLER]: Error signing out: %@", signOutError)
         }
         
         //passo il controllo alla view di login, LoginViewController
@@ -215,7 +201,7 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
     }
     
     @IBAction func unwindToProfile(_ sender: UIStoryboardSegue) {
-        print("Unwind Segue il profilo")
+        print("[USERVIEWCONTROLLER]: Unwind Segue il profilo")
         
         // controllo che l'identifier non sia nil
         // se lo è entra dentro l'else ed esce dalla funzione
@@ -265,13 +251,13 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
     
     func appInviteDialog(_ appInviteDialog: FBSDKAppInviteDialog!, didCompleteWithResults results: [AnyHashable : Any]!) {
         if results == nil {
-            print("User Canceled invitation dialog with Done Button")
+            print("[USERVIEWCONTROLLER]: User Canceled invitation dialog with Done Button")
         }else {
             let resultObject = NSDictionary(dictionary: results)
             if let didCancel = resultObject.value(forKey: "completionGesture"){
                 if (didCancel as AnyObject).caseInsensitiveCompare("Cancel") == ComparisonResult.orderedSame
                 {
-                    print("User Canceled invitation dialog")
+                    print("[USERVIEWCONTROLLER]: User Canceled invitation dialog")
                 }
             }
         }
