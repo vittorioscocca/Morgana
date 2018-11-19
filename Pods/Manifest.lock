@@ -80,7 +80,7 @@ DEPENDENCIES:
   - PayPal-iOS-SDK
 
 SPEC REPOS:
-  https://github.com/CocoaPods/Specs.git:
+  https://github.com/cocoapods/specs.git:
     - CardIO
     - Firebase
     - FirebaseAnalytics
@@ -114,6 +114,6 @@ SPEC CHECKSUMS:
   PayPal-iOS-SDK: 10654cd111e911a9807bddb96fae81aacb8e9915
   Protobuf: 8a9838fba8dae3389230e1b7f8c104aa32389c03
 
-PODFILE CHECKSUM: a6dca79466f82da1fab71909e750e5f4e26dfbbf
+PODFILE CHECKSUM: 797b8adfdb4f143184d55df7995cc925c51c8d9d
 
-COCOAPODS: 1.5.0
+COCOAPODS: 1.5.3

@@ -98,7 +98,6 @@ class LoadRemoteProducts {
                     let prodottoConCosto = prodotto
                     self.productsList!.append(prodottoConCosto)
                     self.offersDctionary![prodotto] = costo as? Double
-                    print("Prodotto caricato \(prodotto)")
                 }
             }
             self.dispatchQueue.async {

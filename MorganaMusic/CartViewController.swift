@@ -134,10 +134,20 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        guard let path = sender else {return}
-        
-        let orderSent = Cart.sharedIstance.carrello[(path as! IndexPath).row]
-        (segue.destination as! CartOrderDetailsViewController).orderSent = orderSent
+        guard let identifier = segue.identifier else {
+            return
+        }
+        switch identifier {
+        case "segueToPayement":
+            break
+        case "segueToCartOrderDetails":
+            guard let path = sender else {return}
+            let orderSent = Cart.sharedIstance.carrello[(path as! IndexPath).row]
+            (segue.destination as! CartOrderDetailsViewController).orderSent = orderSent
+            break
+        default:
+            break
+        }
     }
     
     private func unwind(){

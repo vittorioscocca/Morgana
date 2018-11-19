@@ -32,7 +32,6 @@ class PaymentManager {
             onCompleted(true)
             return
         }
-        
         if payment.paymentType == "Credits" {
             self.setPaymentAndOrderCompletedOnFirebase(user: user)
             self.prepareNotification(user: user)
@@ -59,7 +58,7 @@ class PaymentManager {
          curl -v https://api.sandbox.paypal.com/v1/oauth2/token \
          -H "Accept: application/json" \
          -H "Accept-Language: en_US" \
-         -u "AfN_l2vZFwYniDa6bpCW3NmqrD4wX0VV7vH3VdDUb0Fjxsw2__X9gC0fee2VNKus-mRuvN4oHCjPJyBl:ECdrVG4XzWKF2BaMqJ_lLMoHQruvf141-lp8lltUKNfyOEgJMTRQtid3qNHAVRbVOQwvBlJrnvXEHggl" \
+         -u "Client-id" \
          -d "grant_type=client_credentials"
          
          */
@@ -68,7 +67,22 @@ class PaymentManager {
         //sandbox
         //https://api.sandbox.paypal.com/v1/oauth2/token
         
-        if let url = NSURL(string: "https://api.sandbox.paypal.com/v1/oauth2/token") {
+        var client_id = ""
+        var secret = ""
+        var tokenUrl = ""
+        guard let payPalEnvironment = Cart.sharedIstance.payPalEnvironment else { return }
+        
+        if payPalEnvironment.actualEnvironment == PayPalEnvironmentSandbox {
+            client_id = payPalEnvironment.payPalEnvironmentSandbox
+            secret = payPalEnvironment.payPalSecretKeySandbox
+            tokenUrl = payPalEnvironment.payPalTokenUrlSandBox
+        } else if payPalEnvironment.actualEnvironment == PayPalEnvironmentProduction {
+            client_id = payPalEnvironment.payPalEnvironmentProduction
+            secret = payPalEnvironment.payPalSecretKeyProduction
+            tokenUrl = payPalEnvironment.payPalTokenUrlProduction
+        }
+        
+        if let url = NSURL(string: tokenUrl) {
             let request = NSMutableURLRequest(url: url as URL)
             request.httpMethod = "POST" //Or GET if that's what you need
             
@@ -77,10 +91,6 @@ class PaymentManager {
             request.addValue("en_US", forHTTPHeaderField: "Accept-Language")
             //this content type don' ude json input
             request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-            
-            let client_id = "AfN_l2vZFwYniDa6bpCW3NmqrD4wX0VV7vH3VdDUb0Fjxsw2__X9gC0fee2VNKus-mRuvN4oHCjPJyBl"
-            let secret = "ECdrVG4XzWKF2BaMqJ_lLMoHQruvf141-lp8lltUKNfyOEgJMTRQtid3qNHAVRbVOQwvBlJrnvXEHggl"
-            
             
             let userPasswordString = client_id+":"+secret
             let userPasswordData = userPasswordString.data(using: String.Encoding.utf8)
@@ -219,7 +229,10 @@ class PaymentManager {
         //https://api.paypal.com/v1/payments/payment/{payment_id}
         //sandbox
         //https://api.sandbox.paypal.com/v1/payments/payment/
-        if let url = NSURL(string: "https://api.sandbox.paypal.com/v1/payments/payment/"+(self.payment?.idPayment)!) {
+        guard let payPalEnvironment = Cart.sharedIstance.payPalEnvironment else { return }
+        let enviromentUrl = payPalEnvironment.actualEnvironment == PayPalEnvironmentSandbox ? payPalEnvironment.lookUpPaymentUrlSandBox :  payPalEnvironment.lookUpPaymentUrlProduction
+        
+        if let url = NSURL(string: enviromentUrl + (self.payment?.idPayment)!) {
             let request = NSMutableURLRequest(url: url as URL)
             request.httpMethod = "GET" //Or GET if that's what you need
             
@@ -247,7 +260,6 @@ class PaymentManager {
                 }
             }).resume()
         }
-        
     }
     
     private func setPaymentAndOrderCompletedOnFirebase(user: User){
@@ -349,7 +361,7 @@ class PaymentManager {
     private func sendReceiptByEmail(){
         /*
          curl -s --user 'api:key-8c2bae2b713b839f3f766f21c3cd31d4' \
-         https://api.mailgun.net/v3/sandbox.morganazone.it/messages \
+         
          -F from='Excited User <postmaster@sandbox.morganazone.it>' \
          -F to='vittorioscocca@hotmail.com' \
          -F subject='Hello' \
@@ -363,30 +375,42 @@ class PaymentManager {
             guard dictionary != nil else {
                 return
             }
-            let emailUser = dictionary?["email"]
-            let fullName = dictionary?["fullName"]
-            if let url = NSURL(string: "https://api.mailgun.net/v3/sandbox.morganazone.it/messages") {
+            FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "administration/mailService", onCompletion: { (mailError,mailDictionary) in
+                guard mailError == nil else {
+                    print("errore")
+                    return
+                }
+                guard mailDictionary != nil else {
+                    return
+                }
                 
-                let request = NSMutableURLRequest(url: url as URL)
-                request.httpMethod = "POST"
-                let user = "api"
-                let psw = "key-8c2bae2b713b839f3f766f21c3cd31d4"
-                let userPasswordString = user+":"+psw
-                let userPasswordData = userPasswordString.data(using: String.Encoding.utf8)
-                let base64EncodedCredential = userPasswordData!.base64EncodedString()
-                let authString = "Basic \(base64EncodedCredential)"
-                request.addValue(authString, forHTTPHeaderField: "Authorization")
-                request.timeoutInterval = 200000.0
-                let bodyStr = "from=Ricevuta dell tuo pagamento a Morgana Music Srls <postmaster@sandbox.morganazone.it>&to=Receiver name <\(emailUser!)>&subject=Test&text=Caro \(fullName!) grazie per aver acquistato i nostri prodotti...segue ricevuta"
-                
-                
-                request.httpBody = bodyStr.data(using: String.Encoding.utf8)
-                let session = URLSession.shared
-                session.dataTask(with: request as URLRequest, completionHandler: { (returnData, response, error) -> Void in
-                    let strData = NSString(data: returnData!, encoding: String.Encoding.utf8.rawValue)
-                    print("Mailgun response \(strData!)")
-                }).resume()
-            }
+                let emailUser = dictionary?["email"]
+                let fullName = dictionary?["fullName"]
+                if let url = NSURL(string: (mailDictionary!["url"] as? String)!) {
+                    
+                    let request = NSMutableURLRequest(url: url as URL)
+                    request.httpMethod = "POST"
+                    let user = (mailDictionary!["user"] as? String)!
+                    let psw = (mailDictionary!["password"] as? String)!
+                    let userPasswordString = user+":"+psw
+                    let userPasswordData = userPasswordString.data(using: String.Encoding.utf8)
+                    let base64EncodedCredential = userPasswordData!.base64EncodedString()
+                    let authString = "Basic \(base64EncodedCredential)"
+                    request.addValue(authString, forHTTPHeaderField: "Authorization")
+                    request.timeoutInterval = 200000.0
+                    let bodyStr = "from=Ricevuta dell tuo pagamento a Morgana Music Srls <postmaster@sandbox.morganazone.it>&to=Receiver name <\(emailUser!)>&subject=Test&text=Caro \(fullName!) grazie per aver acquistato i nostri prodotti...segue ricevuta"
+                    
+                    
+                    request.httpBody = bodyStr.data(using: String.Encoding.utf8)
+                    let session = URLSession.shared
+                    session.dataTask(with: request as URLRequest, completionHandler: { (returnData, response, error) -> Void in
+                        let strData = NSString(data: returnData!, encoding: String.Encoding.utf8.rawValue)
+                        print("Mailgun response \(strData!)")
+                    }).resume()
+                }
+            })
+            
+            
         })
     }
     

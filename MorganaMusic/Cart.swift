@@ -13,6 +13,7 @@ class Cart {
     static let sharedIstance = Cart()
     
     var paymentMethod: Payment?
+    var payPalEnvironment: PayPalEnvironment?
     var carrello: [Order]
     
     var state: String?
@@ -55,6 +56,7 @@ class Cart {
     func initializeCart() {
         self.carrello = []
         self.paymentMethod = nil
+        self.payPalEnvironment = nil
         self.state = offerState.initialized.rawValue
         self.company = nil
     }
