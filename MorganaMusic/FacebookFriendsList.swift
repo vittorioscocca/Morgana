@@ -99,6 +99,7 @@ class FacebookFriendsListManager: NSObject {
     }
     
     @objc private func fbTokenDidChange(){
+        print("[FBFriendsListManager]: fbTokenDidChange")
         user = CoreDataController.sharedIstance.findUserForIdApp(Auth.auth().currentUser?.uid)
         if let fbAccessToken = user?.fbAccesToken {
             setInternalState(.startUp(fbAccessToken))
@@ -246,7 +247,7 @@ class FacebookFriendsListManager: NSObject {
             print("[FBFriendsListManager]: Request of contact list ignored in state: \(internalState)")
             
         case let .startUp(fbTokenString), let .error(fbTokenString, _, _), .success(let fbTokenString, _, _, true):
-            connectToFacebook(freshness: freshness, completion: { (outcome) in
+            connectToFacebook(freshness: freshness, fbAccessToken: fbTokenString, completion: { (outcome) in
                 switch self.internalState {
                 case let .stop(newFbTokenString, _), let .startUp(newFbTokenString), let .error(newFbTokenString, _, _), let .success(newFbTokenString, _, _, _):
                      if newFbTokenString != fbTokenString {
@@ -313,7 +314,7 @@ class FacebookFriendsListManager: NSObject {
     
     private var pendingRequests = 0
     
-    private func connectToFacebook(freshness: ContactListFreshness, completion: @escaping (RequestOutcome) -> ()) {
+    private func connectToFacebook(freshness: ContactListFreshness, fbAccessToken: String, completion: @escaping (RequestOutcome) -> ()) {
         guard let userIdApp = user?.idApp else { return }
         if  case .localCache = freshness{
             CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: userIdApp, completion: { (list) in
@@ -328,7 +329,7 @@ class FacebookFriendsListManager: NSObject {
             CoreDataController.sharedIstance.deleteFriends(userIdApp)
             let parameters_friend = ["fields" : "name, first_name, last_name, id, email, gender, picture.type(large)"]
             
-            FBSDKGraphRequest(graphPath: "me/friends", parameters: parameters_friend, tokenString: fbTokenString, version: nil, httpMethod: "GET").start(completionHandler: {(connection,result,error) -> Void in
+            FBSDKGraphRequest(graphPath: "me/friends", parameters: parameters_friend, tokenString: fbAccessToken, version: nil, httpMethod: "GET").start(completionHandler: {(connection,result,error) -> Void in
                 self.pendingRequests -= 1
                 print("[FBFriendsListManager]: Pendig request with freshness level \(freshness), served!. Actual pending requests: \(self.pendingRequests)")
                 

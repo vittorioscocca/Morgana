@@ -82,6 +82,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
             view.addGestureRecognizer(self.revealViewController().panGestureRecognizer())
         }
 
+        user = CoreDataController.sharedIstance.findUserForIdApp(Auth.auth().currentUser?.uid)
         if user == nil {
             self.logout()
         } else {

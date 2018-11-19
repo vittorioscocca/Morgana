@@ -101,6 +101,7 @@ class OrdersListManager: NSObject {
             case let .stop(_, online):
                 if !newFriendsList.isEmpty && online {
                     print("[OrdersListManager]: Facebbok Friends List is complete and network is online, starting up")
+                    self.user = CoreDataController.sharedIstance.findUserForIdApp(Auth.auth().currentUser?.uid)
                     self.setInternalState(.startUp(newFriendsList))
                 }
                 else {
@@ -115,6 +116,7 @@ class OrdersListManager: NSObject {
                 }
                 else {
                     print("[OrdersListManager]: Facebbok Friends List is complete, starting up")
+                    self.user = CoreDataController.sharedIstance.findUserForIdApp(Auth.auth().currentUser?.uid)
                     self.setInternalState(.startUp(newFriendsList))
                 }
                 
@@ -136,6 +138,7 @@ class OrdersListManager: NSObject {
                 else if newFriendsList != friendsList {
                     if online {
                         print("[OrdersListManager]: New Friends List detected, starting up with new credentials")
+                        self.user = CoreDataController.sharedIstance.findUserForIdApp(Auth.auth().currentUser?.uid)
                         self.setInternalState(.startUp(newFriendsList))
                     }
                     else {
@@ -298,7 +301,6 @@ class OrdersListManager: NSObject {
                 return
             }
             connectToFirebase(freshness: freshness, currentFriendsList: friendsList, completion: { (outcome) in
-               
                 switch self.internalState {
                 case let .stop(newFriendsList, _), let .startUp(newFriendsList), let .error(newFriendsList, _, _), let .success(newFriendsList, _, _, _, _):
                     if newFriendsList != friendsList {
@@ -379,27 +381,23 @@ class OrdersListManager: NSObject {
                 //completion(.persistentError(OrdersListManager.ErrorCondition.generalError("errore")))
                 return
             }
+            pendingRequests += 1
+            print("[OrdersListManager]: New request with freshness level \(freshness). Actual pending requests: \(self.pendingRequests)")
+            
             FirebaseData.sharedIstance.readOrdersSentOnFireBase(user: currentUser, friendsList: currentFriendsList, onCompletion: { (ordersSent)  in
                 FirebaseData.sharedIstance.readOrderReceivedOnFireBase(user: currentUser, onCompletion: { (ordersReceived) in
                     if self.pendingRequests > 0 {
                         self.pendingRequests -= 1
                         print("[OrdersListManager]: Pendig request with freshness level \(freshness), served!. Actual pending requests: \(self.pendingRequests)")
-                        
-                        self.dispatchQueue.async {
-                            print("[OrdersListManager]: Server Contact List state did change")
-                            self.notificationCenter.post(name: .OrdersListStateDidChange, object: self)
-                        }
+                    }
+                    
+                    self.dispatchQueue.async {
+                        print("[OrdersListManager]: Order List state did change")
+                        self.notificationCenter.post(name: .OrdersListStateDidChange, object: self)
                     }
                     completion(.success(ordersSent, ordersReceived))
                 })
             })
-            pendingRequests += 1
-            print("[OrdersListManager]: New request with freshness level \(freshness). Actual pending requests: \(self.pendingRequests)")
-            
-            dispatchQueue.async {
-                print("[OrdersListManager]: Server Contact List state did change")
-                self.notificationCenter.post(name: .OrdersListStateDidChange, object: self)
-            }
         }
     }
     
