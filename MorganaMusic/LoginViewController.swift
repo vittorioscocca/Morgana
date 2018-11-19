@@ -37,16 +37,27 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
             customFBButtom.delegate = self
             customFBButtom.readPermissions = ["public_profile", "email", "user_friends"]
             FBSDKProfile.enableUpdates(onAccessTokenChange: true)
+            
             NotificationCenter.default.addObserver(self,
                                                    selector:  #selector(fBAccessTokenDidChange(notification:)),
                                                    name:.FBSDKAccessTokenDidChange,
                                                    object: nil)
+            
+            NotificationCenter.default.addObserver(self,
+                                                   selector:  #selector(messaginRegistrationTokenRefreshed),
+                                                   name:.MessagingRegistrationTokenRefreshed,
+                                                   object: nil)
+            
             return
         }
         
         let userPage = storyboard?.instantiateViewController(withIdentifier: "SWRevealController")
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         appDelegate.window!.rootViewController = userPage
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     override func didReceiveMemoryWarning() {
@@ -64,6 +75,15 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
             CoreDataController.sharedIstance.updateFBAccessToken(idApp: currentUserId, fbAccessToken: newToken.tokenString)
             NotificationCenter.default.post(name: .FbTokenDidChangeNotification, object: self)
         }
+    }
+    
+    @objc func messaginRegistrationTokenRefreshed() {
+        guard let currentUserId = Auth.auth().currentUser?.uid else {
+        print("[AppDelegate]: firebase fcm modificato, impossibile aggiornare valore su firebase, user id inesistente")
+        return
+        }
+    
+        FireBaseAPI.updateNode(node: "users/" + currentUserId, value: ["fireBaseIstanceIDToken" : Messaging.messaging().fcmToken ?? ""])
     }
     
     func fetchProfile(){
@@ -105,16 +125,6 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
     private func addUserInCloud(user: User, onCompletion: @escaping ()->()){
         guard let userFireBase = Auth.auth().currentUser else { return }
         let ref = Database.database().reference()
-        guard let firstName = user.firstName,
-            let lastName = user.lastName,
-            let fullName = user.fullName,
-            let idFB = user.idFB,
-            let email = user.email,
-            let gender = user.gender,
-            let pictureUrl = user.pictureUrl,
-            let fcmToken = Messaging.messaging().fcmToken
-            else { return }
-        
         
         ref.child("users/" + userFireBase.uid).observeSingleEvent(of: .value, with: { (snap) in
             //if user exist on firbase exit, else save user data on firebase(only one time)
@@ -122,14 +132,14 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                 print("[LoginViewController]: exist: user already exist on Firebase")
                 //Firebase Token can changed, so if there is such problem with a login/logout we have the new Token
                 let dataUser = [
-                    "name" : firstName,
-                    "surname" : lastName,
-                    "fullName" : fullName,
-                    "idFB" : idFB,
-                    "email" : email,
-                    "gender" : gender,
-                    "pictureUrl" : pictureUrl,
-                    "fireBaseIstanceIDToken" : fcmToken, //InstanceID.instanceID().token()!,
+                    "name" : user.firstName ?? "",
+                    "surname" : user.lastName ?? "",
+                    "fullName" : user.fullName ?? "",
+                    "idFB" : user.idFB ?? "",
+                    "email" : user.email ?? "",
+                    "gender" : user.gender ?? "",
+                    "pictureUrl" : user.pictureUrl ?? "",
+                    "fireBaseIstanceIDToken" : Messaging.messaging().fcmToken ?? ""
                     ] as [String : Any]
                 ref.child("users/" + userFireBase.uid).updateChildValues(dataUser)
                 onCompletion()
@@ -137,23 +147,23 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
             }
             //create user data on Firebase
             let dataUser = [
-                "name" : firstName,
-                "surname" : lastName,
-                "fullName" : fullName,
-                "idFB" : idFB,
-                "email" : email,
-                "gender" : gender,
-                "pictureUrl" : pictureUrl,
+                "name" : user.firstName ?? "",
+                "surname" : user.lastName ?? "",
+                "fullName" : user.fullName ?? "",
+                "idFB" : user.idFB ?? "",
+                "email" : user.email ?? "",
+                "gender" : user.gender ?? "",
+                "pictureUrl" : user.pictureUrl ?? "",
                 "numberOfPendingPurchasedProducts": 0,
                 "numberOfPendingReceivedProducts" : 0,
                 "accountState" : "Active",
                 "companyCode":"0",
-                "fireBaseIstanceIDToken" : Messaging.messaging().fcmToken!, //InstanceID.instanceID().token()!,
+                "fireBaseIstanceIDToken" : Messaging.messaging().fcmToken ?? "",
                 "credits": 5,
                 "birthday": "",
                 "cityOfRecidence":""
                 ] as [String : Any]
-            ref.child("users").child(userFireBase.uid).setValue(dataUser)
+            ref.child("users/").child(userFireBase.uid).setValue(dataUser)
             onCompletion()
             
         })
