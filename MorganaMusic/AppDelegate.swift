@@ -108,7 +108,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate  {
             UNUserNotificationCenter.current().delegate = self
             
             // For iOS 10 data message (sent via FCM)
-            Messaging.messaging().delegate = self
+            //Messaging.messaging().delegate = self
         }
         
         application.registerForRemoteNotifications()
@@ -586,22 +586,16 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
     }
 }
 
-extension AppDelegate : MessagingDelegate {
-    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String) {
-        guard let currentUserId = Auth.auth().currentUser?.uid else {
-            print("[AppDelegate]: firebase fcm modificato, impossibile aggiornare valore su firebase, user id inesistente")
-            return
-        }
-        let ref = Database.database().reference()
-        ref.child("users").child(currentUserId).setValue(["fireBaseIstanceIDToken":fcmToken])
-    }
-    
-    
-    // Receive data message on iOS 10 devices.
-    func application(received remoteMessage: MessagingRemoteMessage) {
-    
-    }
-}
+//extension AppDelegate : MessagingDelegate {
+//    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String) {
+//        
+//    }
+//
+//    // Receive data message on iOS 10 devices.
+//    func application(received remoteMessage: MessagingRemoteMessage) {
+//
+//    }
+//}
 
 
 

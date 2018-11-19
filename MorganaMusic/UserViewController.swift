@@ -137,20 +137,15 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
         let firebaseObserverKilled = UserDefaults.standard
         if !firebaseObserverKilled.bool(forKey: "firebaseObserverKilled") {
             firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
-            let fireBaseToken = UserDefaults.standard
-            let uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
-            let user = CoreDataController.sharedIstance.findUserForIdApp(uid)
-            if user != nil {
-                guard let userIdApp = user?.idApp else { return }
-                FireBaseAPI.removeObserver(node: "users/" + userIdApp)
-                FireBaseAPI.removeObserver(node: "ordersSent/" + userIdApp)
-                FireBaseAPI.removeObserver(node: "ordersReceived/" + userIdApp)
-                firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
-                print("[USERVIEWCONTROLLER]: Firebase Observer Killed")
-            }
-            
-        } else {print("[USERVIEWCONTROLLER]: no observer killed")}
-        
+            guard let userIdApp = Auth.auth().currentUser?.uid else { return }
+            FireBaseAPI.removeObserver(node: "users/" + userIdApp)
+            FireBaseAPI.removeObserver(node: "ordersSent/" + userIdApp)
+            FireBaseAPI.removeObserver(node: "ordersReceived/" + userIdApp)
+            firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
+            print("[USERVIEWCONTROLLER]: Firebase Observer Killed")
+        } else {
+            print("[USERVIEWCONTROLLER]: no observer killed")
+        }
     }
     
     private func logout(){
@@ -211,7 +206,6 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
             return
         }
         //self.navigationController?.popViewController(animated: true)
-        
     }
     
     @IBAction func inviteButtonTapped(_ sender: UIButton) {

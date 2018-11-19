@@ -170,10 +170,11 @@ class CoreDataController {
     func addFriendInUser(idAppUser: String, idFB: String, mail: String?, fullName: String?, firstName: String?, lastName: String?, gender: String?, pictureUrl: String?, cityOfRecidence: String?) {
         let entityFriend = NSEntityDescription.entity(forEntityName: "Friend", in: self.context)
         let newFriend = Friend(entity: entityFriend!, insertInto: self.context)
-        let currentUser = findUserForEmail(mail!)
+        guard let userMail = mail else { return }
+        guard let currentUser = findUserForEmail(userMail) else { return }
         
         
-        newFriend.user = currentUser!
+        newFriend.user = currentUser
         
         newFriend.idFB = idFB
         newFriend.fullName = fullName
@@ -182,7 +183,7 @@ class CoreDataController {
         newFriend.gender = gender
         newFriend.pictureUrl = pictureUrl
         newFriend.cityOfRecidence = cityOfRecidence
-        currentUser!.addToFriends(newFriend)
+        currentUser.addToFriends(newFriend)
 
         self.salvaContext()
     }

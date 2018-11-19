@@ -316,7 +316,7 @@ class FacebookFriendsListManager: NSObject {
     private var pendingRequests = 0
     
     private func connectToFacebook(freshness: ContactListFreshness, fbAccessToken: String, completion: @escaping (RequestOutcome) -> ()) {
-        guard let userIdApp = user?.idApp else { return }
+        guard let userIdApp = Auth.auth().currentUser?.uid else { return }
         if  case .localCache = freshness{
             CoreDataController.sharedIstance.loadAllFriendsOfUser(idAppUser: userIdApp, completion: { (list) in
                 if let fbFriendsList = list {
