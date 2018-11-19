@@ -587,8 +587,13 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
 }
 
 extension AppDelegate : MessagingDelegate {
-    func messaging(_ messaging: Messaging, didRefreshRegistrationToken fcmToken: String) {
-        print(fcmToken)
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String) {
+        guard let currentUserId = Auth.auth().currentUser?.uid else {
+            print("[AppDelegate]: firebase fcm modificato, impossibile aggiornare valore su firebase, user id inesistente")
+            return
+        }
+        let ref = Database.database().reference()
+        ref.child("users").child(currentUserId).setValue(["fireBaseIstanceIDToken":fcmToken])
     }
     
     
