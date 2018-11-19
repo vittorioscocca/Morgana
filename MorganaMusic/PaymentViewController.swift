@@ -35,9 +35,6 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     //App idUtente su FireBase
     var user: User?
-    var uid: String?
-    
-    var fireBaseToken = UserDefaults.standard
     var productOfferedBadge = UserDefaults.standard
     
     var controller: UIAlertController?
@@ -50,8 +47,7 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
-        self.user = CoreDataController.sharedIstance.findUserForIdApp(uid)
+        self.user = CoreDataController.sharedIstance.findUserForIdApp(Auth.auth().currentUser?.uid)
         
         // Set up payPalConfig
         payPalConfig.acceptCreditCards = true

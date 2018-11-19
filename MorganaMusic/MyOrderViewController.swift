@@ -14,7 +14,6 @@ import FirebaseInstanceID
 import UserNotifications
 
 class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchResultsUpdating {
-    
     @IBOutlet weak var myTable: UITableView!
     @IBOutlet weak var drinksList_segmentControl: UISegmentedControl!
     @IBOutlet var successView: UIView!
@@ -23,11 +22,9 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     private var user: User?
     private var friendsList: [Friend]?
-    private var uid: String?
     var searchController = UISearchController(searchResultsController: nil)
     
     //device memory
-    private var fireBaseToken = UserDefaults.standard
     private var productSendBadge = UserDefaults.standard
     private var lastOrderSentReadedTimestamp = UserDefaults.standard
     private var lastOrderReceivedReadedTimestamp = UserDefaults.standard
@@ -83,9 +80,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             navigationItem.searchController?.searchBar.tintColor = .white
             
             UITextField.appearance(whenContainedInInstancesOf: [UISearchBar.self]).defaultTextAttributes = [NSAttributedStringKey.foregroundColor.rawValue: UIColor.white]
-            
             UITextField.appearance(whenContainedInInstancesOf: [UISearchBar.self]).attributedPlaceholder = NSAttributedString(string: "Cerca ordine", attributes: nil)
-            
         } else {
             searchController = ({
                 // creo un oggetto di tipo UISearchController
@@ -101,16 +96,14 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 return controller
             })()
         }
-        
         if revealViewController() != nil {
             menuButton.target = revealViewController()
             menuButton.action = #selector(SWRevealViewController.revealToggle(_:))
             view.addGestureRecognizer(self.revealViewController().panGestureRecognizer())
         }
-        
+
         setSegmentcontrol()
-        uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
-        user = CoreDataController.sharedIstance.findUserForIdApp(self.uid)
+        user = CoreDataController.sharedIstance.findUserForIdApp(Auth.auth().currentUser?.uid)
         updateSegmentControl()
         
         NotificationCenter.default.addObserver(self,

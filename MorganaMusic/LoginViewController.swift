@@ -24,28 +24,24 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
     @IBOutlet weak var customFBButtom: FBSDKLoginButton!
     
     //FB and Firebase access Token
-    var fbToken = UserDefaults.standard
-    var fireBaseToken = UserDefaults.standard
+    var fbToken: String?
+    var firebaseUserId: String?
     
     var controller :UIAlertController?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let uidFiB = fireBaseToken.object(forKey: "FireBaseToken") as? String
         
-        if  uidFiB != nil {
-            // User is signed in.
-            //after FB access control pass to HomeViewController
-            //let userPage = storyboard?.instantiateViewController(withIdentifier: "HomeViewController")
-            let userPage = storyboard?.instantiateViewController(withIdentifier: "SWRevealController")
-            let appDelegate = UIApplication.shared.delegate as! AppDelegate
-            appDelegate.window!.rootViewController = userPage
-            
-        }else {
+        guard let _ = Auth.auth().currentUser else {
             //Facebook Login
             customFBButtom.delegate = self
             customFBButtom.readPermissions = ["public_profile", "email", "user_friends"]
+            return
         }
+        
+        let userPage = storyboard?.instantiateViewController(withIdentifier: "SWRevealController")
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        appDelegate.window!.rootViewController = userPage
     }
     
     override func didReceiveMemoryWarning() {
@@ -73,8 +69,13 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                 let data = picture?["data"] as? NSDictionary
                 let url = data?["url"] as? String
                 
-                guard let user = self.fireBaseToken.object(forKey: "FireBaseToken") as? String else { return }
-                let newUser = CoreDataController.sharedIstance.addNewUser(user, user_id_fb, email, fullName, user_name, user_lastName, user_gender, url)
+                guard let userId = self.firebaseUserId else {
+                    return
+                }
+                
+                guard let newUser = CoreDataController.sharedIstance.addNewUser(idApp: userId, idFB: user_id_fb, email: email, fullName: fullName, firstName: user_name, lastName: user_lastName, gender: user_gender, pictureUrl: url, fbAccessToken: self.fbToken!) else {
+                    return
+                }
                 NotificationCenter.default.post(name: .FbTokenDidChangeNotification, object: self)
                 self.addUserInCloud(user: newUser, onCompletion: {
                     self.createUserPointsStats()
@@ -148,7 +149,7 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
         
         ref.child("usersPointsStats/" + userFireBase.uid).observeSingleEvent(of: .value, with: { (snap) in
             guard !snap.exists() else {
-                print("exist: userPoints already exist on Firebase")
+                print("[LoginViewController]: exist: userPoints already exist on Firebase")
                 return
             }
             //create user data on Firebase
@@ -208,22 +209,22 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
                     if error != nil {
                         print(error!)
                     }else {
-                        print("[LoginViewController]: User logged on FireBase")
+                        print("[LoginViewController]: User logged on Facebook")
                         
                         while Auth.auth().currentUser == nil {
                             print("[LoginViewController]...waiting Firebase user id")
                         }
-                        print("[LoginViewController]: Success! User id is ready")
+                        print("[LoginViewController]: Success! Firebase User id is ready")
                         guard let fireBaseUser = Auth.auth().currentUser else { return }
                         
-                        self.fireBaseToken.set(fireBaseUser.uid, forKey: "FireBaseToken")
+                        self.firebaseUserId = fireBaseUser.uid
                         NotificationCenter.default.post(name: .FirebaseTokenDidChangeNotification, object: self)
                         
                         if (result.token) != nil {
                             print("[LoginViewController]: User logged on Facebook")
                             
                             //save token on UserDefaults
-                            self.fbToken.set(FBSDKAccessToken.current()?.tokenString, forKey: "FBToken")
+                            self.fbToken = FBSDKAccessToken.current()?.tokenString
                             self.fetchProfile()
                             DispatchQueue.main.async(execute: { () -> Void in
                                 //slider first access

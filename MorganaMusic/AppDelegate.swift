@@ -76,23 +76,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate  {
         
     }
     
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        //var token for Firebase and Facebook
-        let fbToken = UserDefaults.standard
-        let fireBaseToken = UserDefaults.standard
-        let uidFiB = fireBaseToken.object(forKey: "FireBaseToken") as? String
-        let uidFB = fbToken.object(forKey: "FBToken") as? String
-        
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {      
         //Firebase configuration
         FirebaseApp.configure()
+        
         //Singleton initialization
         _ = FirebaseData.sharedIstance
         _ = NetworkStatus.default
-        _ = FacebookFriendsListManager.instance
-        _ = LoadRemoteProducts.instance
-        _ = OrdersListManager.instance
-        _ = PointsManager.sharedInstance
-
+      
         //Firebase push notification
         if #available(iOS 10.0, *) {
             // For iOS 10 display notification (sent via APNS)
@@ -122,15 +113,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate  {
         
         application.registerForRemoteNotifications()
         
-        guard (( uidFB == nil) && (uidFiB == nil) && lastViewControllerOnQuick.object(forKey: "lastViewControllerOnQuick") == nil) else{
-            print("[DEBUG] Salto il login iniziale")
-            MorganaMusicActivate()
-            updateFacebookAndFirebaseInfo()
-            return true
+        let firebaseUser = Auth.auth().currentUser
+        let user = CoreDataController.sharedIstance.findUserForIdApp(firebaseUser?.uid)
+        
+        if user != nil {
+            if user!.fbAccesToken != nil && user!.idApp != nil && lastViewControllerOnQuick.object(forKey: "lastViewControllerOnQuick") != nil {
+                print("[APPDELEGATE]: Salto il login iniziale")
+                MorganaMusicActivate()
+                updateFacebookAndFirebaseInfo()
+            }
         }
         
         //FBSDKLoginButton.classForCoder()
         FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
+        
+        _ = FacebookFriendsListManager.instance
+        _ = LoadRemoteProducts.instance
+        _ = OrdersListManager.instance
+        _ = PointsManager.sharedInstance
         
         initializeDynamicShortcuts()
         
@@ -194,8 +194,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate  {
     func updateFacebookAndFirebaseInfo(){
         let parameters = ["fields" : "email, name, first_name, last_name, age_range,id, gender, picture.type(large)"]
         
-        let fbToken = UserDefaults.standard
-        let fbTokenString = fbToken.object(forKey: "FBToken") as? String
+        guard let fbTokenString = FBSDKAccessToken.current()?.tokenString else {
+            print("[APPDELEGATE]: FB Access Token doesn't exist")
+            return
+        }
         
         FBSDKGraphRequest(graphPath: "me", parameters: parameters, tokenString: fbTokenString, version: nil, httpMethod: "GET").start(completionHandler: {(connection,result, error) -> Void in
             if ((error) != nil){
@@ -214,8 +216,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate  {
                 let url = data?["url"] as? String
                 let fireBaseToken = UserDefaults.standard
                 let user = fireBaseToken.object(forKey: "FireBaseToken") as? String
-                guard let us = user, let idFB = user_id_fb else { return }
-                let newUser = CoreDataController.sharedIstance.addNewUser(us, idFB, email, fullName, user_name, user_lastName, user_gender, url)
+                
+                guard let us = user, let idFB = user_id_fb else {
+                    return
+                }
+                
+                guard let newUser = CoreDataController.sharedIstance.addNewUser(idApp: us, idFB: idFB, email: email, fullName: fullName, firstName: user_name, lastName: user_lastName, gender: user_gender, pictureUrl: url, fbAccessToken: fbTokenString) else {
+                    return
+                }
+                
                 self.updateUserInCloud(user: newUser)
             }
         })

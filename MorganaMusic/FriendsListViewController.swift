@@ -19,8 +19,7 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     
     var segueFrom: String?
     var resultSearchController: UISearchController?
-    let fireBaseToken = UserDefaults.standard
-    var userId: String?
+    
     var friendsList: [Friend]? = []
     var filteredList = [Friend]()
     var start = 0
@@ -29,7 +28,7 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     var currentPage = 0
     var numberOfFriends = 0
     var forwardOrder: Order?
-    var defaults = UserDefaults.standard
+   
     var user: User?
     var controller :UIAlertController?
     
@@ -38,7 +37,7 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
         super.viewDidLoad()
         self.myTable.dataSource = self
         self.myTable.delegate = self
-        self.userId = fireBaseToken.object(forKey: "FireBaseToken")! as? String
+        
     
         resultSearchController = ({
             // creo un oggetto di tipo UISearchController

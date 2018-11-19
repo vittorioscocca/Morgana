@@ -33,8 +33,6 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
     typealias selectionType = (product:String?, price: Double?)
     var selection: selectionType = ("",0.0)
     var result = [String:String]()
-    let defaults = UserDefaults.standard
-    
     var productsList = [String]()
     var offersDctionary = [String : Double]()
     
