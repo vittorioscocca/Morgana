@@ -44,11 +44,8 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
     let effectView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
     
     var user: User?
-    var uid: String?
     
     //UserDefault variables
-    var fireBaseToken = UserDefaults.standard
-    let fbToken = UserDefaults.standard
     var productOfferedBadge = UserDefaults.standard
     var firebaseObserverKilled = UserDefaults.standard
     
@@ -84,9 +81,9 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
             menuButton.action = #selector(SWRevealViewController.revealToggle(_:))
             view.addGestureRecognizer(self.revealViewController().panGestureRecognizer())
         }
-        self.isConnectedtoNetwork = true
-        self.uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
-        self.user = CoreDataController.sharedIstance.findUserForIdApp(uid)
+        isConnectedtoNetwork = true
+        
+        user = CoreDataController.sharedIstance.findUserForIdApp(Auth.auth().currentUser?.uid)
         if user == nil {
             self.logout()
         } else {self.viewSettings()}
@@ -138,7 +135,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
     }
     @objc func updateTable(){
-        print("table reloaded")
+        print("[ORDERVIEWCONTROLLER]: table reloaded")
         myTable.reloadData()
     }
     
@@ -150,15 +147,16 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         let firebaseObserverKilled = UserDefaults.standard
         if !firebaseObserverKilled.bool(forKey: "firebaseObserverKilled") {
             firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
-            let fireBaseToken = UserDefaults.standard
-            let uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
-            let user = CoreDataController.sharedIstance.findUserForIdApp(uid)
-            guard let userIdApp = user?.idApp else { return }
+            
+            guard let userIdApp = CoreDataController.sharedIstance.findUserForIdApp(Auth.auth().currentUser?.uid)?.idApp else {
+                return
+            }
+            
             FireBaseAPI.removeObserver(node: "users/" + userIdApp)
             FireBaseAPI.removeObserver(node: "ordersSent/" + userIdApp)
             FireBaseAPI.removeObserver(node: "ordersReceived/" + userIdApp)
             firebaseObserverKilled.set(true, forKey: "firebaseObserverKilled")
-            print("Firebase Observer Killed")
+            print("[ORDERVIEWCONTROLLER]: Firebase Observer Killed")
             
         } else {print("no observer killed")}
     }
@@ -170,19 +168,17 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         //effettuo logout FB
         let loginManager = FBSDKLoginManager()
         loginManager.logOut()
-        //self.fbToken.set(nil, forKey: "FBToken")
-        self.fbToken.set(nil, forKey: "FBToken")
+       
         
         //effettuologout da firebase
         let firebaseAuth = Auth.auth()
         do {
             self.killFirebaseObserver()
             try firebaseAuth.signOut()
-            self.fireBaseToken.removeObject(forKey: "FireBaseToken")
             
-            print("utente disconnesso di firebase")
+            print("[ORDERVIEWCONTROLLER]: utente disconnesso di firebase")
         } catch let signOutError as NSError {
-            print ("Error signing out: %@", signOutError)
+            print ("[ORDERVIEWCONTROLLER]: Error signing out: %@", signOutError)
         }
         //passo il controllo alla view di login, LoginViewController
         let loginPage = storyboard?.instantiateViewController(withIdentifier: "LoginViewController")
@@ -256,7 +252,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
             
             CacheImage.getImage(url: url, onCompletion: { (image) in
                 guard image != nil else {
-                    print("immagine utente non reperibile")
+                    print("[ORDERVIEWCONTROLLER]: immagine utente non reperibile")
                     return
                 }
                 DispatchQueue.main.async(execute: {
@@ -313,7 +309,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         let thisCell = tableView.cellForRow(at: indexPath)
         if (thisCell is FirendsListTableViewCell){
             guard self.user != nil else {
-                print("utente non presente")
+                print("[ORDERVIEWCONTROLLER]: utente non presente")
                 return
             }
             //self.getFriendsList()
@@ -340,10 +336,10 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         
         switch editingStyle {
         case .delete:
-            print("premuto il tasto Delete")
+            print("[ORDERVIEWCONTROLLER]: premuto il tasto Delete")
             
             let elemento = Order.sharedIstance.products?[indexPath.row]
-            print("elimo l'elemento \((elemento?.productName)!)")
+            print("[ORDERVIEWCONTROLLER]: elimo l'elemento \((elemento?.productName)!)")
             
             Order.sharedIstance.products?.remove(at: indexPath.row)
             
@@ -363,7 +359,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
                                        preferredStyle: .alert)
         let action = UIAlertAction(title: "Chiudi", style: UIAlertActionStyle.default, handler:
         {(paramAction:UIAlertAction!) in
-            print("Il messaggio di chiusura è stato premuto")
+            print("[ORDERVIEWCONTROLLER]: Il messaggio di chiusura è stato premuto")
         })
         controller!.addAction(action)
         self.present(controller!, animated: true, completion: nil)
@@ -381,7 +377,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         })
         let actionAnnulla = UIAlertAction(title: "Annulla", style: UIAlertActionStyle.default, handler:
         {(paramAction:UIAlertAction!) in
-            print("Il messaggio di chiusura è stato premuto")
+            print("[ORDERVIEWCONTROLLER]: Il messaggio di chiusura è stato premuto")
         })
         
         controller!.addAction(actionAnnulla)
@@ -444,7 +440,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
             (segue.destination as! FriendsListViewController).user = self.user
             break
         case "segueToOfferta":
-            (segue.destination as! FriendActionViewController).userId = self.uid
+            (segue.destination as! FriendActionViewController).userId = self.user?.idApp
             
             if (Order.sharedIstance.userDestination?.idFB != nil) {
                 let userTemp = Order.sharedIstance.userDestination
@@ -480,10 +476,10 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
             break
         case "unwindToOfferfromListFriendWithoutValue":
-            print("senza valori senza reload table")
+            print("[ORDERVIEWCONTROLLER]: senza valori senza reload table")
             break
         case "unwindToOfferfromListFriend":
-            print("con nuovi valori valori e reload table")
+            print("[ORDERVIEWCONTROLLER]: con nuovi valori valori e reload table")
             self.delete.isEnabled = true
             self.myTable.reloadData()
             break

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Firebase
 
 public extension NSNotification.Name {
     static let ReadingRemoteUserPointDidFinish = NSNotification.Name("ReadingRemoteUserPointDidFinish")
@@ -66,16 +67,11 @@ class PointsManager {
         }
     }
     
-   
-    private var fireBaseToken = UserDefaults.standard
-    
-    
     //Metodi
     private init(){
         self.days = [Int]()
-        let uid = fireBaseToken.object(forKey: "FireBaseToken") as? String
-        
-        guard let idApp = CoreDataController.sharedIstance.findUserForIdApp(uid)?.idApp else  { return }
+        let user = CoreDataController.sharedIstance.findUserForIdApp(Auth.auth().currentUser?.uid)
+        guard let idApp = user?.idApp else  { return }
         
         readUserPointsStatsOnFirebase(userId: idApp) { (error) in
             if error != nil {
@@ -83,7 +79,6 @@ class PointsManager {
             }
             NotificationCenter.default.post(name: .ReadingRemoteUserPointDidFinish, object: self)
         }
-
     }
     
     func readUserPointsStatsOnFirebase (userId: String,onCompletion: @escaping (String?)->()) {
@@ -259,7 +254,6 @@ class PointsManager {
             return false
         }
     }
-    
     
     func releaseCredits(){
         

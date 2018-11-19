@@ -8,6 +8,7 @@
 
 import Foundation
 import FBSDKLoginKit
+import Firebase
 import CoreData
 
 public extension NSNotification.Name {
@@ -43,7 +44,8 @@ class FacebookFriendsListManager: NSObject {
     private let uiApplication: UIApplication
     private static let requestRetryDelay: DispatchTimeInterval = DispatchTimeInterval.seconds(10)
     private var fbTokenString: String?
-    private let fireBaseToken = UserDefaults.standard
+    
+    
     private var user: User?
     private var context: NSManagedObjectContext
 
@@ -54,11 +56,12 @@ class FacebookFriendsListManager: NSObject {
         self.uiApplication = uiApplication
         internalState = FacebookFriendsListManager.setInitialState(networkStatus: networkStatus)
         
-        self.user = CoreDataController.sharedIstance.findUserForIdApp(fireBaseToken.object(forKey: "FireBaseToken") as? String)
+        self.user = CoreDataController.sharedIstance.findUserForIdApp(Auth.auth().currentUser?.uid)
+        
         let application = uiApplication.delegate as! AppDelegate
         self.context = application.persistentContainer.viewContext
         
-        fbTokenString = UserDefaults.standard.object(forKey: "FBToken") as? String
+        fbTokenString = user?.fbAccesToken
         super.init()
         
         self.notificationCenter.addObserver(self,
@@ -86,19 +89,19 @@ class FacebookFriendsListManager: NSObject {
     }
     
     private static func setInitialState(networkStatus: NetworkStatus) -> InternalState {
-        let fbToken = UserDefaults.standard.object(forKey: "FBToken") as? String
-        if let fbCredentials = fbToken, networkStatus.online{
-            return .startUp(fbCredentials)
+        let user = CoreDataController.sharedIstance.findUserForIdApp(Auth.auth().currentUser?.uid)
+        
+        if let fbAccesToken = user?.fbAccesToken, networkStatus.online{
+            return .startUp(fbAccesToken)
         } else {
             return .stop("", online: networkStatus.online)
         }
     }
     
     @objc private func fbTokenDidChange(){
-        fbTokenString = UserDefaults.standard.object(forKey: "FBToken") as? String
-        if let fbCredentials = fbTokenString {
-            user = CoreDataController.sharedIstance.findUserForIdApp(fireBaseToken.object(forKey: "FireBaseToken") as? String)
-            setInternalState(.startUp(fbCredentials))
+        user = CoreDataController.sharedIstance.findUserForIdApp(Auth.auth().currentUser?.uid)
+        if let fbAccessToken = user?.fbAccesToken {
+            setInternalState(.startUp(fbAccessToken))
             requestContactList(freshness: .fresh)
         }
     }
