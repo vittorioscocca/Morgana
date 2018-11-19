@@ -35,7 +35,8 @@ class MorganaMusicTests: XCTestCase {
     
     
     private func createProducts(productName: String, price: Double, quantity: Int)->Product{
-        return Product(productName: productName, price: price, quantity: quantity)
+        return Product(productName: productName, price: price, quantity: quantity, points: nil
+        )
     }
     
     private func createUserDestination(fullName: String, idFB: String, pictureUrl: String, idApp: String, fireBaseIstanceIDToken: String)-> UserDestination{
@@ -47,7 +48,7 @@ class MorganaMusicTests: XCTestCase {
         
     }
     private func addProductToOrder(order: Order, product: Product){
-        order.prodotti?.append(product)
+        order.products?.append(product)
     }
     
     private func createPayment( platform: String, paymentType: String, createTime: String, idPayment: String, statePayment: String, autoId: String, total: String)->Payment{
@@ -125,7 +126,7 @@ class MorganaMusicTests: XCTestCase {
                     XCTAssertEqual(order.userDestination?.idFB, "10212636768259173")
                     XCTAssertEqual(order.userDestination?.fireBaseIstanceIDToken, "eNGzn53t8uY:APA91bHVhMrxmfsqxy-h_HlDqAE4wgXbn6YKK5tdY5gHd2y7EOox9QlCZyhLRhKXAoLl6x72xB1yNR7x8F5_05SoRUd4d9lcmtxf5GV8zNEPwER7XphpCK_BDAXEqSOFezRYGbkalLsS")
                     XCTAssertEqual(order.userDestination?.pictureUrl, "https://goo.gl/v5FFC9")
-                    XCTAssertEqual(order.prodotti![0].productName, "Birra")
+                    XCTAssertEqual(order.products![0].productName, "Birra")
                 }
             })
         })

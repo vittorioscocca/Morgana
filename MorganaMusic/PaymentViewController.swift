@@ -5,8 +5,6 @@
 //  Created by Vittorio Scocca on 17/05/17.
 //  Copyright © 2017 Vittorio Scocca. All rights reserved.
 //
-
-
 import UIKit
 import FirebaseDatabase
 import FirebaseAuth
@@ -15,16 +13,11 @@ import FirebaseMessaging
 import FirebaseInstanceID
 import UserNotifications
 
-
-
 class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, PayPalPaymentDelegate {
     
     @IBOutlet var myTable: UITableView!
     
-    //PayPalEnvironmentSandbox
-    //PayPalEnvironmentProduction
-    //Production run only on hardware device
-    var environment:String = PayPalEnvironmentSandbox {
+    var environment:String = Cart.sharedIstance.payPalEnvironment?.actualEnvironment ?? PayPalEnvironmentSandbox {
         willSet(newEnvironment) {
             if (newEnvironment != environment) {
                 PayPalMobile.preconnect(withEnvironment: newEnvironment)
@@ -74,7 +67,6 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         PayPalMobile.preconnect(withEnvironment: environment)
-        
     }
     
     override func didReceiveMemoryWarning() {
@@ -155,15 +147,10 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
             guard let userApp = self.user, let userIdApp = self.user?.idApp else { return }
             FirebaseData.sharedIstance.saveCartOnFirebase(user: userApp, badgeValue: self.productOfferedBadge.object(forKey: "paymentOfferedBadge") as? Int, onCompletion: {
-                print("ordine salvato su firebase")
-                DispatchQueue.main.async {
-                    // ritorno sul main thread ed aggiorno la view
-                    self.stopActivityIndicator()
-                }
+                print("[PAYMENT]: ordine salvato su firebase")
                 
                 if Cart.sharedIstance.state == "Valid" {
-                    print("Pagamento carrello valido")
-                    
+                    print("[PAYMENT]: Pagamento carrello valido")
                     PointsManager.sharedInstance.readUserPointsStatsOnFirebase(userId: userIdApp, onCompletion: { (error) in
                         guard error == nil else {
                             print(error!)
@@ -175,15 +162,16 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
                                 NotificationsCenter.pointsNotification(title: "Congratulazioni \((userApp.firstName)!)", body: "Hai appena cumulato \(points) Punti!")
                             })
                         })
-                        
-                        print("Punti aggiornati")
+
+                        print("[PAYMENT]: Punti aggiornati")
                         Cart.sharedIstance.initializeCart()
                         DispatchQueue.main.async(execute: {
+                            self.stopActivityIndicator()
                             self.performSegue(withIdentifier: "unwindToOfferFromPayment", sender: nil)
                         })
                     })
                 } else {
-                    print("Pagamento carrello non valido, riprova")
+                    print("[PAYMENT]: Pagamento carrello non valido, riprova")
                     DispatchQueue.main.async(execute: {
                         self.generateAlert(title: "Attenzione", message: "Il pagamento non è stato validato, riprova su 'I miei Drinks' sezione 'Ricevuti'")
                     })
@@ -198,12 +186,10 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        
         return "Metodi di pagamento"
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        
         //return self.paymentMethod.count
         return 3
     }
@@ -242,19 +228,17 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
             
             let payment = PayPalPayment(amount: total, currencyCode: "EUR", shortDescription: "Morgana Music Club", intent: .sale)
             /*
-             payment.items = items
-             payment.paymentDetails = paymentDetails*/
+            payment.items = items
+            payment.paymentDetails = paymentDetails
+            */
             
+                
             if (payment.processable) {
-                let paymentViewController = PayPalPaymentViewController(payment: payment, configuration: payPalConfig, delegate: self)
-                present(paymentViewController!, animated: true, completion: nil)
+                let paymentViewController = PayPalPaymentViewController(payment: payment, configuration: self.payPalConfig, delegate: self)
+                self.present(paymentViewController!, animated: true, completion: nil)
                 
             }
             else {
-                // This particular payment will always be processable. If, for
-                // example, the amount was negative or the shortDescription was
-                // empty, this payment wouldn't be processable, and you'd want
-                // to handle that here.
                 print("Payment not processalbe: \(payment)")
             }
             break

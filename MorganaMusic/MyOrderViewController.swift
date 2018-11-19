@@ -54,7 +54,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     public var forwardOrder :Order?
     private var oldFriendDestination: UserDestination?
     private var pendingPaymentId = String()
-    private let pageTableView = FirebaseData.DIM_PAGE_SCROLL
+//    private let pageTableView = FirebaseData.DIM_PAGE_SCROLL
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -123,12 +123,12 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         ordersReceived = OrdersListManager.instance.readOrdersList().ordersList.ordersReceivedList.filter{ $0.viewState != .deleted ||
             $0.paymentState == .valid && $0.offerState != .refused && $0.offerState != .forward}
         
-        if !fetchingMoreOrdersSent {
-            beginFetchOrdersSent()
-        }
-        if !fetchingMoreOrdersReceived {
-            beginFetchOrdersReceived()
-        }
+//        if !fetchingMoreOrdersSent {
+//            beginFetchOrdersSent()
+//        }
+//        if !fetchingMoreOrdersReceived {
+//            beginFetchOrdersReceived()
+//        }
        
         myTable.addSubview(refreshControl1)
         successView.isHidden = true
@@ -168,7 +168,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     @objc func OrdersListStateDidChange(){
         print("stato attuale Order list", OrdersListManager.instance.state)
-        if case .loading = OrdersListManager.instance.state{
+        if case .loading = OrdersListManager.instance.state {
             myActivityIndicator.startAnimating()
             myTable.isUserInteractionEnabled = false
         } else {
@@ -192,13 +192,13 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             ordersReceived = orderRiceivedList.filter{ $0.viewState != .deleted ||
                 $0.paymentState == .valid && $0.offerState != .refused && $0.offerState != .forward}
             
-            if !fetchingMoreOrdersSent {
-                beginFetchOrdersSent()
-            }
-            
-            if !fetchingMoreOrdersReceived {
-                beginFetchOrdersReceived()
-            }
+//            if !fetchingMoreOrdersSent {
+//                beginFetchOrdersSent()
+//            }
+//
+//            if !fetchingMoreOrdersReceived {
+//                beginFetchOrdersReceived()
+//            }
             
             DispatchQueue.main.async(execute: { () -> Void in
                 self.myTable.reloadData()
@@ -653,76 +653,76 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     //        }
     //    }
     
-    //MARK: - infinitive scroll
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let offsetY = scrollView.contentOffset.y
-        let contentHeight = scrollView.contentSize.height
-        
-        guard offsetY > 0 else { return }
-        
-        if offsetY > contentHeight - scrollView.frame.height {
-            if self.drinksList_segmentControl.selectedSegmentIndex == 0 {
-                if !fetchingMoreOrdersSent {
-                    beginFetchOrdersSent()
-                }
-            } else if self.drinksList_segmentControl.selectedSegmentIndex == 1 {
-                if !fetchingMoreOrdersReceived {
-                    beginFetchOrdersReceived()
-                }
-            }
-        }
-    }
+//    //MARK: - infinitive scroll
+//    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+//        let offsetY = scrollView.contentOffset.y
+//        let contentHeight = scrollView.contentSize.height
+//
+//        guard offsetY > 0 else { return }
+//
+//        if offsetY > contentHeight - scrollView.frame.height {
+//            if self.drinksList_segmentControl.selectedSegmentIndex == 0 {
+//                if !fetchingMoreOrdersSent {
+//                    beginFetchOrdersSent()
+//                }
+//            } else if self.drinksList_segmentControl.selectedSegmentIndex == 1 {
+//                if !fetchingMoreOrdersReceived {
+//                    beginFetchOrdersReceived()
+//                }
+//            }
+//        }
+//    }
+//
+//    private func deleteDuplicate(_ orders: inout [Order]){
+//        for order in orders {
+//            orders = orders.filter({$0.timeStamp != order.timeStamp})
+//            orders.append(order)
+//        }
+//    }
     
-    private func deleteDuplicate(_ orders: inout [Order]){
-        for order in orders {
-            orders = orders.filter({$0.timeStamp != order.timeStamp})
-            orders.append(order)
-        }
-    }
-    
-    private func beginFetchOrdersSent() {
-        guard let user = self.user else { return }
-        fetchingMoreOrdersSent = true
-        
-        FirebaseData.sharedIstance.readOrdersSentOnFireBaseRange(user: user, onCompletion: { (order) in
-            
-            if self.ordersSent.count < self.pageTableView && FirebaseData.sharedIstance.totalNumberOrdersSentReaded < FirebaseData.sharedIstance.totalNumberOrdersSent{
-                self.beginFetchOrdersSent()
-            }
-            DispatchQueue.main.async(execute: {
-                self.fetchingMoreOrdersSent = false
-                guard let orderRange = order else { return }
-               
-                self.ordersSent = self.ordersSent + orderRange.filter{$0.viewState != .deleted &&
-                    $0.userDestination?.idApp != self.user?.idApp &&
-                    $0.paymentState == .valid}
-                self.deleteDuplicate(&self.ordersSent)
-                print("****// order sent dimension from interface: \(self.ordersSent.count)")
-                self.myTable.reloadData()
-            })
-        })
-    }
-    
-    private func beginFetchOrdersReceived() {
-        guard let user = self.user else { return }
-        fetchingMoreOrdersReceived = true
-        
-        FirebaseData.sharedIstance.readOrdersReceivedOnFireBaseRange(user: user, onCompletion: { (order) in
-            if self.ordersReceived.count < self.pageTableView && FirebaseData.sharedIstance.totalNumberOrdesReceivedReaded < FirebaseData.sharedIstance.totalNumberOrdesReceived{
-                self.beginFetchOrdersReceived()
-            }
-            DispatchQueue.main.async(execute: {
-                self.fetchingMoreOrdersReceived = false
-                guard let orderRange = order else {return}
-                        
-                self.ordersReceived = self.ordersReceived + orderRange.filter{ $0.viewState != .deleted &&
-                    $0.paymentState == .valid && $0.offerState != .refused && $0.offerState != .forward}
-                self.deleteDuplicate(&self.ordersReceived)
-                print("order received dimension: \(self.ordersReceived.count)")
-                self.myTable.reloadData()
-            })
-        })
-    }
+//    private func beginFetchOrdersSent() {
+//        guard let user = self.user else { return }
+//        fetchingMoreOrdersSent = true
+//
+//        FirebaseData.sharedIstance.readOrdersSentOnFireBaseRange(user: user, onCompletion: { (order) in
+//
+//            if self.ordersSent.count < self.pageTableView && FirebaseData.sharedIstance.totalNumberOrdersSentReaded < FirebaseData.sharedIstance.totalNumberOrdersSent{
+//                self.beginFetchOrdersSent()
+//            }
+//            DispatchQueue.main.async(execute: {
+//                self.fetchingMoreOrdersSent = false
+//                guard let orderRange = order else { return }
+//
+//                self.ordersSent = self.ordersSent + orderRange.filter{$0.viewState != .deleted &&
+//                    $0.userDestination?.idApp != self.user?.idApp &&
+//                    $0.paymentState == .valid}
+//                self.deleteDuplicate(&self.ordersSent)
+//                print("****// order sent dimension from interface: \(self.ordersSent.count)")
+//                self.myTable.reloadData()
+//            })
+//        })
+//    }
+//
+//    private func beginFetchOrdersReceived() {
+//        guard let user = self.user else { return }
+//        fetchingMoreOrdersReceived = true
+//
+//        FirebaseData.sharedIstance.readOrdersReceivedOnFireBaseRange(user: user, onCompletion: { (order) in
+//            if self.ordersReceived.count < self.pageTableView && FirebaseData.sharedIstance.totalNumberOrdesReceivedReaded < FirebaseData.sharedIstance.totalNumberOrdesReceived{
+//                self.beginFetchOrdersReceived()
+//            }
+//            DispatchQueue.main.async(execute: {
+//                self.fetchingMoreOrdersReceived = false
+//                guard let orderRange = order else {return}
+//
+//                self.ordersReceived = self.ordersReceived + orderRange.filter{ $0.viewState != .deleted &&
+//                    $0.paymentState == .valid && $0.offerState != .refused && $0.offerState != .forward}
+//                self.deleteDuplicate(&self.ordersReceived)
+//                print("order received dimension: \(self.ordersReceived.count)")
+//                self.myTable.reloadData()
+//            })
+//        })
+//    }
     
     private func scheduleRememberExpiryNotification(order: Order){
         let ref = Database.database().reference()
@@ -931,13 +931,18 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         if self.drinksList_segmentControl.selectedSegmentIndex == 1 {
-            precondition(indexPath.row < ordersReceived.count)
-            switch ordersReceived[indexPath.row].offerState {
-            case .accepted:
+            
+            if (indexPath.row < ordersReceived.count) {
+                switch ordersReceived[indexPath.row].offerState {
+                case .accepted:
+                    return false
+                default:
+                    return true
+                }
+            } else {
                 return false
-            default:
-                return true
             }
+            
         } else {
             //precondition(indexPath.row < ordersSent.count)
             guard  indexPath.row < ordersSent.count else { return false}
@@ -1146,7 +1151,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
         case let x where (x.range(of:"'Aggiungi'") != nil):
             action = UIAlertAction(title: "Aggiungi ai tuoi crediti", style: UIAlertActionStyle.default, handler:
                 {(paramAction:UIAlertAction!) in
-                    print("Il messaggio di chiusura è stato premuto")
+    
                     if let range = msg.range(of: "€ ") {
                         let credit = msg[range.upperBound...].trimmingCharacters(in: .whitespaces).components(separatedBy: " ").first!
                         ManageCredits.updateCredits(newCredit: credit, userId: (self.user?.idApp)!, onCompletion: { (error) in
@@ -1168,7 +1173,6 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             })
             actionAnnulla = UIAlertAction(title: "Annulla", style: UIAlertActionStyle.default, handler:
                 {(paramAction:UIAlertAction!) in
-                    print("Il messaggio di chiusura è stato premuto")
             })
             break
         case let x where (x.range(of:"'Rifiuta'") != nil):
@@ -1348,7 +1352,16 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                     let oldFriendDestinationIdApp = self.oldFriendDestination?.idApp
                     else { return }
                 
-                FireBaseAPI.updateNode(node: "ordersSent/\(userIdApp)/\(forwardCompanyId)/\(forwardOfferId)", value: ["IdAppUserDestination" : forwardUserDestinationIdApp, "facebookUserDestination":forwardUserDestinationIdFB, "offerState":"Pending"])
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd'T'H:mm:ssZ"
+                formatter.locale = Locale.init(identifier: "it_IT")
+                let creationDate = formatter.string(from: Date())
+                
+                //if the user has bought the order for itself expiration date is from 1 year
+                let expirationDate = formatter.string(from: Calendar.current.date(byAdding: .weekday, value: 3, to: Date())!)
+                
+                
+                FireBaseAPI.updateNode(node: "ordersSent/\(userIdApp)/\(forwardCompanyId)/\(forwardOfferId)", value: [Order.idAppUserDestination : forwardUserDestinationIdApp, Order.facebookUserDestination:forwardUserDestinationIdFB, Order.offerState:"Pending", Order.offerCreationDate:creationDate,Order.expirationDate:expirationDate])
                 
                 FirebaseData.sharedIstance.moveFirebaseRecord(userApp: user,user: olderFriendDestination, company: forwardCompanyId, order: orderForwarder, onCompletion: { (error) in
                     guard error == nil else {

@@ -81,12 +81,12 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
             menuButton.action = #selector(SWRevealViewController.revealToggle(_:))
             view.addGestureRecognizer(self.revealViewController().panGestureRecognizer())
         }
-        isConnectedtoNetwork = true
-        
-        user = CoreDataController.sharedIstance.findUserForIdApp(Auth.auth().currentUser?.uid)
+
         if user == nil {
             self.logout()
-        } else {self.viewSettings()}
+        } else {
+            self.viewSettings()
+        }
         
         NotificationCenter.default.addObserver(self,
                                             selector: #selector(networkStatusDidChange),
@@ -106,7 +106,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
             self.viewDidLoad()
         }
         self.isConnectedtoNetwork = true
-        
+        readCompanies()
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(updateTable),
                                                name: .CacheImageLoadImage,
@@ -197,6 +197,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
                 //self.myTable.reloadData()
                 Cart.sharedIstance.company = self.companies?[0]
             })
+            Cart.sharedIstance.payPalEnvironment = PayPalEnvironment(companyId: (companies?[0].companyId)!)
         }
     }
     

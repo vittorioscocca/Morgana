@@ -76,17 +76,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate  {
         
     }
     
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        //Paypal sandbox credentials
-        PayPalMobile.initializeWithClientIds(forEnvironments: [PayPalEnvironmentProduction: "ARowfMHmd5EwE2lUU2Gc3DkAwyQEFUi1H2qzmwhIiplZ9T2r0eqAAzh_qoE8O57fH6yEz6P9Kl6uRHU2",PayPalEnvironmentSandbox: "AfN_l2vZFwYniDa6bpCW3NmqrD4wX0VV7vH3VdDUb0Fjxsw2__X9gC0fee2VNKus-mRuvN4oHCjPJyBl"])
-        
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {      
         //Firebase configuration
         FirebaseApp.configure()
         
         //Singleton initialization
         _ = FirebaseData.sharedIstance
         _ = NetworkStatus.default
-        
+      
         //Firebase push notification
         if #available(iOS 10.0, *) {
             // For iOS 10 display notification (sent via APNS)
@@ -431,7 +428,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate  {
 @available(iOS 10, *)
 extension AppDelegate : UNUserNotificationCenterDelegate {
     
-    // Receive displayed notifications for iOS 10 devices.
+    //with this function notification will present when the app is open
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         let userInfo = notification.request.content.userInfo
