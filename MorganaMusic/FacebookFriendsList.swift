@@ -100,8 +100,9 @@ class FacebookFriendsListManager: NSObject {
     
     @objc private func fbTokenDidChange(){
         print("[FBFriendsListManager]: fbTokenDidChange")
-        user = CoreDataController.sharedIstance.findUserForIdApp(Auth.auth().currentUser?.uid)
-        if let fbAccessToken = user?.fbAccesToken {
+        guard let user = CoreDataController.sharedIstance.findUserForIdApp(Auth.auth().currentUser?.uid) else { return }
+        
+        if let fbAccessToken = user.fbAccesToken {
             setInternalState(.startUp(fbAccessToken))
             requestContactList(freshness: .fresh)
         }

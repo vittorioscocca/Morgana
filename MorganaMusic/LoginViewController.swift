@@ -36,6 +36,11 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
             //Facebook Login
             customFBButtom.delegate = self
             customFBButtom.readPermissions = ["public_profile", "email", "user_friends"]
+            FBSDKProfile.enableUpdates(onAccessTokenChange: true)
+            NotificationCenter.default.addObserver(self,
+                                                   selector:  #selector(fBAccessTokenDidChange(notification:)),
+                                                   name:.FBSDKAccessTokenDidChange,
+                                                   object: nil)
             return
         }
         
@@ -47,6 +52,18 @@ class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    //update Facebook access token
+    @objc func fBAccessTokenDidChange(notification: NSNotification) {
+        guard let oldToken = notification.userInfo?["FBSDKAccessTokenChangeOldKey"] as? FBSDKAccessToken else { return }
+        guard let newToken = notification.userInfo?["FBSDKAccessTokenChangeNewKey"] as? FBSDKAccessToken else { return }
+        
+        if oldToken.tokenString != newToken.tokenString {
+            guard let currentUserId = Auth.auth().currentUser?.uid else { return }
+            CoreDataController.sharedIstance.updateFBAccessToken(idApp: currentUserId, fbAccessToken: newToken.tokenString)
+            NotificationCenter.default.post(name: .FbTokenDidChangeNotification, object: self)
+        }
     }
     
     func fetchProfile(){
