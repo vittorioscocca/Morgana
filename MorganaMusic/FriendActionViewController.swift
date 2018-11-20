@@ -34,7 +34,7 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
     var selection: selectionType = ("",0.0)
     var result = [String:String]()
     var productsList = [String]()
-    var offersDctionary = [String : Double]()
+    var offersDictionary = [String : Double]()
     
     var fullNameFriend: String?
     var idFBFriend: String?
@@ -114,7 +114,7 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
     private func loadOfferte(){
         if LoadRemoteProducts.instance.isNotNull() && LoadRemoteProducts.instance.isNotEmpty() {
             self.productsList = LoadRemoteProducts.instance.products!
-            self.offersDctionary = LoadRemoteProducts.instance.offers!
+            self.offersDictionary = LoadRemoteProducts.instance.offers!
             self.pickerView.reloadAllComponents()
             
             DispatchQueue.main.async(execute: {
@@ -143,7 +143,7 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
         let product = self.productsList[row]
         product1_label.text = product
         selection.product = product
-        selection.price = self.offersDctionary[product]
+        selection.price = self.offersDictionary[product]
         
         let priceString = String(format:"%.2f", selection.price!)
         price1_label.text = priceString + " €"

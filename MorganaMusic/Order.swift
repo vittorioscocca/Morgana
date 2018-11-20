@@ -36,11 +36,13 @@ class Order {
     
     var points: Int {
         var innerPoints = 0
+        
         products?.forEach({ (product) in
-            if let point = product.points {
-               innerPoints += point
+            if let points = product.points {
+                innerPoints += points 
             }
         })
+        
         return innerPoints
     }
     
@@ -60,19 +62,28 @@ class Order {
         case deleted = "deleted" // l'utente destinatario dell'offerta accetta l'offerta
         case filed = "filed" // l'utente destinatario dell'offerta ha inoltrato l'offerta
     }
+    
     var costoTotale: Double {
         var tot: Double = 0.0
-        for i in products! {
-            tot += i.price! * Double(i.quantity!)
-        }
+        
+        products?.forEach({ (product) in
+            if let price = product.price, let quantity = product.quantity {
+                tot += price * Double(quantity)
+            }
+        })
+        
         return tot
     }
     
     var prodottiTotali: Int {
         var tot: Int = 0
-        for i in products! {
-            tot += i.quantity!
-        }
+        
+        products?.forEach({ (product) in
+            if let quantity = product.quantity {
+                tot += quantity
+            }
+        })
+    
         return tot
     }
     
