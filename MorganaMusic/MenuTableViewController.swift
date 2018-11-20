@@ -89,7 +89,7 @@ class MenuTableViewController: UITableViewController {
             guard error == nil else {return}
             guard let dic = dictionary else {return}
             
-            if dic["companyCode"] as? String != "0" {
+            if dic["companyCode"] as? String == "mr001" {
                 self.actualMenu = self.menuCompany
                 self.myTable.reloadData()
             }
