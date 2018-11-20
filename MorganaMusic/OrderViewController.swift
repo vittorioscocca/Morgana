@@ -283,10 +283,10 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
             
             if indexPath.row < products.count  {
                 if quantity != 0 {
-                    cell?.textLabel?.text = "(\(quantity)) " + productName + "    Punti:\(points)    " + "€ "  + String(format:"%.2f", price)
+                    cell?.textLabel?.text = "(\(quantity)) " + productName.uppercased() + "    Punti: \(points)    " + "€ "  + String(format:"%.2f", price)
                     
-                    quantità_label.text = "   Prodotti: \(Order.sharedIstance.prodottiTotali)"
-                    totale_label.text = "   Totale: € " + String(format:"%.2f", Order.sharedIstance.costoTotale)
+                    quantità_label.text = "Prodotti: \(Order.sharedIstance.prodottiTotali)"
+                    totale_label.text = "Totale: € " + String(format:"%.2f", Order.sharedIstance.costoTotale)
                     points_label.text = "Punti: \(Order.sharedIstance.points)"
                 }else {
                     cell?.textLabel?.text = elemento.productName

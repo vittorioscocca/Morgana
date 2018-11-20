@@ -54,7 +54,8 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
     public var forwardOrder :Order?
     private var oldFriendDestination: UserDestination?
     private var pendingPaymentId = String()
-//    private let pageTableView = FirebaseData.DIM_PAGE_SCROLL
+    
+    //private let pageTableView = FirebaseData.DIM_PAGE_SCROLL
     
     override func viewDidLoad() {
         super.viewDidLoad()
