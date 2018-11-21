@@ -26,7 +26,7 @@ class PaymentManager {
         //Code for testing, exclude Payments  for Test
         guard payment.idPayment?.range(of: "test")  == nil else {
             self.setPaymentAndOrderCompletedOnFirebase(user: user)
-            self.prepareNotification(user: user)
+            //self.prepareNotification(user: user)
             self.sendReceiptByEmail()
             self.saveReceiptOnFireBase()
             onCompleted(true)
@@ -34,7 +34,7 @@ class PaymentManager {
         }
         if payment.paymentType == "Credits" {
             self.setPaymentAndOrderCompletedOnFirebase(user: user)
-            self.prepareNotification(user: user)
+            //self.prepareNotification(user: user)
             self.sendReceiptByEmail()
             self.saveReceiptOnFireBase()
             onCompleted(true)
@@ -212,7 +212,7 @@ class PaymentManager {
             }
             
             self.setPaymentAndOrderCompletedOnFirebase(user: user)
-            self.prepareNotification(user: user)
+            //self.prepareNotification(user: user)
             self.sendReceiptByEmail()
             self.saveReceiptOnFireBase()
             onCompleted(true)
@@ -265,9 +265,9 @@ class PaymentManager {
     private func setPaymentAndOrderCompletedOnFirebase(user: User){
         let ref = Database.database().reference()
         ref.child("pendingPayments/\((user.idApp)!)/\((self.payment?.company?.companyId)!)/\((self.payment?.autoId)!)").updateChildValues(["stateCartPayment":"Valid","statePayment" : "terminated"])
-        for relatedOrders in (self.payment?.relatedOrders)! {
-            ref.child("ordersSent/\((user.idApp)!)/\((self.payment?.company?.companyId)!)/\(relatedOrders)").updateChildValues(["paymentState" : "Valid"])
-            self.setOrderReceivedCompletedOnFirebase(user: user, autiIdOrderReceived: relatedOrders)
+        for relatedOrder in (self.payment?.relatedOrders)! {
+            ref.child("ordersSent/\((user.idApp)!)/\((self.payment?.company?.companyId)!)/\(relatedOrder)").updateChildValues(["paymentState" : "Valid"])
+            self.setOrderReceivedCompletedOnFirebase(user: user, autiIdOrderReceived: relatedOrder)
         }
     }
     
@@ -277,57 +277,58 @@ class PaymentManager {
             guard snap.exists() else {return}
             guard snap.value != nil else {return}
             
-            var userDestination: String?
-            var ordersSentAutoId : String?
             let dizionario_offerte = snap.value! as! NSDictionary
             
-            for (chiave,valore) in dizionario_offerte {
-                
-                switch chiave as! String {
-                case "IdAppUserDestination":
-                    userDestination = valore as? String
-                    break
-                case "ordersSentAutoId":
-                    ordersSentAutoId = valore as? String
-                    break
-                default:
-                    break
-                }
+            if  let userDestination = dizionario_offerte["IdAppUserDestination"] as? String, let ordersSentAutoId = dizionario_offerte["ordersSentAutoId"] as? String {
+                ref.child("ordersReceived/\((userDestination))/\((self.payment?.company?.companyId)!)/\((ordersSentAutoId))").updateChildValues(["paymentState" : "Valid"])
             }
-            if  userDestination != nil && ordersSentAutoId != nil {
-                ref.child("ordersReceived/\((userDestination!))/\((self.payment?.company?.companyId)!)/\((ordersSentAutoId!))").updateChildValues(["paymentState" : "Valid"])
+            
+            //prepare notification
+            let idAppUserDestination = dizionario_offerte["IdAppUserDestination"] as? String
+            let userFullName = user.fullName
+            let userIdApp = user.idApp
+            let userSenderIdApp = user.idApp
+            let idOrder = dizionario_offerte["orderAutoId"] as? String
+            let autoIdOrder = dizionario_offerte["ordersSentAutoId"] as? String
+            
+            
+            if  idAppUserDestination != user.idApp {
+                let msg = "Il tuo amico " + (user.fullName)! + " ti ha appena offerto qualcosa"
+                //push notification and App badge value for Receiver
+                NotificationsCenter.sendOrderNotification(userDestinationIdApp: idAppUserDestination!, msg: msg, controlBadgeFrom: "received", companyId: (self.payment?.company?.companyId)!, userFullName: userFullName!, userIdApp: userIdApp!, userSenderIdApp: userSenderIdApp!,idOrder: idOrder!, autoIdOrder: autoIdOrder!)
             }
+            self.updateNumberPendingProducts(idAppUserDestination!, recOrPurch: "received")
         })
     }
     
-    private func prepareNotification(user: User){
-        let ref = Database.database().reference()
-        for relatedOrders in (self.payment?.relatedOrders)! {
-            ref.child("ordersSent/\((user.idApp)!)/\((self.payment?.company?.companyId)!)/\(relatedOrders)").observeSingleEvent(of: .value, with: { (snap) in
-                guard snap.exists() else {return}
-                guard snap.value != nil else {return}
-                
-                let dizionario_offerte = snap.value! as! NSDictionary
-                
-                
-                let idAppUserDestination = dizionario_offerte["IdAppUserDestination"] as? String
-                let userFullName = user.fullName
-                let userIdApp = user.idApp
-                let userSenderIdApp = user.idApp
-                let idOrder = dizionario_offerte["orderAutoId"] as? String
-                let autoIdOrder = dizionario_offerte["ordersSentAutoId"] as? String
-                
-                
-                if  idAppUserDestination != user.idApp {
-                    let msg = "Il tuo amico " + (user.fullName)! + " ti ha appena offerto qualcosa"
-                    //push notification and App badge value for Receiver
-                    NotificationsCenter.sendOrderNotification(userDestinationIdApp: idAppUserDestination!, msg: msg, controlBadgeFrom: "received", companyId: (self.payment?.company?.companyId)!, userFullName: userFullName!, userIdApp: userIdApp!, userSenderIdApp: userSenderIdApp!,idOrder: idOrder!, autoIdOrder: autoIdOrder!)
-                }
-                self.updateNumberPendingProducts(idAppUserDestination!, recOrPurch: "received")
-                
-            })
-        }
-    }
+//    private func prepareNotification(user: User){
+//        let ref = Database.database().reference()
+//        for relatedOrders in (self.payment?.relatedOrders)! {
+//            ref.child("ordersSent/\((user.idApp)!)/\((self.payment?.company?.companyId)!)/\(relatedOrders)").observeSingleEvent(of: .value, with: { (snap) in
+//                guard snap.exists() else {return}
+//                guard snap.value != nil else {return}
+//
+//                let dizionario_offerte = snap.value! as! NSDictionary
+//
+//
+//                let idAppUserDestination = dizionario_offerte["IdAppUserDestination"] as? String
+//                let userFullName = user.fullName
+//                let userIdApp = user.idApp
+//                let userSenderIdApp = user.idApp
+//                let idOrder = dizionario_offerte["orderAutoId"] as? String
+//                let autoIdOrder = dizionario_offerte["ordersSentAutoId"] as? String
+//
+//
+//                if  idAppUserDestination != user.idApp {
+//                    let msg = "Il tuo amico " + (user.fullName)! + " ti ha appena offerto qualcosa"
+//                    //push notification and App badge value for Receiver
+//                    NotificationsCenter.sendOrderNotification(userDestinationIdApp: idAppUserDestination!, msg: msg, controlBadgeFrom: "received", companyId: (self.payment?.company?.companyId)!, userFullName: userFullName!, userIdApp: userIdApp!, userSenderIdApp: userSenderIdApp!,idOrder: idOrder!, autoIdOrder: autoIdOrder!)
+//                }
+//                self.updateNumberPendingProducts(idAppUserDestination!, recOrPurch: "received")
+//
+//            })
+//        }
+//    }
     
     private func updateNumberPendingProducts(_ idAppUserDestination: String, recOrPurch: String){
         let ref = Database.database().reference()

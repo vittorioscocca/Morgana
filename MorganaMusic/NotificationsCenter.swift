@@ -30,7 +30,7 @@ class NotificationsCenter{
         
         FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + userDestinationIdApp, onCompletion: {(error,dictionary) in
             guard error == nil else {
-                (print("nessuna connessione"))
+                (print("[NOTIFICATIONCENTER]: nessuna connessione"))
                 return
             }
             guard dictionary != nil else {
@@ -64,14 +64,14 @@ class NotificationsCenter{
                     // here "jsonData" is the dictionary encoded in JSON data
                     
                 } catch {
-                    print(error.localizedDescription)
+                    print("[NOTIFICATIONCENTER]: ", error.localizedDescription)
                 }
                 
                 request.httpBody = httpData
                 let session = URLSession.shared
                 session.dataTask(with: request as URLRequest, completionHandler: { (returnData, response, error) -> Void in
                     guard let strData = NSString(data: returnData!, encoding: String.Encoding.utf8.rawValue) else { return }
-                    print("NOTIFICA INVIATA \(strData)")
+                    print("[NOTIFICATIONCENTER]: NOTIFICA INVIATA \(strData)")
                 }).resume() //Remember this one or nothing will happen :-)
             }
             
@@ -82,7 +82,7 @@ class NotificationsCenter{
         
         FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + userDestinationIdApp, onCompletion: {(error,dictionary) in
             guard error == nil else {
-                (print("nessuna connessione"))
+                (print("[NOTIFICATIONCENTER]: nessuna connessione"))
                 return
             }
             guard dictionary != nil else {
@@ -116,14 +116,14 @@ class NotificationsCenter{
                     // here "jsonData" is the dictionary encoded in JSON data
                     
                 } catch {
-                    print(error.localizedDescription)
+                    print("[NOTIFICATIONCENTER]: ", error.localizedDescription)
                 }
                 
                 request.httpBody = httpData
                 let session = URLSession.shared
                 session.dataTask(with: request as URLRequest, completionHandler: { (returnData, response, error) -> Void in
                     guard let strData = NSString(data: returnData!, encoding: String.Encoding.utf8.rawValue) else { return }
-                    print("NOTIFICA INVIATA \(strData)")
+                    print("[NOTIFICATIONCENTER]: NOTIFICA INVIATA \(strData)")
                 }).resume() //Remember this one or nothing will happen :-)
             }
             
@@ -134,7 +134,7 @@ class NotificationsCenter{
         
         FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + userDestinationIdApp, onCompletion: {(error,dictionary) in
             guard error == nil else {
-                (print("nessuna connessione"))
+                (print("[NOTIFICATIONCENTER]: nessuna connessione"))
                 return
             }
             guard dictionary != nil else {
@@ -175,7 +175,7 @@ class NotificationsCenter{
                 let session = URLSession.shared
                 session.dataTask(with: request as URLRequest, completionHandler: { (returnData, response, error) -> Void in
                     guard let strData = NSString(data: returnData!, encoding: String.Encoding.utf8.rawValue) else { return}
-                    print("NOTIFICA INVIATA \(strData)")
+                    print("[NOTIFICATIONCENTER]: NOTIFICA INVIATA \(strData)")
                 }).resume() //Remember this one or nothing will happen :-)
             }
             
@@ -186,7 +186,7 @@ class NotificationsCenter{
         
         FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "users/" + userDestinationIdApp, onCompletion: {(error,dictionary) in
             guard error == nil else {
-                (print("nessuna connessione"))
+                (print("[NOTIFICATIONCENTER]: nessuna connessione"))
                 return
             }
             guard dictionary != nil else {
@@ -227,7 +227,7 @@ class NotificationsCenter{
                 let session = URLSession.shared
                 session.dataTask(with: request as URLRequest, completionHandler: { (returnData, response, error) -> Void in
                     guard let strData = NSString(data: returnData!, encoding: String.Encoding.utf8.rawValue) else { return }
-                    print("NOTIFICA INVIATA \(strData)")
+                    print("[NOTIFICATIONCENTER]: NOTIFICA INVIATA \(strData)")
                 }).resume() //Remember this one or nothing will happen :-)
             }
             
@@ -261,7 +261,7 @@ class NotificationsCenter{
         let request = UNNotificationRequest(identifier: "LocalAlert", content: content, trigger: trigger)
         center.add(request) { (error : Error?) in
             if let theError = error {
-                print(theError.localizedDescription)
+                print("[NOTIFICATIONCENTER]: ",theError.localizedDescription)
             }
             
         }
@@ -285,7 +285,7 @@ class NotificationsCenter{
         dateComponents.day = calendar.component(.day, from: expirationDate)
         
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
-        print("NOTIFICA REMEBER EXPIRATION CREATA alle \(dateComponents.hour!):\(dateComponents.minute!)")
+        print("[NOTIFICATIONCENTER]: NOTIFICA REMEBER EXPIRATION CREATA alle \(dateComponents.hour!):\(dateComponents.minute!)")
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
         center.add(request) { (error : Error?) in
             if let theError = error {
@@ -326,14 +326,14 @@ class NotificationsCenter{
         let diferencesHour = 20
         let now = self.formattedDate(date:Date())
         dateComponents.hour = calendar.component(.hour, from: now) + 1 + diferencesHour
-        print(dateComponents)
+        print("[NOTIFICATIONCENTER]: ", dateComponents)
         
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
         
         center.add(request) { (error : Error?) in
             if let theError = error {
-                print(theError.localizedDescription)
+                print("[NOTIFICATIONCENTER]: ", theError.localizedDescription)
             }
         }
     }
@@ -359,11 +359,11 @@ class NotificationsCenter{
             
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
         //let trigger1 = UNTimeIntervalNotificationTrigger.init(timeInterval: 3.0, repeats: false)
-         print("NOTIFICA CICLICA CREATA ogni giorno ore \(dateComponents.hour!):\(dateComponents.minute!)")
+         print("[NOTIFICATIONCENTER]: NOTIFICA CICLICA CREATA ogni giorno ore \(dateComponents.hour!):\(dateComponents.minute!)")
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
         center.add(request) { (error : Error?) in
             if let theError = error {
-                print(theError.localizedDescription)
+                print("[NOTIFICATIONCENTER]: error ", theError.localizedDescription)
             }
            
         }

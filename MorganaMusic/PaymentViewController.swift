@@ -97,8 +97,7 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
         paymentViewController.dismiss(animated: true, completion: nil)
     }
     
-    func payPalPaymentViewController(_ paymentViewController: PayPalPaymentViewController, didComplete completedPayment: PayPalPayment)
-    {
+    func payPalPaymentViewController(_ paymentViewController: PayPalPaymentViewController, didComplete completedPayment: PayPalPayment) {
         print("PayPal Payment Success !")
         paymentViewController.dismiss(animated: true, completion: { () -> Void in
             // send completed confirmaion to  server
@@ -157,10 +156,8 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
                             return
                         }
                         let points = PointsManager.sharedInstance.addPointsForShopping(userId:userIdApp, expense: Cart.sharedIstance.costoTotale)
-                        PointsManager.sharedInstance.updateNewValuesOnFirebase(actualUserId: userIdApp, onCompletion: {
-                            DispatchQueue.main.async(execute: {
-                                NotificationsCenter.pointsNotification(title: "Congratulazioni \((userApp.firstName)!)", body: "Hai appena cumulato \(points) Punti!")
-                            })
+                        PointsManager.sharedInstance.updateNewPointsOnFirebase(actualUserId: userIdApp, onCompletion: {
+                            NotificationsCenter.pointsNotification(title: "Congratulazioni \((userApp.firstName)!)", body: "Hai appena cumulato \(points) Punti!")
                         })
 
                         print("[PAYMENT]: Punti aggiornati")

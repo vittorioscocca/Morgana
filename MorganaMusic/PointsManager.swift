@@ -203,7 +203,7 @@ class PointsManager {
         return balanceCurrentPoints
     }
     
-    func updateNewValuesOnFirebase(actualUserId: String, onCompletion: @escaping ()->()){
+    func updateNewPointsOnFirebase(actualUserId: String, onCompletion: @escaping ()->()){
         
         let newValuesDictionary: [String: Any] = [
             "personalDiscount": self.personalDiscount!,

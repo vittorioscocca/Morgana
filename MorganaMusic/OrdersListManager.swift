@@ -81,6 +81,7 @@ class OrdersListManager: NSObject {
     }
     
     deinit {
+        self.pendingRequests = 0
         notificationCenter.removeObserver(self)
     }
     
@@ -147,7 +148,7 @@ class OrdersListManager: NSObject {
                     }
                 }
             }
-            print("[OrdersListManager]:Order request started due to Facebook Friends List updated")
+            print("[OrdersListManager]: Order request started due to Facebook Friends List updated")
             self.requestOrdersList(freshness: .fresh)
         }
     }
@@ -297,7 +298,7 @@ class OrdersListManager: NSObject {
             
         case let .startUp(friendsList), let .error(friendsList, _, _), .success(let friendsList, _, _, _, true):
             guard pendingRequests == 0 else {
-                print("[OrdersListManager]:order request ignored due to another pending request")
+                print("[OrdersListManager]: Order request ignored due to another pending request")
                 return
             }
             connectToFirebase(freshness: freshness, currentFriendsList: friendsList, completion: { (outcome) in
@@ -385,17 +386,20 @@ class OrdersListManager: NSObject {
             print("[OrdersListManager]: New request with freshness level \(freshness). Actual pending requests: \(self.pendingRequests)")
             
             FirebaseData.sharedIstance.readOrdersSentOnFireBase(user: currentUser, friendsList: currentFriendsList, onCompletion: { (ordersSent)  in
+                print("[OrdersListManager]: readOrdersSentOnFireBase")
                 FirebaseData.sharedIstance.readOrderReceivedOnFireBase(user: currentUser, onCompletion: { (ordersReceived) in
+                    print("[OrdersListManager]: readOrderReceivedOnFireBase")
                     if self.pendingRequests > 0 {
                         self.pendingRequests -= 1
                         print("[OrdersListManager]: Pendig request with freshness level \(freshness), served!. Actual pending requests: \(self.pendingRequests)")
+                        self.dispatchQueue.async {
+                            print("[OrdersListManager]: Order List state did change")
+                            self.notificationCenter.post(name: .OrdersListStateDidChange, object: self)
+                        }
+                        completion(.success(ordersSent, ordersReceived))
                     }
                     
-                    self.dispatchQueue.async {
-                        print("[OrdersListManager]: Order List state did change")
-                        self.notificationCenter.post(name: .OrdersListStateDidChange, object: self)
-                    }
-                    completion(.success(ordersSent, ordersReceived))
+                    
                 })
             })
         }

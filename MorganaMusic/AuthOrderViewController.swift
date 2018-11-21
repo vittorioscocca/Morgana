@@ -358,7 +358,7 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
                 return
             }
             let points = PointsManager.sharedInstance.addPointsForConsumption(date: currentDate, numberOfProducts: self.numberOfProducts())
-            PointsManager.sharedInstance.updateNewValuesOnFirebase(actualUserId: userDestinationIdApp, onCompletion: {
+            PointsManager.sharedInstance.updateNewPointsOnFirebase(actualUserId: userDestinationIdApp, onCompletion: {
                 //send notification
                 let msg = "Il tuo ordine è stato approvato, hai cumulato \(points) punti"
                 NotificationsCenter.sendConsuptionNotification(userDestinationIdApp: userDestinationIdApp, msg: msg, controlBadgeFrom: "received")
