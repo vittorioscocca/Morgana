@@ -188,7 +188,7 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
             return
         }
         let prod = Product(productName: selection.product, price: price, quantity: Int(quantity.text!), points: Int(points))
-        Order.sharedIstance.addProduct(product: prod)
+        Order.sharedIstance.addProduct(product: prod, userId: userId!)
         
         performSegue(withIdentifier: "unwindToOffersFromOffriDrink", sender: nil)
     }

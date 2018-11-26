@@ -24,7 +24,7 @@ class FacebookFriendsList {
     }
     
     fileprivate init(contactList: [Friend]){
-        self.contactList = contactList
+        self.contactList = contactList.sorted{ $0.fullName! < $1.fullName!}
     }
     
     var facebookFriendsList :[Friend] {

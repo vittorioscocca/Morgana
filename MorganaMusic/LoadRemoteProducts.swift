@@ -26,14 +26,14 @@ class LoadRemoteProducts {
     private let uiApplication: UIApplication
     
     private var productsList: [String]? = [String]()
-    private var offersDctionary: [String : Double]? = [String : Double]()
+    private var offersDictionary: [String : Double]? = [String : Double]()
     
     var products: [String]? {
         return productsList
     }
     
     var offers: [String : Double]? {
-        return offersDctionary
+        return offersDictionary
     }
     
     init(dispatchQueue: DispatchQueue, networkStatus: NetworkStatus, notificationCenter: NotificationCenter, uiApplication: UIApplication) {
@@ -76,14 +76,14 @@ class LoadRemoteProducts {
     @objc func loadRemoteProducts(){
         guard networkStatus.online else {
             self.productsList = nil
-            self.offersDctionary = nil
+            self.offersDictionary = nil
             return
         }
         
         FireBaseAPI.readNodeOnFirebase(node: "merchant products", onCompletion: { (error, dictionary) in
             guard error == nil else {
                 self.productsList = nil
-                self.offersDctionary = nil
+                self.offersDictionary = nil
                 return
             }
             guard let productsDictionary = dictionary else {
@@ -91,15 +91,16 @@ class LoadRemoteProducts {
             }
             
             self.productsList = [String]()
-            self.offersDctionary = [String : Double]()
+            self.offersDictionary = [String : Double]()
             
             for (prodotto, costo) in productsDictionary {
                 if prodotto != "autoId" {
                     let prodottoConCosto = prodotto
                     self.productsList!.append(prodottoConCosto)
-                    self.offersDctionary![prodotto] = costo as? Double
+                    self.offersDictionary![prodotto] = costo as? Double
                 }
             }
+            self.productsList = self.productsList?.sorted{ $0 < $1 }
             self.dispatchQueue.async {
                 print("Notifying products change")
                 self.notificationCenter.post(name: .RemoteProductsListDidChange, object: self)
@@ -109,12 +110,12 @@ class LoadRemoteProducts {
     }
     
     func isNotNull() -> Bool {
-        return productsList != nil && offersDctionary != nil
+        return productsList != nil && offersDictionary != nil
     }
     
     func isNotEmpty()-> Bool {
         if isNotNull() {
-            return !(productsList?.isEmpty)! && !(offersDctionary?.isEmpty)!
+            return !(productsList?.isEmpty)! && !(offersDictionary?.isEmpty)!
         }else {
             return false
         }
