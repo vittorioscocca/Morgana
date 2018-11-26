@@ -797,18 +797,17 @@ class FirebaseData {
             default:
                 break
             }
-            
-            if order.userDestination?.idFB == self.user?.idFB {
-                order.userSender?.fullName = self.user?.fullName
-                order.userSender?.pictureUrl = self.user?.pictureUrl
-                
-            } else if !(self.friendList?.isEmpty)! {
-                for friend in self.friendList! {
-                    if friend.idFB == order.userSender?.idFB {
-                        order.userSender?.fullName = friend.fullName
-                        order.userSender?.pictureUrl = friend.pictureUrl
-                        break
-                    }
+        }
+        
+        if order.userSender?.idFB == self.user?.idFB {
+            order.userSender?.fullName = self.user?.fullName
+            order.userSender?.pictureUrl = self.user?.pictureUrl
+        } else if !(self.friendList?.isEmpty)! {
+            for friend in self.friendList! {
+                if friend.idFB == order.userSender?.idFB {
+                    order.userSender?.fullName = friend.fullName
+                    order.userSender?.pictureUrl = friend.pictureUrl
+                    break
                 }
             }
         }
@@ -948,18 +947,25 @@ class FirebaseData {
                 }
             } else {
                 let ordersReceived = OrdersListManager.instance.readOrdersList().ordersList.ordersReceivedList
-                ordersReceived.forEach({ (order) in
-                    if order.orderAutoId == snap.key {
-                        guard let orderChanged = snap.value as? NSDictionary, let offerState = orderChanged["offerState"] as? String  else { return }
-                        if offerState != order.offerState.rawValue {
-                            OrdersListManager.instance.refreshOrdersList()
-                            print("[FIREBASEDATA]: Order list refreshed from firebase observer, offerState changed in orders received")
+                if ordersReceived.count < snap.childrenCount - 1 {
+                    OrdersListManager.instance.refreshOrdersList()
+                    print("[FIREBASEDATA]: Order list refreshed from firebase observer, new child added in order received")
+                    return
+                } else {
+                    ordersReceived.forEach({ (order) in
+                        //verifing if is an update
+                        if order.orderAutoId == snap.key {
+                            guard let orderChanged = snap.value as? NSDictionary, let offerState = orderChanged["offerState"] as? String  else { return }
+                            if offerState != order.offerState.rawValue {
+                                OrdersListManager.instance.refreshOrdersList()
+                                print("[FIREBASEDATA]: Order list refreshed from firebase observer, offerState changed in orders received")
+                                return
+                            }
                         }
-                    }
-                })
+                    })
+                }
             }
         })
-        
         ref.child("ordersSent/" + userIdApp + "/\(companyID)").observe(.childChanged, with: { (snap) in
             let ordersSent = OrdersListManager.instance.readOrdersList().ordersList.ordersSentList
             ordersSent.forEach({ (order) in
