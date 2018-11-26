@@ -136,7 +136,7 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
             Cart.sharedIstance.paymentMethod = payment
             Cart.sharedIstance.pendingPayPalOffer()
             
-            for order in Cart.sharedIstance.carrello{
+            for order in Cart.sharedIstance.cart{
                 order.dataCreazioneOfferta = paycreatetime
                 order.calcolaDataScadenzaOfferta(selfOrder: (self.user?.idApp == order.userDestination?.idApp))
                 order.pendingOffer()
@@ -266,7 +266,7 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     
     private func completeCartInformation(){
-        for j in Cart.sharedIstance.carrello {
+        for j in Cart.sharedIstance.cart {
             //Get idApp
             guard let idFBUserDestination = j.userDestination?.idFB else { return }
             FirebaseData.sharedIstance.readUserIdAppFromIdFB(node: "users", child: "idFB", idFB: idFBUserDestination, onCompletion: { (error,idApp) in
@@ -294,7 +294,7 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
             guard dictionary != nil else {return}
             if (dictionary?["autoId"] as? String) != "04fLLHPLYYboLfy8enAkogDcdI02"{
                 //in seguito da eliminare escludo l'utente vittorio del simulatore
-                for order in Cart.sharedIstance.carrello {
+                for order in Cart.sharedIstance.cart {
                     if order.userDestination?.idApp == idApp {
                         order.userDestination?.fireBaseIstanceIDToken = dictionary?["fireBaseIstanceIDToken"] as? String
                     }

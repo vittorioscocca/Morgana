@@ -51,7 +51,7 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
         if section == 0 {
-            return Cart.sharedIstance.carrello.count
+            return Cart.sharedIstance.cart.count
         }else {
             return 1
         }
@@ -72,19 +72,19 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
         if (sectionTitle[indexPath.section] == sectionTitle[0]) {
             cell = tableView.dequeueReusableCell(withIdentifier: "cartUserCell", for: indexPath)
             
-            let url = NSURL(string: (Cart.sharedIstance.carrello[indexPath.row].userDestination?.pictureUrl)!)
+            let url = NSURL(string: (Cart.sharedIstance.cart[indexPath.row].userDestination?.pictureUrl)!)
             let data = NSData(contentsOf: url! as URL)
             (cell as! CartUserTableViewCell).friendImageView.image = UIImage(data: data! as Data)
             
             
-            (cell as! CartUserTableViewCell).nome_label.text = (Cart.sharedIstance.carrello[indexPath.row].userDestination?.fullName)!
-            (cell as! CartUserTableViewCell).totProdotti_label.text = "Prodotti: " + String(Cart.sharedIstance.carrello[indexPath.row].prodottiTotali)
-            (cell as! CartUserTableViewCell).costoOfferta_label.text = "€ " + String(format:"%.2f", Cart.sharedIstance.carrello[indexPath.row].costoTotale)
+            (cell as! CartUserTableViewCell).nome_label.text = (Cart.sharedIstance.cart[indexPath.row].userDestination?.fullName)!
+            (cell as! CartUserTableViewCell).totProdotti_label.text = "Prodotti: " + String(Cart.sharedIstance.cart[indexPath.row].prodottiTotali)
+            (cell as! CartUserTableViewCell).costoOfferta_label.text = "€ " + String(format:"%.2f", Cart.sharedIstance.cart[indexPath.row].costoTotale)
             cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
         } else {
             //products section
             cell = tableView.dequeueReusableCell(withIdentifier: "cartCell", for: indexPath)
-            cell?.textLabel?.text = "Prodotti: \(Cart.sharedIstance.prodottiTotali) \t\t\t\t Totale: € " +  String(format:"%.2f",Cart.sharedIstance.costoTotale)
+            cell?.textLabel?.text = "Prodotti: \(Cart.sharedIstance.totalProducts) \t\t Punti: \(Cart.sharedIstance.totalPoints) \t\t Totale: € \(String(format:"%.2f",Cart.sharedIstance.costoTotale))" 
             
             cell?.textLabel?.textColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
             cell?.textLabel?.font =  UIFont.systemFont(ofSize: 17)
@@ -107,12 +107,12 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
         case .delete:
             print("premuto il tasto Delete")
             
-            let elemento = Cart.sharedIstance.carrello[indexPath.row]
+            let elemento = Cart.sharedIstance.cart[indexPath.row]
             print("elimo l'elemento \((elemento.userDestination?.fullName)!)")
 
-            Cart.sharedIstance.carrello.remove(at: indexPath.row)
+            Cart.sharedIstance.cart.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
-            if Cart.sharedIstance.carrello.isEmpty {
+            if Cart.sharedIstance.cart.isEmpty {
                 unwind()
             } else {
                 self.myTable.reloadData()
@@ -142,7 +142,7 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
             break
         case "segueToCartOrderDetails":
             guard let path = sender else {return}
-            let orderSent = Cart.sharedIstance.carrello[(path as! IndexPath).row]
+            let orderSent = Cart.sharedIstance.cart[(path as! IndexPath).row]
             (segue.destination as! CartOrderDetailsViewController).orderSent = orderSent
             break
         default:
@@ -167,7 +167,7 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
                                        preferredStyle: .alert)
         let actionProsegui = UIAlertAction(title: "Elimina", style: UIAlertActionStyle.default, handler:
         {(paramAction:UIAlertAction!) in
-            Cart.sharedIstance.carrello.removeAll()
+            Cart.sharedIstance.cart.removeAll()
             self.performSegue(withIdentifier: "unwindToOffer", sender: nil)
             self.dismiss(animated: true) { () -> Void in
                 print("VC Dismesso")
