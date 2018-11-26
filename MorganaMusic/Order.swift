@@ -148,12 +148,13 @@ class Order {
         self.offerState = OfferStates.ransom
     }
     
-    func addProduct(product: Product) {
+    func addProduct(product: Product, userId: String) {
         var trovato = false
         for i in self.products! {
             if i.productName == product.productName {
                 trovato = true
                 i.quantity! += product.quantity!
+                i.points = PointsManager.sharedInstance.addPointsForShopping(userId: userId, expense: i.price! * Double(i.quantity!))
             }
         }
         guard trovato else {
