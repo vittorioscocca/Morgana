@@ -14,13 +14,13 @@ class Cart {
     
     var paymentMethod: Payment?
     var payPalEnvironment: PayPalEnvironment?
-    var carrello: [Order]
+    var cart: [Order]
     
     var state: String?
     
     var costoTotale: Double {
         var tot: Double = 0.0
-        for i in carrello {
+        for i in cart {
             tot += i.costoTotale
         }
         return tot
@@ -28,12 +28,22 @@ class Cart {
     
     var company: Company?
     
-    var prodottiTotali:Int {
+    var totalProducts:Int {
         var tot: Int = 0
-        for i in carrello {
+        for i in cart {
             tot += i.prodottiTotali
         }
         return tot
+    }
+    
+    var totalPoints: Int {
+        var innerPoints = 0
+        
+        cart.forEach({ (order) in
+            innerPoints += order.points
+        })
+        
+        return innerPoints
     }
     
     enum offerState: String {
@@ -47,14 +57,14 @@ class Cart {
     
     
     private init(){
-        self.carrello = []
+        self.cart = []
         self.paymentMethod = nil
         self.state = offerState.initialized.rawValue
         
     }
     
     func initializeCart() {
-        self.carrello = []
+        self.cart = []
         self.paymentMethod = nil
         self.payPalEnvironment = nil
         self.state = offerState.initialized.rawValue

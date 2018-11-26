@@ -155,7 +155,7 @@ class FirebaseData {
         var workItems = [DispatchWorkItem]()
         let queue = DispatchQueue.init(label: "it.morgana.queue")
         
-        for order in Cart.sharedIstance.carrello {
+        for order in Cart.sharedIstance.cart {
             guard let userIdapp = user.idApp,
                 let companyId = order.company?.companyId
             else {
@@ -172,7 +172,7 @@ class FirebaseData {
                 self.saveProductOnFireBase(order: order)
                 self.saveOrderAsReceivedOnFireBase(order: order)
                 
-                if self.idOrder?.count == Cart.sharedIstance.carrello.count {
+                if self.idOrder?.count == Cart.sharedIstance.cart.count {
                     self.savePaymentOnFireBase(companyId: companyId, onCompletion: {
                         OrdersListManager.instance.refreshOrdersList()
                         print("[FIREBASEDATA]: refresh Order List request")
@@ -198,7 +198,7 @@ class FirebaseData {
         guard idFBFriend != nil , creationDate != nil else { return nil}
         
         var orderDetails: [String:String] = [:]
-        for order in Cart.sharedIstance.carrello {
+        for order in Cart.sharedIstance.cart {
             guard let products = order.products else { return orderDetails }
             if (order.userDestination?.idFB == idFBFriend) && (order.dataCreazioneOfferta == creationDate) {
                 for product in products {
@@ -320,7 +320,7 @@ class FirebaseData {
         paymentDictionaryDetails[Payment.paymentType] = Cart.sharedIstance.paymentMethod?.paymentType
         paymentDictionaryDetails[Payment.platform] = Cart.sharedIstance.paymentMethod?.platform
         paymentDictionaryDetails[Payment.statePayment] = Cart.sharedIstance.paymentMethod?.statePayment
-        paymentDictionaryDetails[Payment.totalProducts] = String(Cart.sharedIstance.prodottiTotali)
+        paymentDictionaryDetails[Payment.totalProducts] = String(Cart.sharedIstance.totalProducts)
         paymentDictionaryDetails[Payment.total] = String(format:"%.2f", Cart.sharedIstance.costoTotale)
         paymentDictionaryDetails[Payment.stateCartPayment] = Cart.sharedIstance.state
         

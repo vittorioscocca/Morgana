@@ -469,11 +469,11 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
             }
             
             //Disable Cart BarButtonItem if cart is Empty and remove badge number
-            if Cart.sharedIstance.carrello.count == 0 {
+            if Cart.sharedIstance.cart.count == 0 {
                 self.carousel.isEnabled = false
                 self.carousel.removeBadge()
             } else {
-                self.carousel.addBadge(number: Cart.sharedIstance.carrello.count)
+                self.carousel.addBadge(number: Cart.sharedIstance.cart.count)
             }
 
             break
@@ -495,11 +495,11 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         }
         
         //Disable Cart BarButtonItem if cart is Empty and remove badge number
-        if Cart.sharedIstance.carrello.count == 0 {
+        if Cart.sharedIstance.cart.count == 0 {
             self.carousel.isEnabled = false
             self.carousel.removeBadge()
         }else {
-            self.carousel.addBadge(number: Cart.sharedIstance.carrello.count)
+            self.carousel.addBadge(number: Cart.sharedIstance.cart.count)
         }
 
     }
@@ -532,7 +532,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         
         //add new Order into Cart
         //Se l'Ordine è indirizzata ad un utente già presente nel carrello unisce i prodotti sotto lo stesso utente destinatario
-        for cartOrder in Cart.sharedIstance.carrello {
+        for cartOrder in Cart.sharedIstance.cart {
             if cartOrder.userDestination?.idFB == order.userDestination?.idFB {
                 cartOrder.products?.removeLast()
                 //Se il prodotto è lo stesso cambia solo la quantità
@@ -552,10 +552,10 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
             }
         }
         if !insertOk {
-            Cart.sharedIstance.carrello.append(order)
+            Cart.sharedIstance.cart.append(order)
         }
         self.carousel.isEnabled = true
-        self.carousel.addBadge(number: Cart.sharedIstance.carrello.count)
+        self.carousel.addBadge(number: Cart.sharedIstance.cart.count)
         self.deleteOrdine()
     }
     
