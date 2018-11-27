@@ -58,8 +58,8 @@ class Order {
     }
     
     enum ViewStates: String {
-        case active = "active" //l'utente destinatario dell'offerta rifiuta l'offerta
-        case deleted = "deleted" // l'utente destinatario dell'offerta accetta l'offerta
+        case active = "active" //l'utente destinatario dell'offerta accetta l'offerta
+        case deleted = "deleted" // l'utente destinatario dell'offerta rifiuta o cancella l'offerta
         case filed = "filed" // l'utente destinatario dell'offerta ha inoltrato l'offerta
     }
     

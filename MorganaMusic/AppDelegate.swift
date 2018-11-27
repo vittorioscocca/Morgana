@@ -533,7 +533,7 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             let autoIdOrder = userInfo["autoIdOrder"] as? String
             let companyId = userInfo["companyId"] as? String
                 
-            FirebaseData.sharedIstance.acceptOrder(state: "Offerta accettata", userFullName: userFullName!, userIdApp: userIdApp!, comapanyId: companyId!, userSenderIdApp: userSenderIdApp!, idOrder: idOrder!, autoIdOrder: autoIdOrder!)
+            FirebaseData.sharedIstance.acceptOrder(state: "Offerta accettata", userFullName: userFullName!, userIdApp: userIdApp!, comapanyId: companyId!, userSenderIdApp: userSenderIdApp!, idOrder: idOrder!, autoIdOrder: autoIdOrder!, viewState: Order.ViewStates.active)
             print("Ordine ACCETTATO")
             break
         case "refuseOrder.action" :
@@ -547,7 +547,7 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             let autoIdOrder = userInfo["autoIdOrder"] as? String
             let companyId = userInfo["companyId"] as? String
             
-            FirebaseData.sharedIstance.refuseOrder(state: "Offerta rifiutata", userFullName: userFullName!, userIdApp: userIdApp!, comapanyId: companyId!, userSenderIdApp: userSenderIdApp!, idOrder: idOrder!, autoIdOrder: autoIdOrder!)
+            FirebaseData.sharedIstance.refuseOrder(state: "Offerta rifiutata", userFullName: userFullName!, userIdApp: userIdApp!, comapanyId: companyId!, userSenderIdApp: userSenderIdApp!, idOrder: idOrder!, autoIdOrder: autoIdOrder!, viewState: Order.ViewStates.deleted)
             print("Ordine Rifiutato")
             break
         case "acceptCredits.action":

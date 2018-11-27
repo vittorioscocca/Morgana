@@ -814,7 +814,14 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                         let offerId = self.ordersReceived[indexPath.row].idOfferta
                         else { return }
                         
-                    FirebaseData.sharedIstance.acceptOrder(state: "Offerta accettata", userFullName: userFullName, userIdApp: userIdApp, comapanyId: companyId, userSenderIdApp: userSenderIdApp, idOrder: offerId, autoIdOrder: self.ordersReceived[indexPath.row].orderAutoId)
+                    FirebaseData.sharedIstance.acceptOrder(state: "Offerta accettata",
+                                                           userFullName: userFullName,
+                                                           userIdApp: userIdApp,
+                                                           comapanyId: companyId,
+                                                           userSenderIdApp: userSenderIdApp,
+                                                           idOrder: offerId,
+                                                           autoIdOrder: self.ordersReceived[indexPath.row].orderAutoId,
+                                                           viewState: Order.ViewStates.active)
                     
                     self.scheduleExpiryNotification(order: self.ordersReceived[indexPath.row])
                     self.scheduleRememberExpiryNotification(order: self.ordersReceived[indexPath.row])
@@ -1180,7 +1187,14 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
             action = UIAlertAction(title: "Rifiuta", style: UIAlertActionStyle.default, handler: {(paramAction:UIAlertAction!) in
                 print("'Rifiuta' è stato cliccato")
                 FirebaseData.sharedIstance.user = self.user
-                FirebaseData.sharedIstance.refuseOrder(state: "Offerta rifiutata", userFullName: (self.user?.fullName)!, userIdApp: (self.user?.idApp)!, comapanyId: (self.ordersReceived[(indexPath?.row)!].company?.companyId)!, userSenderIdApp: (self.ordersReceived[(indexPath?.row)!].userSender?.idApp)!, idOrder: self.ordersReceived[(indexPath?.row)!].idOfferta!, autoIdOrder: self.ordersReceived[(indexPath?.row)!].orderAutoId)
+                FirebaseData.sharedIstance.refuseOrder(state: "Offerta rifiutata",
+                                                       userFullName: (self.user?.fullName)!,
+                                                       userIdApp: (self.user?.idApp)!,
+                                                       comapanyId: (self.ordersReceived[(indexPath?.row)!].company?.companyId)!,
+                                                       userSenderIdApp: (self.ordersReceived[(indexPath?.row)!].userSender?.idApp)!,
+                                                       idOrder: self.ordersReceived[(indexPath?.row)!].idOfferta!,
+                                                       autoIdOrder: self.ordersReceived[(indexPath?.row)!].orderAutoId,
+                                                       viewState: Order.ViewStates.deleted)
                 self.ordersReceived[(indexPath?.row)!].refuseOffer()
                 //FirebaseData.sharedIstance.deleteOrderReceveidOnFirebase(order: self.ordersReceived[(indexPath?.row)!])
                 

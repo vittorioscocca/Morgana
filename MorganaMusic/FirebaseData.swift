@@ -1143,9 +1143,9 @@ class FirebaseData {
     }
     
     //func updateStateOnFirebase (order: Order, state: String){
-    func updateStateOnFirebase (userIdApp: String, userSenderIdApp: String, comapanyId: String, idOrder: String, autoIdOrder: String, state: String){
+    func updateStateOnFirebase (userIdApp: String, userSenderIdApp: String, comapanyId: String, idOrder: String, autoIdOrder: String, state: String, viewState: Order.ViewStates) {
         
-        FireBaseAPI.updateNode(node: "ordersReceived/\(userIdApp)/\(comapanyId)/\(autoIdOrder)", value: [Order.orderReaded : "true", Order.offerState : state])
+        FireBaseAPI.updateNode(node: "ordersReceived/\(userIdApp)/\(comapanyId)/\(autoIdOrder)", value: [Order.orderReaded : "true", Order.offerState : state, "viewState": viewState.rawValue])
         FireBaseAPI.updateNode(node: "ordersSent/\(userSenderIdApp)/\(comapanyId)/\(idOrder)", value: [Order.offerState: state])
     }
     
@@ -1251,16 +1251,32 @@ class FirebaseData {
         })
     }
     
-    func acceptOrder(state: String, userFullName: String, userIdApp: String, comapanyId: String,userSenderIdApp: String,idOrder: String, autoIdOrder: String){
-        FirebaseData.sharedIstance.updateStateOnFirebase(userIdApp: userIdApp, userSenderIdApp: userSenderIdApp,comapanyId: comapanyId, idOrder: idOrder, autoIdOrder: autoIdOrder, state: state)
+    func acceptOrder(state: String, userFullName: String, userIdApp: String, comapanyId: String,userSenderIdApp: String,idOrder: String, autoIdOrder: String, viewState: Order.ViewStates){
+        FirebaseData.sharedIstance.updateStateOnFirebase(userIdApp: userIdApp,
+                                                         userSenderIdApp: userSenderIdApp,
+                                                         comapanyId: comapanyId,
+                                                         idOrder: idOrder,
+                                                         autoIdOrder: autoIdOrder,
+                                                         state: state,
+                                                         viewState: viewState)
+        
         let msg = "Il tuo amico " + userFullName  + " ha accettato il tuo ordine"
+        
         NotificationsCenter.sendOrderAcionNotification(userDestinationIdApp:userSenderIdApp, msg: msg, controlBadgeFrom: "purchased")
         FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase(userSenderIdApp, recOrPurch: "purchased")
     }
     
-    func refuseOrder(state: String, userFullName: String, userIdApp: String, comapanyId: String, userSenderIdApp: String,idOrder: String, autoIdOrder: String) {
-        FirebaseData.sharedIstance.updateStateOnFirebase(userIdApp: userIdApp, userSenderIdApp: userSenderIdApp,comapanyId:comapanyId, idOrder: idOrder, autoIdOrder: autoIdOrder, state: state)
+    func refuseOrder(state: String, userFullName: String, userIdApp: String, comapanyId: String, userSenderIdApp: String,idOrder: String, autoIdOrder: String, viewState: Order.ViewStates) {
+        FirebaseData.sharedIstance.updateStateOnFirebase(userIdApp: userIdApp,
+                                                         userSenderIdApp: userSenderIdApp,
+                                                         comapanyId:comapanyId,
+                                                         idOrder: idOrder,
+                                                         autoIdOrder: autoIdOrder,
+                                                         state: state,
+                                                         viewState: viewState)
+        
         let msg = "Il tuo amico " + userFullName  + " ha rifiutato il tuo ordine"
+        
         NotificationsCenter.sendOrderAcionNotification(userDestinationIdApp: userSenderIdApp, msg: msg, controlBadgeFrom: "purchased")
         FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase(userSenderIdApp, recOrPurch: "purchased")
     }
