@@ -1359,6 +1359,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 guard let userIdApp  = self.user?.idApp,
                     let forwardCompanyId = self.forwardOrder?.company?.companyId,
                     let forwardOfferId = self.forwardOrder?.idOfferta,
+                    let forwardAutoIdOffer = self.forwardOrder?.orderAutoId,
                     let forwardUserDestinationIdApp = self.forwardOrder?.userDestination?.idApp,
                     let forwardUserDestinationIdFB = self.forwardOrder?.userDestination?.idFB,
                     let user = self.user,
@@ -1386,6 +1387,19 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                     self.showSuccess()
                     
                     FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase(oldFriendDestinationIdApp, recOrPurch: "received")
+                    
+                    let msg = "Il tuo amico " + (user.fullName)! + " ti ha appena offerto qualcosa"
+                    
+                    //push notification and App badge value for Receiver
+                    NotificationsCenter.sendOrderNotification(userDestinationIdApp: forwardUserDestinationIdApp,
+                                                              msg: msg,
+                                                              controlBadgeFrom: "received",
+                                                              companyId: forwardCompanyId,
+                                                              userFullName: user.fullName!,
+                                                              userIdApp: userIdApp,
+                                                              userSenderIdApp: userIdApp,
+                                                              idOrder: forwardOfferId,
+                                                              autoIdOrder: forwardAutoIdOffer)
                     
                 })
                 

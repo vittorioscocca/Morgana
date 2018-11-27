@@ -193,10 +193,12 @@ class PaymentViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "paymentCell", for: indexPath)
-        let arrayKey = [String](paymentMethod.keys)
+        let arrayKey = [String](paymentMethod.keys).sorted{ $0<$1 }
+        
         (cell as! PaymentTableViewCell).brandCompany.image = UIImage(named: self.paymentMethod[arrayKey[indexPath.row]]!)
         (cell as! PaymentTableViewCell).nameCompany.text = arrayKey[indexPath.row]
         cell.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
+        
         return cell
     }
     

@@ -26,6 +26,7 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
         case erroreTitle = "Attenzione"
         case enterOneProduct_message = "Inserisci almeno un prodotto"
         case enterQuantity_message = "Inserisci una quantità di prodotto maggiore di 0"
+        case genericError_message = "Conteggio prezzo o calcolo punti fallito"
     }
     
     var userId: String?
@@ -180,13 +181,17 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
             self.generateAlert(title: ErrorMessages.erroreTitle.rawValue, message: ErrorMessages.enterOneProduct_message.rawValue)
             return
         }
+        
         guard quantity.text != "0" else {
             self.generateAlert(title: ErrorMessages.erroreTitle.rawValue, message: ErrorMessages.enterQuantity_message.rawValue)
             return
         }
+        
         guard let price = selection.price, let points = points_label.text else {
+            self.generateAlert(title: ErrorMessages.erroreTitle.rawValue, message: ErrorMessages.genericError_message.rawValue)
             return
         }
+        
         let prod = Product(productName: selection.product, price: price, quantity: Int(quantity.text!), points: Int(points))
         Order.sharedIstance.addProduct(product: prod, userId: userId!)
         
