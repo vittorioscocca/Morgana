@@ -16,6 +16,7 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     @IBOutlet weak var numAmici: UIBarButtonItem!
     @IBOutlet weak var myActivityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var loading_label: UILabel!
+    @IBOutlet weak var emptyListMessage: UILabel!
     
     var segueFrom: String?
     var resultSearchController: UISearchController?
@@ -54,9 +55,9 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
         })()
        
         myTable.addSubview(refreshControl1)
-        friendsList = deleteForwardFriend(friendListPass: FacebookFriendsListManager.instance.readContactList().facebookFriendsList)
+        friendsList = FacebookFriendsListManager.instance.readContactList().facebookFriendsList
         guard let fbFriendsList = friendsList else { return }
-        self.numAmici.title = String(fbFriendsList.count)
+        numAmici.title = String(fbFriendsList.count)
         
         NotificationCenter.default.addObserver(self,
                                        selector: #selector(FacebookFriendsListStateDidChange),
@@ -87,7 +88,6 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
             myActivityIndicator.startAnimating()
             refreshControl1.beginRefreshing()
             myTable.isUserInteractionEnabled = false
-            print("*-*- passato")
         } else {
             myActivityIndicator.stopAnimating()
             loading_label.isHidden = true
@@ -97,19 +97,34 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
             generateAlert(error: error.error)
         }
         
-        if case .success = FacebookFriendsListManager.instance.state{
+        if case .success = FacebookFriendsListManager.instance.state {
             refreshControl1.endRefreshing()
             myTable.isUserInteractionEnabled = true
+            guard let fbFriendsList = friendsList, fbFriendsList.count > 0 else {
+                emptyListMessage.isHidden = false
+                emptyListMessage.text = "Invita i tuoi amici a scaricare l'app"
+                return
+            }
+            
             friendsList = deleteForwardFriend(friendListPass: FacebookFriendsListManager.instance.readContactList().facebookFriendsList)
-            guard let fbFriendsList = friendsList else { return }
+            guard let fbFriendsListFiltered = friendsList, fbFriendsListFiltered.count > 0 else {
+                emptyListMessage.isHidden = false
+                emptyListMessage.text = "Nessun amico disponibile"
+                return
+            }
+            emptyListMessage.isHidden = true
             numAmici.title = String(fbFriendsList.count)
             myTable.reloadData()
         }
     }
     
     private func deleteForwardFriend(friendListPass: [Friend]?) -> [Friend]? {
+        var idToDelete: Set<String> = Set()
         if let order = forwardOrder {
-            return friendListPass?.filter({$0.idFB != order.userDestination?.idFB})
+            for (_, value) in order.refusedOrderUsers {
+                idToDelete.insert(value)
+            }
+            return friendListPass?.filter({!idToDelete.contains($0.idFB!)})
         }
         return friendListPass
     }

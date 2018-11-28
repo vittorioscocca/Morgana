@@ -1915,6 +1915,12 @@
                                 <rect key="frame" x="169" y="315" width="37" height="37"/>
                                 <color key="color" red="0.74117647060000003" green="0.1529411765" blue="0.20784313730000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </activityIndicatorView>
+                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="LISTA AMICI VUOTA" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nKU-BJ-IoX">
+                                <rect key="frame" x="110.5" y="323" width="154" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Loading..." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IBT-FP-KA6">
                                 <rect key="frame" x="0.0" y="361.5" width="375" height="33.5"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -1926,9 +1932,11 @@
                         <constraints>
                             <constraint firstItem="fvb-co-DNo" firstAttribute="top" secondItem="1Wa-g1-TIe" secondAttribute="bottom" id="3HY-j4-XD0"/>
                             <constraint firstAttribute="trailing" secondItem="fvb-co-DNo" secondAttribute="trailing" id="4ne-DS-HAc"/>
+                            <constraint firstItem="nKU-BJ-IoX" firstAttribute="centerY" secondItem="74v-zx-k3r" secondAttribute="centerY" id="6zp-JK-Jv3"/>
                             <constraint firstItem="74v-zx-k3r" firstAttribute="top" secondItem="IBT-FP-KA6" secondAttribute="bottom" constant="-80" id="Pm4-ja-mqJ"/>
                             <constraint firstItem="IBT-FP-KA6" firstAttribute="height" secondItem="s6s-NQ-MEq" secondAttribute="height" multiplier="0.05" id="Sak-US-6NC"/>
                             <constraint firstItem="74v-zx-k3r" firstAttribute="centerY" secondItem="s6s-NQ-MEq" secondAttribute="centerY" id="aCn-Vk-Wjp"/>
+                            <constraint firstItem="nKU-BJ-IoX" firstAttribute="centerX" secondItem="74v-zx-k3r" secondAttribute="centerX" id="cri-Mq-T0K"/>
                             <constraint firstItem="1Wa-g1-TIe" firstAttribute="top" secondItem="U0M-CR-yd9" secondAttribute="bottom" id="dXq-Lh-Uzi"/>
                             <constraint firstItem="74v-zx-k3r" firstAttribute="centerX" secondItem="s6s-NQ-MEq" secondAttribute="centerX" id="f2r-oL-m7W"/>
                             <constraint firstItem="IBT-FP-KA6" firstAttribute="centerX" secondItem="74v-zx-k3r" secondAttribute="centerX" id="fBF-Vr-jh9"/>
@@ -1940,6 +1948,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="emptyListMessage" destination="nKU-BJ-IoX" id="mOf-BE-Ktw"/>
                         <outlet property="loading_label" destination="IBT-FP-KA6" id="dBU-Pp-3jN"/>
                         <outlet property="myActivityIndicator" destination="74v-zx-k3r" id="PqQ-3K-yF1"/>
                         <outlet property="myTable" destination="fvb-co-DNo" id="SMw-az-E4M"/>

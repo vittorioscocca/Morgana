@@ -33,6 +33,7 @@ class Order {
     var totalReadedFromFirebase: String = ""
     var company: Company?
     var viewState: ViewStates
+    var refusedOrderUsers: [String:String] = [:]
     
     var points: Int {
         var innerPoints = 0
@@ -54,7 +55,8 @@ class Order {
         case consumed = "Offerta consumata" // data scadenza raggiunta
         case pending = "Pending" //stato di default
         case ransom = "Offerta riscattata"
-        case scaled = "Offerta scalata"  
+        case scaled = "Offerta scalata"
+        case addedToCredits = "Offerta aggiunta ai crediti"
     }
     
     enum ViewStates: String {
@@ -205,4 +207,5 @@ extension Order {
     static let orderExpirationNotificationIsScheduled = "orderExpirationNotificationIsScheduled"
     static let scanningQrCode = "scanningQrCode"
     static let senderIdFB = "userSenderIdFB"
+    static let refusedOrderUsers = "refusedOrderUsers"
 }
