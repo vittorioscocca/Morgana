@@ -120,7 +120,8 @@ class FirebaseData {
             Order.userSenderIdApp: user?.idApp != nil ? user!.idApp! : "",
             Order.orderReaded:"false",
             Order.consumingDate: "",
-            Order.viewState: order.viewState.rawValue
+            Order.viewState: order.viewState.rawValue,
+            Order.refusedOrderUsers: ""
         ]
     }
     
@@ -552,12 +553,21 @@ class FirebaseData {
                         }
                     }
                 }
-                //filtering expired data
                 
+                //filtering expired data
                 if order.offerState != .expired {
                     self.scheduleExpiryNotification(order: order)
                     if let timeStamp = ServerValue.timestamp().values.first as? TimeInterval {
                         self.mangeExpiredOffers(timeStamp: timeStamp, order: order, ref: self.ref)
+                    }
+                }
+                
+                let refusedOrdersUserDic = orderDataDictionary[Order.refusedOrderUsers] as? NSDictionary
+                if refusedOrdersUserDic != nil {
+                    for (_, dic) in refusedOrdersUserDic! {
+                        for (key, value) in (dic as? NSDictionary)! {
+                            order.refusedOrderUsers[key as! String] = value as? String
+                        }
                     }
                 }
             
@@ -935,6 +945,8 @@ class FirebaseData {
     //MARK: OBSERVER ORDERS ON FIREBASE
     private func observeOrdersOnFirebase(userIdApp: String) {
         ref.child("ordersReceived/" + userIdApp + "/\(companyID)").observe(.childChanged, with: { (snap) in
+            guard snap.exists() else { return }
+            
             if snap.key == "scanningQrCode" {
                 if (snap.value as? Bool)! == true {
                     let activeViewController = UIApplication.topViewController(UIApplication.shared.keyWindow?.rootViewController?.childViewControllers[1])
@@ -966,6 +978,7 @@ class FirebaseData {
                 }
             }
         })
+        //problema questi observer sentono quando un child si modifica ma non sentono se un nuovo child è creato
         ref.child("ordersSent/" + userIdApp + "/\(companyID)").observe(.childChanged, with: { (snap) in
             let ordersSent = OrdersListManager.instance.readOrdersList().ordersList.ordersSentList
             ordersSent.forEach({ (order) in
@@ -1144,15 +1157,18 @@ class FirebaseData {
     
     //func updateStateOnFirebase (order: Order, state: String){
     func updateStateOnFirebase (userIdApp: String, userSenderIdApp: String, comapanyId: String, idOrder: String, autoIdOrder: String, state: String, viewState: Order.ViewStates) {
-        
         FireBaseAPI.updateNode(node: "ordersReceived/\(userIdApp)/\(comapanyId)/\(autoIdOrder)", value: [Order.orderReaded : "true", Order.offerState : state, "viewState": viewState.rawValue])
+        
+        let node = "ordersSent/\(userSenderIdApp)/\(comapanyId)/\(idOrder)/\(Order.refusedOrderUsers)/"
+        let dictionaryToSave = ["\((user?.fullName)!) idFB" : user?.idFB!]
+        ref.child(node).childByAutoId().setValue(dictionaryToSave)
+        
         FireBaseAPI.updateNode(node: "ordersSent/\(userSenderIdApp)/\(comapanyId)/\(idOrder)", value: [Order.offerState: state])
     }
     
     func deleteOrderOnFirebase(node: String,userIdApp: String, comapanyId: String, autoIdOrder: String, viewState: String){
-        
         //ref.child("ordersReceived/" + (order.userDestination?.idApp)! + "/" + order.orderAutoId).removeValue()
-        FireBaseAPI.updateNode(node: "\(node)/\(userIdApp)/\(comapanyId)/\(autoIdOrder)", value: ["viewState":viewState])
+        FireBaseAPI.updateNode(node: "\(node)/\(userIdApp)/\(comapanyId)/\(autoIdOrder)", value: [Order.offerState: Order.OfferStates.addedToCredits.rawValue, Order.viewState: viewState])
     }
     
     /*
@@ -1190,10 +1206,9 @@ class FirebaseData {
         var date = Date()
         if userApp.idApp == userDestinationIdApp {
             date = Calendar.current.date(byAdding: .year, value: 1, to: Date())!
-        }else {
+        } else {
             date = Calendar.current.date(byAdding: .weekday, value: 3, to: Date())!
         }
-        
         
         let newValues = [
             Order.offerCreationDate : creationDate,
@@ -1212,6 +1227,7 @@ class FirebaseData {
                 return
             }
             FireBaseAPI.updateNode(node: "ordersReceived/\(userDestinationIdApp)/\(company)", value: [Order.scanningQrCode : false])
+            FireBaseAPI.updateNode(node: destinationNode, value: [Order.timestamp : ServerValue.timestamp()])
             onCompletion(error)
         })
         

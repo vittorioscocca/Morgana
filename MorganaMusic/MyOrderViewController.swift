@@ -466,7 +466,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                         (cell as! OrderSentTableViewCell).createDate.textColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
                     }
                     
-                case .ransom:
+                case .ransom, .addedToCredits:
                     break
                 }
             }
@@ -1195,12 +1195,13 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                                                        idOrder: self.ordersReceived[(indexPath?.row)!].idOfferta!,
                                                        autoIdOrder: self.ordersReceived[(indexPath?.row)!].orderAutoId,
                                                        viewState: Order.ViewStates.deleted)
+                
                 self.ordersReceived[(indexPath?.row)!].refuseOffer()
                 //FirebaseData.sharedIstance.deleteOrderReceveidOnFirebase(order: self.ordersReceived[(indexPath?.row)!])
                 
                 self.ordersReceived.remove(at: (indexPath?.row)!)
                 self.myTable.deleteRows(at: [indexPath!], with: .fade)
-                
+                OrdersListManager.instance.refreshOrdersList()
             })
             actionAnnulla = UIAlertAction(title: "Annulla", style: UIAlertActionStyle.default, handler:
                 {(paramAction:UIAlertAction!) in
@@ -1215,6 +1216,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 self.oldFriendDestination = UserDestination(nil, self.forwardOrder?.userDestination?.idFB, nil, self.forwardOrder?.userDestination?.idApp, nil)
                 self.forwardOrder?.userDestination?.idApp = self.user?.idApp
                 self.forwardOrder?.userDestination?.idFB = self.user?.idFB
+                
                 FireBaseAPI.updateNode(node: "ordersSent/\((self.user?.idApp)!)/\((self.forwardOrder?.company?.companyId)!)/\((self.forwardOrder?.idOfferta)!)", value: ["IdAppUserDestination" : (self.user?.idApp)!, "facebookUserDestination":(self.user?.idFB)!,"offerState":"Offerta riscattata"])
                 
                 FirebaseData.sharedIstance.moveFirebaseRecord(userApp: self.user!,user: self.oldFriendDestination!, company: (self.forwardOrder?.company?.companyId)!, order: self.forwardOrder!, onCompletion: { (error) in
@@ -1364,8 +1366,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                     let forwardUserDestinationIdFB = self.forwardOrder?.userDestination?.idFB,
                     let user = self.user,
                     let olderFriendDestination = self.oldFriendDestination,
-                    let orderForwarder = self.forwardOrder,
-                    let oldFriendDestinationIdApp = self.oldFriendDestination?.idApp
+                    let orderForwarder = self.forwardOrder
                     else { return }
                 
                 let formatter = DateFormatter()
@@ -1376,9 +1377,12 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 //if the user has bought the order for itself expiration date is from 1 year
                 let expirationDate = formatter.string(from: Calendar.current.date(byAdding: .weekday, value: 3, to: Date())!)
                 
-                
-                FireBaseAPI.updateNode(node: "ordersSent/\(userIdApp)/\(forwardCompanyId)/\(forwardOfferId)", value: [Order.idAppUserDestination : forwardUserDestinationIdApp, Order.facebookUserDestination:forwardUserDestinationIdFB, Order.offerState:"Pending", Order.offerCreationDate:creationDate,Order.expirationDate:expirationDate])
-                
+                FireBaseAPI.updateNode(node: "ordersSent/\(userIdApp)/\(forwardCompanyId)/\(forwardOfferId)",
+                    value: [Order.idAppUserDestination: forwardUserDestinationIdApp,
+                            Order.facebookUserDestination: forwardUserDestinationIdFB,
+                            Order.offerState: "Pending",
+                            Order.offerCreationDate:creationDate,Order.expirationDate: expirationDate])
+
                 FirebaseData.sharedIstance.moveFirebaseRecord(userApp: user,user: olderFriendDestination, company: forwardCompanyId, order: orderForwarder, onCompletion: { (error) in
                     guard error == nil else {
                         self.generateAlert(title: "Errore", msg: error!, indexPath: nil)
@@ -1386,7 +1390,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                     }
                     self.showSuccess()
                     
-                    FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase(oldFriendDestinationIdApp, recOrPurch: "received")
+                    FirebaseData.sharedIstance.updateNumberPendingProductsOnFireBase(forwardUserDestinationIdApp, recOrPurch: "received")
                     
                     let msg = "Il tuo amico " + (user.fullName)! + " ti ha appena offerto qualcosa"
                     
