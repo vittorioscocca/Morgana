@@ -195,7 +195,7 @@ class PointsManager {
         }else {
             addPointsForStandardConsumption(numberOfProducts)
         }
-        return balanceCurrentPoints
+        return Int(Double(numberOfProducts)*standardConsumptions!/changeCreditToPoint!)
     }
     
     

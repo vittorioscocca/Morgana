@@ -68,7 +68,7 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
         
         FirebaseData.sharedIstance.readSingleOrder(userId: idUserDestination, companyId: idCompany, orderId: idOrder, onCompletion: { (orders) in
             guard !orders.isEmpty else {
-                print("errore di lettura su Ordine")
+                print("[AuthOrderViewController]: errore di lettura su Ordine")
                 return
             }
             let order = orders[0]
@@ -115,7 +115,7 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
     private func readImage(){
         CacheImage.getImage(url: self.orderReaded?.userDestination?.pictureUrl, onCompletion: { (image) in
             guard image != nil else {
-                print("Attenzione URL immagine Mittente non presente")
+                print("[AuthOrderViewController]: Attenzione URL immagine Mittente non presente")
                 return
             }
             DispatchQueue.main.async(execute: {
@@ -263,7 +263,6 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
     
     private func numberOfProducts()->Int{
         var totQuantity = 0
-        
         guard let products = orderReaded?.products else { return totQuantity}
         
         for product in products{
@@ -271,8 +270,6 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
         }
         return totQuantity
     }
-    
-    
     
     private func updateNewProductsOfferDetails(){
         
@@ -311,7 +308,6 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
         self.present(self.alert, animated: true, completion: nil)
     }
     
-    
     private func sendNotificationToUserSender(){
         //Send notification
         var msg: String = ""
@@ -320,7 +316,7 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
             let friendName = orderReaded?.userDestination?.fullName
         else { return }
         
-        msg = "Il tuo amico \(friendName) ha appena consumato l'ordine da te inviato "
+        msg = "Il tuo amico \(friendName) ha appena consumato l'ordine che gli hai offerto"
         NotificationsCenter.sendConsuptionNotification(userDestinationIdApp: userDestinationIdApp, msg: msg, controlBadgeFrom: "purchased")
         print("Notifica al sender inviata")
     }
@@ -338,11 +334,11 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
         if orderReaded?.offerState == .accepted {
             if orderReaded?.userDestination?.idApp != orderReaded?.userSender?.idApp {
                 sendNotificationToUserSender()
-                sendNotificationToUserReceiver()
+                //sendNotificationToUserReceiver()
             }
             self.updateUserPoints()
         }else {
-            print("Sato offerta diversa da Accettata")
+            print("[AuthOrderViewController]: Sato offerta diversa da Accettata")
             sendNotificationToUserReceiver()
         }
     }
@@ -360,7 +356,7 @@ class AuthOrderViewController: UIViewController,UITableViewDelegate, UITableView
             let points = PointsManager.sharedInstance.addPointsForConsumption(date: currentDate, numberOfProducts: self.numberOfProducts())
             PointsManager.sharedInstance.updateNewPointsOnFirebase(actualUserId: userDestinationIdApp, onCompletion: {
                 //send notification
-                let msg = "Il tuo ordine è stato approvato, hai cumulato \(points) punti"
+                let msg = "Il tuo ordine è stato approvato, hai cumulato \(points) " + (points > 1 ? "punti" : "punto")
                 NotificationsCenter.sendConsuptionNotification(userDestinationIdApp: userDestinationIdApp, msg: msg, controlBadgeFrom: "received")
                 
             })

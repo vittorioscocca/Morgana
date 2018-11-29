@@ -20,6 +20,7 @@ class Payment {
     static let totalProducts = "totalProducts"
     static let stateCartPayment = "stateCartPayment"
     static let pendingUserIdApp = "pendingUserIdApp"
+    static let totalPoints = "totalPoints"
     
     enum State: String {
         case notValid = "Not Valid"
@@ -37,6 +38,7 @@ class Payment {
     var relatedOrders: [String]
     var pendingUserIdApp: String
     var company: Company?
+    var totalPoints: Int
     
     init( platform: String, paymentType: String, createTime: String, idPayment: String, statePayment: String, autoId: String, total: String) {
         
@@ -50,6 +52,7 @@ class Payment {
         self.relatedOrders = []
         self.pendingUserIdApp = ""
         self.company = Company()
+        self.totalPoints = 0
     }
     
 }
