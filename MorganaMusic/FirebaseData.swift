@@ -324,6 +324,7 @@ class FirebaseData {
         paymentDictionaryDetails[Payment.totalProducts] = String(Cart.sharedIstance.totalProducts)
         paymentDictionaryDetails[Payment.total] = String(format:"%.2f", Cart.sharedIstance.costoTotale)
         paymentDictionaryDetails[Payment.stateCartPayment] = Cart.sharedIstance.state
+        paymentDictionaryDetails[Payment.totalPoints] = Cart.sharedIstance.totalPoints
         
         if self.user?.idApp != nil {
             paymentDictionaryDetails[Payment.pendingUserIdApp] = (self.user?.idApp)!
@@ -942,43 +943,89 @@ class FirebaseData {
             })
     }
     
+    private func navigateToPreviuousController() {
+        /*var previousViewController: UIViewController? = nil
+        
+        if let navigationStack = UIApplication.shared.navigationController?.viewControllers {
+            for viewController in navigationStack {
+                if viewController == self {
+                    break
+                }
+                
+                previousViewController = viewController
+            }
+        }
+        
+        conversationListViewController = previousViewController as? ConversationListViewController
+        
+        var oldestUnreadMessage: IndexPath? = nil
+        
+        if let sections = fetchedResultsController?.sections {
+            sectionsLoop: for sectionIndex in 0..<sections.count {
+                let section = sections[sectionIndex]
+                
+                if let objects = section.objects {
+                    for objectIndex in 0..<objects.count {
+                        let object = objects[objectIndex]
+                        
+                        if let message = object as? MessageLogEntry {
+                            if message.incoming && !message.read {
+                                oldestUnreadMessage = IndexPath(row: objectIndex, section: sectionIndex)
+                                break sectionsLoop
+                            }
+                        }
+                    }
+                }
+            }
+        }*/
+    }
+    
     //MARK: OBSERVER ORDERS ON FIREBASE
     private func observeOrdersOnFirebase(userIdApp: String) {
         ref.child("ordersReceived/" + userIdApp + "/\(companyID)").observe(.childChanged, with: { (snap) in
             guard snap.exists() else { return }
-            
+
             if snap.key == "scanningQrCode" {
                 if (snap.value as? Bool)! == true {
-                    let activeViewController = UIApplication.topViewController(UIApplication.shared.keyWindow?.rootViewController?.childViewControllers[1])
-                    if activeViewController is QROrderGenerationViewController {
-                        (activeViewController as! QROrderGenerationViewController).unwind()
-                    }
-                    FireBaseAPI.updateNode(node: "ordersReceived/\((self.user?.idApp)!)/\(self.companyID)", value: [Order.scanningQrCode: false])
-                    OrdersListManager.instance.refreshOrdersList()
-                    print("[FIREBASEDATA]: Order list refreshed from firebase observer, scanningQRCode")
+                    if let controllers = UIApplication.shared.keyWindow?.rootViewController?.childViewControllers {
+                        for viewController in controllers {
+                            if UIApplication.topViewController(viewController) is QROrderGenerationViewController {
+                                if let currentController  = UIApplication.topViewController(viewController) as? QROrderGenerationViewController {
+                                    currentController.unwind()
+                                    FireBaseAPI.updateNode(node: "ordersReceived/\((self.user?.idApp)!)/\(self.companyID)", value: [Order.scanningQrCode: false])
+                                    OrdersListManager.instance.refreshOrdersList()
+                                    print("[FIREBASEDATA]: Order list refreshed from firebase observer, scanningQRCode")
+                                    return
+                                }
+                            }
+                        }
+
+                    }   
                 }
             } else {
                 let ordersReceived = OrdersListManager.instance.readOrdersList().ordersList.ordersReceivedList
-                if ordersReceived.count < snap.childrenCount - 1 {
-                    OrdersListManager.instance.refreshOrdersList()
-                    print("[FIREBASEDATA]: Order list refreshed from firebase observer, new child added in order received")
-                    return
-                } else {
-                    ordersReceived.forEach({ (order) in
-                        //verifing if is an update
-                        if order.orderAutoId == snap.key {
-                            guard let orderChanged = snap.value as? NSDictionary, let offerState = orderChanged["offerState"] as? String  else { return }
-                            if offerState != order.offerState.rawValue {
-                                OrdersListManager.instance.refreshOrdersList()
-                                print("[FIREBASEDATA]: Order list refreshed from firebase observer, offerState changed in orders received")
-                                return
-                            }
+                ordersReceived.forEach({ (order) in
+                    //verifing if is an update
+                    if order.orderAutoId == snap.key {
+                        guard let orderChanged = snap.value as? NSDictionary, let offerState = orderChanged[Order.offerState] as? String else { return }
+                        if offerState != order.offerState.rawValue {
+                            OrdersListManager.instance.refreshOrdersList()
+                            print("[FIREBASEDATA]: Order list refreshed from firebase observer, offerState changed in orders received")
+                            return
                         }
-                    })
-                }
+                    }
+                })
+                
             }
         })
-        //problema questi observer sentono quando un child si modifica ma non sentono se un nuovo child è creato
+        ref.child("ordersReceived/" + userIdApp + "/\(companyID)").observe(.childAdded, with: { (snap) in
+            guard snap.exists() else { return }
+            
+            OrdersListManager.instance.refreshOrdersList()
+            print("[FIREBASEDATA]: Order list refreshed from firebase observer, new child added in order received")
+            return
+        })
+        
         ref.child("ordersSent/" + userIdApp + "/\(companyID)").observe(.childChanged, with: { (snap) in
             let ordersSent = OrdersListManager.instance.readOrdersList().ordersList.ordersSentList
             ordersSent.forEach({ (order) in

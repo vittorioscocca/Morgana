@@ -805,6 +805,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 //Action accept order
                 let acceptOrderAction = UITableViewRowAction(style: .normal, title: "Accetta") { (action, index) in
                     (thisCell as? OrderReceivedTableViewCell)?.cellReaded = true
+                    self.ordersReceived[indexPath.row].orderReaded = true
                     FirebaseData.sharedIstance.user = self.user
                     
                     guard let userFullName = self.user?.fullName,
