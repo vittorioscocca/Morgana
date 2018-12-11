@@ -72,7 +72,7 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
         
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(updateUserPoints),
-                                               name: .ReadingRemoteUserPointDidFinish,
+                                               name: .readingRemoteUserPointDidFinish,
                                                object: nil)
         addToOrder.layer.cornerRadius = 10
         addToOrder.layer.masksToBounds = true

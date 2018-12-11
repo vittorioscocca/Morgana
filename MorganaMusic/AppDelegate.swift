@@ -131,6 +131,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate  {
         _ = LoadRemoteProducts.instance
         _ = OrdersListManager.instance
         _ = PointsManager.sharedInstance
+        _ = LocalCurrency.instance
         
         initializeDynamicShortcuts()
         

@@ -11,7 +11,6 @@ import FBSDKLoginKit
 
 //User Facebook Friends List that use the app
 class FriendsListViewController: UIViewController,UITableViewDelegate, UITableViewDataSource, UISearchResultsUpdating {
-
     @IBOutlet weak var myTable: UITableView!
     @IBOutlet weak var numAmici: UIBarButtonItem!
     @IBOutlet weak var myActivityIndicator: UIActivityIndicatorView!
@@ -20,7 +19,6 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     
     var segueFrom: String?
     var resultSearchController: UISearchController?
-    
     var friendsList: [Friend]? = []
     var filteredList = [Friend]()
     var start = 0
@@ -29,17 +27,14 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
     var currentPage = 0
     var numberOfFriends = 0
     var forwardOrder: Order?
-   
     var user: User?
     var controller :UIAlertController?
-    
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.myTable.dataSource = self
         self.myTable.delegate = self
         
-    
         resultSearchController = ({
             // creo un oggetto di tipo UISearchController
             let controller = UISearchController(searchResultsController: nil)
@@ -249,7 +244,6 @@ class FriendsListViewController: UIViewController,UITableViewDelegate, UITableVi
         myTable.isUserInteractionEnabled = false
         FacebookFriendsListManager.instance.refreshContactList()
     }
-    
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         guard let identifier = segue.identifier else {

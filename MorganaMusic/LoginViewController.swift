@@ -20,7 +20,7 @@ public extension NSNotification.Name {
 
 //Facebook and Firebase Login Controller
 class LoginViewController: UIViewController, FBSDKLoginButtonDelegate {
-    
+
     @IBOutlet weak var customFBButtom: FBSDKLoginButton!
     
     //FB and Firebase access Token

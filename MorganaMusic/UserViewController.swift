@@ -44,7 +44,9 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
             guard user != nil else { return }
             self.userFullName.text = self.user?.fullName
             self.userEmail_text.text = self.user?.email
-        } else {self.generateAlert()}
+        }else {
+            self.generateAlert()
+        }
         
         self.readImage()
         self.setCustomImage()
@@ -61,8 +63,10 @@ class UserViewController: UIViewController, FBSDKAppInviteDialogDelegate {
             guard let userDictionary = dictionary else {
                 return
             }
+            guard let credits = userDictionary["credits"] as? Double else { return }
+            
             DispatchQueue.main.async(execute: {
-                self.userCredits_label.text = "€ " + String(format:"%.2f", userDictionary["credits"] as! Double)
+                self.userCredits_label.text = LocalCurrency.instance.getLocalCurrency(currency: NSNumber(floatLiteral: credits))
                 if userDictionary["companyCode"] as! String != "0" {
                     self.companyCode = userDictionary["companyCode"] as? String
                     
