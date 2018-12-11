@@ -214,11 +214,11 @@ class QROrderGenerationViewController: UIViewController, UITableViewDelegate, UI
                 let productName = product.productName,
                 let price = product.price
             else { return cell }
-            cell.textLabel?.text = "(\(quantity))  " + productName + " € " + String(format:"%.2f", price)
+            cell.textLabel?.text = "(\(quantity))  " + productName + "\t" + LocalCurrency.instance.getLocalCurrency(currency: NSNumber(floatLiteral: (price)))
             cell.textLabel?.textColor = #colorLiteral(red: 0.7411764706, green: 0.1529411765, blue: 0.2078431373, alpha: 1)
             
         } else {
-            cell.textLabel?.text = "Prodotti: \(self.offertaRicevuta!.prodottiTotali) \t\t Totale: € " +  String(format:"%.2f",offertaRicevuta!.costoTotale)
+            cell.textLabel?.text = "Prodotti: \(self.offertaRicevuta!.prodottiTotali) \t\t Totale: " +  LocalCurrency.instance.getLocalCurrency(currency: NSNumber(floatLiteral: (offertaRicevuta!.costoTotale)))
             cell.textLabel?.textColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
             cell.textLabel?.font =  UIFont.systemFont(ofSize: 17)
             cell.backgroundColor = #colorLiteral(red: 0.7411764706, green: 0.1529411765, blue: 0.2078431373, alpha: 1)

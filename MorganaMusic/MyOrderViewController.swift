@@ -471,7 +471,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
             }
             (cell as! OrderSentTableViewCell).productus.text = "Prodotti totali: " + String(orderSent.prodottiTotali)
-            (cell as! OrderSentTableViewCell).cost.text = "€ " + String(format:"%.2f",orderSent.costoTotale)
+            (cell as! OrderSentTableViewCell).cost.text = LocalCurrency.instance.getLocalCurrency(currency: NSNumber(floatLiteral: (orderSent.costoTotale)))
             
             CacheImage.getImage(url: orderSent.userDestination?.pictureUrl, onCompletion: { (image) in
                 guard image != nil else {
@@ -533,7 +533,7 @@ class MyOrderViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
             }
             (cell as! OrderReceivedTableViewCell).productus.text = "Prodotti totali: " + String(orderReceived.prodottiTotali)
-            (cell as! OrderReceivedTableViewCell).cost.text = "€ " + String(format:"%.2f",orderReceived.costoTotale)
+            (cell as! OrderReceivedTableViewCell).cost.text = LocalCurrency.instance.getLocalCurrency(currency: NSNumber(floatLiteral: (orderReceived.costoTotale))) 
             (cell as! OrderReceivedTableViewCell).ordersSentAutoId = orderReceived.idOfferta
             (cell as! OrderReceivedTableViewCell).orderReceivedAutoId = orderReceived.orderAutoId
             (cell as! OrderReceivedTableViewCell).friendFullName.text = orderReceived.userSender?.fullName
