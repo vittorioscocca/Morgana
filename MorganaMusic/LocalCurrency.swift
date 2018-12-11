@@ -23,7 +23,7 @@ class LocalCurrency: NSObject {
     }
     
     func getLocalCurrency(currency: NSNumber)-> String {
-        return currencyFormatter.string(from: currency) ?? "0"
+        return currencyFormatter.string(from: currency) ?? "0,00"
     }
     
 }

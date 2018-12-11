@@ -68,12 +68,10 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
         //navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
         //navigationController?.navigationBar.shadowImage = UIImage()
         
-        guard CheckConnection.isConnectedToNetwork() == true else{
-            self.isConnectedtoNetwork = false
-            self.quantità_label.text = "   Prodotti: " + "\(Order.sharedIstance.prodottiTotali)"
-            self.totale_label.text = "  Totale: € " + String(format:"%.2f", Order.sharedIstance.costoTotale)
-            self.points_label.text = "Punti: \(Order.sharedIstance.points)"
-            self.generateAlert(title: Alert.lostConnection_title.rawValue, msg: Alert.lostConnection_msg.rawValue)
+        guard CheckConnection.isConnectedToNetwork() else{
+            isConnectedtoNetwork = false
+            viewSettings()
+            generateAlert(title: Alert.lostConnection_title.rawValue, msg: Alert.lostConnection_msg.rawValue)
             return
         }
         if revealViewController() != nil {
@@ -103,10 +101,10 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        if  isConnectedtoNetwork == false {
+        if  !isConnectedtoNetwork  {
             self.viewDidLoad()
         }
-        self.isConnectedtoNetwork = true
+        isConnectedtoNetwork = true
         readCompanies()
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(updateTable),
@@ -120,7 +118,7 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
     
     @objc func networkStatusDidChange() {
-        if CheckConnection.isConnectedToNetwork() == true {
+        if CheckConnection.isConnectedToNetwork() {
             updateTable()
         }
     }
@@ -284,7 +282,6 @@ class OrderViewController: UIViewController, UITableViewDelegate, UITableViewDat
             if indexPath.row < products.count  {
                 if quantity != 0 {
                     cell?.textLabel?.text = "(\(quantity)) " + productName.uppercased() + "    Punti: \(points)    " +  LocalCurrency.instance.getLocalCurrency(currency: NSNumber(floatLiteral: price))
-                    
                     quantità_label.text = "Prodotti: \(Order.sharedIstance.prodottiTotali)"
                     totale_label.text = "Totale: " + LocalCurrency.instance.getLocalCurrency(currency: NSNumber(floatLiteral: Order.sharedIstance.costoTotale))
                     points_label.text = "Punti: \(Order.sharedIstance.points)"
