@@ -69,7 +69,7 @@ class LoadRemoteProducts {
     }
     
     @objc func applicationWillEnterForeground(){
-        print("Entering in foreground: Reload products")
+        print("[LoadRemoteProducts]: Entering in foreground: Reload products")
         loadRemoteProducts()
     }
     
@@ -102,10 +102,10 @@ class LoadRemoteProducts {
             }
             self.productsList = self.productsList?.sorted{ $0 < $1 }
             self.dispatchQueue.async {
-                print("Notifying products change")
+                print("[LoadRemoteProducts]: Notifying products change")
                 self.notificationCenter.post(name: .RemoteProductsListDidChange, object: self)
-            }
             
+            }
         })
     }
     

@@ -78,12 +78,12 @@ class CartViewController: UIViewController,UITableViewDelegate, UITableViewDataS
             (cell as! CartUserTableViewCell).friendImageView.image = UIImage(data: data! as Data)
             (cell as! CartUserTableViewCell).nome_label.text = (Cart.sharedIstance.cart[indexPath.row].userDestination?.fullName)!
             (cell as! CartUserTableViewCell).totProdotti_label.text = "Prodotti: " + String(Cart.sharedIstance.cart[indexPath.row].prodottiTotali)
-            (cell as! CartUserTableViewCell).costoOfferta_label.text = "€ " + String(format:"%.2f", Cart.sharedIstance.cart[indexPath.row].costoTotale)
+            (cell as! CartUserTableViewCell).costoOfferta_label.text = LocalCurrency.instance.getLocalCurrency(currency: NSNumber(floatLiteral: (Cart.sharedIstance.cart[indexPath.row].costoTotale)))
             cell?.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
         } else {
             //products section
             cell = tableView.dequeueReusableCell(withIdentifier: "cartCell", for: indexPath)
-            cell?.textLabel?.text = "Prodotti: \(Cart.sharedIstance.totalProducts) \t\t Punti: \(Cart.sharedIstance.totalPoints) \t\t Tot: € \(String(format:"%.2f",Cart.sharedIstance.costoTotale))" 
+            cell?.textLabel?.text = "Prodotti: \(Cart.sharedIstance.totalProducts) \t\t Punti: \(Cart.sharedIstance.totalPoints) \t\t Tot: \(LocalCurrency.instance.getLocalCurrency(currency: NSNumber(floatLiteral: (Cart.sharedIstance.costoTotale))))" 
             
             cell?.textLabel?.textColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
             cell?.textLabel?.font =  UIFont.systemFont(ofSize: 17)

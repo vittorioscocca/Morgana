@@ -72,7 +72,7 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
         
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(updateUserPoints),
-                                               name: .ReadingRemoteUserPointDidFinish,
+                                               name: .readingRemoteUserPointDidFinish,
                                                object: nil)
         addToOrder.layer.cornerRadius = 10
         addToOrder.layer.masksToBounds = true
@@ -146,10 +146,10 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
         selection.product = product
         selection.price = self.offersDictionary[product]
         
-        let priceString = String(format:"%.2f", selection.price!)
-        price1_label.text = priceString + " €"
+        let priceString = LocalCurrency.instance.getLocalCurrency(currency: NSNumber(floatLiteral: selection.price!))
+        price1_label.text = priceString
         points_label.text = String(PointsManager.sharedInstance.addPointsForShopping(userId: userId!,expense: selection.price! * Double(quantity.text!)!))
-        total_label.text = String(format:"%.2f", selection.price! * Double(Int(quantity.text!)!))
+        total_label.text = LocalCurrency.instance.getLocalCurrency(currency: NSNumber(floatLiteral: (selection.price! * Double(Int(quantity.text!)!))))
         
     }
     
@@ -160,20 +160,19 @@ class FriendActionViewController: UIViewController, UIPickerViewDelegate, UIPick
                 self.updateLabels(row: row)
             })
         }
-        
     }
     
     @IBAction func stepperValueChange(_ sender: UIStepper) {
         quantity.text = String(Int(sender.value))
         print("sender touched")
         guard let userid = userId,
-            let price = price1_label.text?.replacingOccurrences(of: " €", with: "", options: .regularExpression),
+            let price = price1_label.text?.replacingOccurrences(of: "€", with: "", options: .regularExpression),
             let quantity = quantity.text
             else {return}
-        guard let finalPrice = Double(price), let finalQuantity = Double(quantity) else { return }
+        guard let finalPrice = Double(price.replacingOccurrences(of: ",", with: ".", options: .regularExpression)), let finalQuantity = Double(quantity) else { return }
         let totalPrice = finalPrice * finalQuantity
         points_label.text = String(PointsManager.sharedInstance.addPointsForShopping(userId: userid, expense: totalPrice))
-        total_label.text = String(format:"%.2f",totalPrice)
+        total_label.text = LocalCurrency.instance.getLocalCurrency(currency: NSNumber(floatLiteral: totalPrice))
     }
     
     @IBAction func sendOrder_clicked(_ sender: UIButton) {

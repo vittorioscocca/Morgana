@@ -10,12 +10,14 @@ import Foundation
 import Firebase
 
 public extension NSNotification.Name {
-    static let ReadingRemoteUserPointDidFinish = NSNotification.Name("ReadingRemoteUserPointDidFinish")
+    static let readingRemoteUserPointDidFinish = NSNotification.Name("ReadingRemoteUserPointDidFinish")
     
 }
 
 class PointsManager {
     static let sharedInstance = PointsManager()
+    static let maxPointsThreshold = 250
+    static let conversioneEuroCostant: Double =  5
     
     //usersPointsStats
     private var lastDateShopping: TimeInterval?//time of last weekly shopping
@@ -56,7 +58,7 @@ class PointsManager {
     
     var balanceCurrentPoints: Int {
         get {
-            return self.totalCurrentPoints!
+            return self.totalCurrentPoints ?? 0
         }
         set(newValue) {
             if newValue < 0 {
@@ -77,7 +79,7 @@ class PointsManager {
             if error != nil {
                 print("\(String(describing: error?.description))")
             }
-            NotificationCenter.default.post(name: .ReadingRemoteUserPointDidFinish, object: self)
+            NotificationCenter.default.post(name: .readingRemoteUserPointDidFinish, object: self)
         }
     }
     
@@ -110,6 +112,19 @@ class PointsManager {
         })
     }
     
+    func readUserPoints(userId: String,onCompletion: @escaping (Int?)->()) {
+        FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "usersPointsStats/"+userId, onCompletion: { (error,dictionary) in
+            guard error == nil else {
+                onCompletion(nil)
+                return
+            }
+            guard dictionary != nil else {return}
+            self.totalCurrentPoints = dictionary?["totalCurrentPoints"] as? Int
+            onCompletion(self.totalCurrentPoints)
+        })
+    }
+    
+    
     private func readMerchantParameters(onCompletion: @escaping ()->()) {
         FireBaseAPI.readNodeOnFirebaseWithOutAutoId(node: "merchantPointsParameters/mr001", onCompletion: { (error,dictionary) in
             guard error == nil else {
@@ -131,7 +146,7 @@ class PointsManager {
                 self.days.append(self.daysOfWeek[(valore as? String)!])
             }
             onCompletion()
-    })
+        })
 
     }
     

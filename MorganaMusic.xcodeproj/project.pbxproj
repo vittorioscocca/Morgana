@@ -98,6 +98,7 @@
 		2AFA98851EC19BCA0007CA33 /* Cart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AFA98841EC19BCA0007CA33 /* Cart.swift */; };
 		2AFA98891EC1CE470007CA33 /* CartUserTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AFA98881EC1CE470007CA33 /* CartUserTableViewCell.swift */; };
 		2F93099F7E4305074AC52905 /* Pods_MorganaMusic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1F6C0F4D7B5B86B25C799B9 /* Pods_MorganaMusic.framework */; };
+		7C15EDC621BEC54D00032783 /* LocalCurrency.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C15EDC521BEC54D00032783 /* LocalCurrency.swift */; };
 		7CAEDB4D215D314A00B24E6E /* PayPalEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CAEDB4C215D314900B24E6E /* PayPalEnvironment.swift */; };
 /* End PBXBuildFile section */
 
@@ -241,6 +242,7 @@
 		2AE35FAB1E93F99900DF453F /* UserViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserViewController.swift; sourceTree = "<group>"; };
 		2AFA98841EC19BCA0007CA33 /* Cart.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cart.swift; sourceTree = "<group>"; };
 		2AFA98881EC1CE470007CA33 /* CartUserTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CartUserTableViewCell.swift; sourceTree = "<group>"; };
+		7C15EDC521BEC54D00032783 /* LocalCurrency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalCurrency.swift; sourceTree = "<group>"; };
 		7CAEDB4C215D314900B24E6E /* PayPalEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayPalEnvironment.swift; sourceTree = "<group>"; };
 		A55BBBAB2199BAA021B9C7F8 /* Pods-MorganaMusic.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MorganaMusic.release.xcconfig"; path = "Pods/Target Support Files/Pods-MorganaMusic/Pods-MorganaMusic.release.xcconfig"; sourceTree = "<group>"; };
 		B1F6C0F4D7B5B86B25C799B9 /* Pods_MorganaMusic.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MorganaMusic.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -486,6 +488,7 @@
 				2A19684E203F3EC40036BDB9 /* FacebookFriendsList.swift */,
 				2A93C7B3204FED8900921DDF /* OrdersListManager.swift */,
 				2A196854203F8A090036BDB9 /* LoadRemoteProducts.swift */,
+				7C15EDC521BEC54D00032783 /* LocalCurrency.swift */,
 			);
 			name = SupportingFiles;
 			sourceTree = "<group>";
@@ -867,6 +870,7 @@
 				2A206B971F0B79990080235B /* FireBaseAPI.swift in Sources */,
 				2A56BBFE1F9755FA00C72860 /* CartOrderDetailsViewController.swift in Sources */,
 				2A9A7ADC1FAFC5C60085AA1F /* CreditsPaymentViewController.swift in Sources */,
+				7C15EDC621BEC54D00032783 /* LocalCurrency.swift in Sources */,
 				2ABD93BB1F18DF5C00F28632 /* NotificationsCenter.swift in Sources */,
 				2AA4B96F1F755E9E00F4FD48 /* Company.swift in Sources */,
 				2A93C7B4204FED8900921DDF /* OrdersListManager.swift in Sources */,
