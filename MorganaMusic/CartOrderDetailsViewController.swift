@@ -86,7 +86,7 @@ class CartOrderDetailsViewController: UIViewController, UITableViewDelegate, UIT
                 guard let quantity = product.quantity,
                     let productName = product.productName,
                     let price  = product.price else { return cell! }
-                cell?.textLabel?.text = "(\(quantity))  " + productName + " € " + String(format:"%.2f", price)
+                cell?.textLabel?.text = "(\(quantity))  " + productName + " \( LocalCurrency.instance.getLocalCurrency(currency: NSNumber(floatLiteral: (price)))) " 
                 cell?.textLabel?.textColor = #colorLiteral(red: 0.7419371009, green: 0.1511851847, blue: 0.20955199, alpha: 1)
             }
         }

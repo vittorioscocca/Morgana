@@ -74,7 +74,7 @@ class OrderSentDetailsViewController: UIViewController, UITableViewDelegate, UIT
             //let data = NSData(contentsOf: url! as URL)
             //(cell as! CartUserTableViewCell).friendImageView.image = UIImage(data: data! as Data)
             (cell as! CartUserTableViewCell).nome_label.text = offertaInviata?.userDestination?.fullName
-            (cell as! CartUserTableViewCell).costoOfferta_label.text = "Totale € " + String(format:"%.2f", (offertaInviata?.costoTotale)!)
+            (cell as! CartUserTableViewCell).costoOfferta_label.text = "Totale " + LocalCurrency.instance.getLocalCurrency(currency: NSNumber(floatLiteral: (offertaInviata?.costoTotale)!))
             
             CacheImage.getImage(url: offertaInviata?.userDestination?.pictureUrl, onCompletion: { (image) in
                 guard image != nil else {
@@ -100,7 +100,7 @@ class OrderSentDetailsViewController: UIViewController, UITableViewDelegate, UIT
                     let price = product.price
                 else { return cell!}
                 
-                cell?.textLabel?.text = "(\(quantity))  " + productName + " € " + String(format:"%.2f", price)
+                cell?.textLabel?.text = "(\(quantity))  " + productName + " \(LocalCurrency.instance.getLocalCurrency(currency: NSNumber(floatLiteral: price))) "
                 cell?.textLabel?.textColor = #colorLiteral(red: 0.7419371009, green: 0.1511851847, blue: 0.20955199, alpha: 1)
             }
         }
