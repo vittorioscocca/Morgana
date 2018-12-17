@@ -379,6 +379,7 @@ class FirebaseData {
             }
         }
     }
+    
     //MARK: READ ORDERS SENT ON FIREBASE
     func readCompaniesOnFireBase(onCompletion: @escaping ([Company]?)->()){
         self.ordersSent.removeAll()
@@ -557,6 +558,7 @@ class FirebaseData {
                 
                 //filtering expired data
                 if order.offerState != .expired {
+                    
                     self.scheduleExpiryNotification(order: order)
                     if let timeStamp = ServerValue.timestamp().values.first as? TimeInterval {
                         self.mangeExpiredOffers(timeStamp: timeStamp, order: order, ref: self.ref)
